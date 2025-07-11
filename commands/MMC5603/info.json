@@ -1,5 +1,5 @@
 {
-  "description": "MMC5603 is a 3-axis magnetometer that measures magnetic field strength in X, Y, and Z directions with high resolution and accuracy. It features configurable measurement ranges up to ±30 Gauss and includes temperature compensation. The sensor uses I2C communication and includes features like configurable data rates and magnetic field ranges for compass and magnetic field detection applications.",
+  "description": "MMC5603 is a 3-axis magnetometer that measures magnetic field strength in X, Y, and Z directions with high resolution and accuracy. It features configurable measurement ranges up to \u00b130 Gauss and includes temperature compensation. The sensor uses I2C communication and includes features like configurable data rates and magnetic field ranges for compass and magnetic field detection applications.",
   "warn_offline": false,
   "warn_unavailable": false,
   "variables": [
@@ -15,5 +15,6 @@
       "description": "I2C SCL pin",
       "default": "board.SCL"
     }
-  ]
+  ],
+  "tested": false
 }

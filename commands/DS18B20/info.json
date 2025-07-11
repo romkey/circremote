@@ -1,5 +1,5 @@
 {
-  "description": "DS18B20 is a digital temperature sensor that uses the OneWire communication protocol. It features high accuracy (±0.5°C) and can operate over long distances with a single data wire. The sensor includes unique 64-bit serial numbers for multiple sensors on the same bus and supports configurable resolution from 9 to 12 bits.",
+  "description": "DS18B20 is a digital temperature sensor that uses the OneWire communication protocol. It features high accuracy (\u00b10.5\u00b0C) and can operate over long distances with a single data wire. The sensor includes unique 64-bit serial numbers for multiple sensors on the same bus and supports configurable resolution from 9 to 12 bits.",
   "warn_offline": false,
   "warn_unavailable": false,
   "variables": [
@@ -9,5 +9,6 @@
       "description": "OneWire pin",
       "default": null
     }
-  ]
+  ],
+  "tested": false
 }

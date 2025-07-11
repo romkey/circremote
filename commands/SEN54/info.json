@@ -15,5 +15,6 @@
       "description": "I2C SCL pin",
       "default": "board.SCL"
     }
-  ]
+  ],
+  "tested": false
 }

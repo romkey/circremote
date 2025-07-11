@@ -2,7 +2,6 @@
   "description": "",
   "warn_offline": false,
   "warn_unavailable": false,
-  "variables": [
-
-  ]
+  "variables": [],
+  "tested": false
 }

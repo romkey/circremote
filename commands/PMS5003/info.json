@@ -15,5 +15,6 @@
       "description": "CPU transmit pin",
       "default": "board.TX"
     }
-  ]
+  ],
+  "tested": false
 }
