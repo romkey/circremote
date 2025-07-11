@@ -29,9 +29,9 @@ class CLI:
 
     def run(self, args):
         """Run the CLI with the given arguments."""
-        options = self.parse_options(args)
+        options, remaining = self.parse_options(args)
         
-        if len(args) < 2:
+        if len(remaining) < 2:
             print("Usage: cpctrl [options] <device_name_or_path> <command_name> [variable=value ...]")
             print("Example: cpctrl /dev/ttyUSB0 BME280")
             print("Example: cpctrl sign-1 BME280 sda=board.IO1 scl=board.IO2")
@@ -39,8 +39,8 @@ class CLI:
             print("Use -h for more options")
             sys.exit(1)
 
-        device_spec = args[0]
-        command_name = args[1]
+        device_spec = remaining[0]
+        command_name = remaining[1]
         
         # Resolve device
         device_info = self.resolve_device(device_spec, options)
@@ -49,7 +49,7 @@ class CLI:
         password = device_info.get('password') or options.password
         
         # Parse variable assignments from remaining arguments
-        variables = self.parse_command_line_variables(args[2:])
+        variables = self.parse_command_line_variables(remaining[2:])
 
         # Check if command directory exists and contains code.py
         commands_dir = Path(__file__).parent.parent / 'commands'
@@ -324,7 +324,7 @@ class CLI:
             self.show_help(parser)
             sys.exit(0)
         
-        return options
+        return options, remaining
 
     def show_help(self, parser):
         """Show help message with examples."""
