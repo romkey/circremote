@@ -1,0 +1,20 @@
+{
+  "description": "PMSA003I is a digital particle concentration sensor that measures PM1.0, PM2.5, and PM10 particulate matter in the air. It uses laser scattering technology to detect particles and provides both standard and environmental concentration readings. The sensor communicates via I2C and includes features for air quality monitoring applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "tested": true,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    }
+  ]
+}

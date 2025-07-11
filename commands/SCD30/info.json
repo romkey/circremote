@@ -1,0 +1,26 @@
+{
+  "description": "SCD30 is a carbon dioxide sensor that provides accurate CO2 measurements with ±30ppm ±3% accuracy. It features automatic baseline correction, temperature and humidity compensation, and includes an integrated temperature and humidity sensor. The sensor is ideal for indoor air quality monitoring.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "tested": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x61"
+    }
+  ]
+} 

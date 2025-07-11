@@ -1,0 +1,25 @@
+{
+  "description": "TSL2591 is a high-dynamic-range digital light sensor that measures visible, infrared, and full-spectrum light. It features dual photodiodes with separate amplifiers for high sensitivity and wide dynamic range. The sensor uses I2C communication and includes configurable gain and integration time settings for optimal performance in various lighting conditions.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x29"
+    }
+  ]
+}

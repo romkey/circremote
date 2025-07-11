@@ -1,0 +1,25 @@
+{
+  "description": "BME680 is a 4-in-1 digital sensor that measures temperature, humidity, barometric pressure, and gas resistance. It includes a gas sensor that can detect various volatile organic compounds (VOCs) and air quality indicators. The sensor uses I2C communication and features configurable oversampling and filtering.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x76"
+    }
+  ]
+}

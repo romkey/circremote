@@ -1,0 +1,25 @@
+{
+  "description": "LTR390 is a UV and ambient light sensor that measures ultraviolet light intensity and visible light. It features dual photodiodes for UV and ambient light detection with configurable gain and resolution settings. The sensor uses I2C communication and includes features like automatic gain control and interrupt functionality for light level monitoring.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x53"
+    }
+  ]
+}

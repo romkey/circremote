@@ -1,0 +1,25 @@
+{
+  "description": "AHT20 is a digital temperature and humidity sensor with high accuracy and low power consumption. It features 16-bit resolution and includes automatic calibration for long-term stability. The sensor uses I2C communication and includes features like configurable measurement modes and low-power operation for battery-powered applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x38"
+    }
+  ]
+}

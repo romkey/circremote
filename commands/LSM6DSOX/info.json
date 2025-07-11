@@ -1,0 +1,25 @@
+{
+  "description": "LSM6DSOX is a 6-axis motion sensor that combines a 3-axis accelerometer and 3-axis gyroscope with advanced features. It measures acceleration and angular velocity with configurable full-scale ranges and data rates. The sensor uses I2C communication and includes features like machine learning core, finite state machine, and advanced interrupt functionality for complex motion detection applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x6A"
+    }
+  ]
+}

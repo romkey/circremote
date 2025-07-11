@@ -1,0 +1,25 @@
+{
+  "description": "TMP117 is a high-precision digital temperature sensor with ±0.1°C accuracy and 16-bit resolution. It features excellent long-term stability and includes configurable conversion modes and temperature resolution settings. The sensor uses I2C communication and includes features like data ready indication and low-power operation for precise temperature monitoring applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x48"
+    }
+  ]
+}

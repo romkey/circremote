@@ -1,0 +1,19 @@
+{
+  "description": "SEN66 is a digital particulate matter sensor that measures PM1.0, PM2.5, and PM10 concentrations in the air. It uses laser scattering technology to detect particles and provides detailed particle count data for various size ranges. The sensor communicates via UART and includes features for air quality monitoring and environmental sensing applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    }
+  ]
+}

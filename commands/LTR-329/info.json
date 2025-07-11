@@ -1,0 +1,26 @@
+{
+  "description": "LTR-329 is a digital ambient light sensor that provides high accuracy light measurements with a wide dynamic range. It features low power consumption, automatic gain control, and includes interrupt capabilities for light level monitoring applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "tested": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x29"
+    }
+  ]
+} 

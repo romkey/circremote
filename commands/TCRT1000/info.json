@@ -1,0 +1,14 @@
+{
+  "description": "TCRT1000 is an infrared proximity sensor that consists of an IR LED and a phototransistor. It detects the presence of objects by measuring the reflection of infrared light. The sensor provides digital output and is commonly used for obstacle detection, line following, and proximity sensing applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "tested": false,
+  "variables": [
+    {
+      "name": "pin",
+      "required": true,
+      "description": "Digital input pin",
+      "default": null
+    }
+  ]
+} 

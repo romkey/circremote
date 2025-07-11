@@ -1,0 +1,25 @@
+{
+  "description": "BMP390 is a high-precision barometric pressure sensor that measures atmospheric pressure and temperature. It features ultra-low noise and high accuracy for altitude measurement applications. The sensor uses I2C communication and includes configurable oversampling, filtering, and power modes for optimal performance in various environmental conditions.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x77"
+    }
+  ]
+}

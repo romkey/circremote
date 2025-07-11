@@ -1,0 +1,26 @@
+{
+  "description": "ADXL345 is a small, thin, low power, 3-axis accelerometer with high resolution (13-bit) measurement at up to ±16g. It features digital output and can detect single and double taps, activity/inactivity, and free-fall detection. The sensor communicates via I2C or SPI and includes a 32-level FIFO buffer.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "tested": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x53"
+    }
+  ]
+} 

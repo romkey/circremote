@@ -1,0 +1,25 @@
+{
+  "description": "LIS3MDL is a 3-axis magnetometer that measures magnetic field strength in X, Y, and Z directions. It features high resolution (±4 to ±16 gauss range) and low power consumption. The sensor uses I2C communication and includes configurable data rate, full-scale range, and operating modes for compass and magnetic field detection applications.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x1C"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "description": "DRV5032 is a digital hall effect sensor that detects magnetic fields and provides digital output. It features low power consumption, high sensitivity, and includes configurable sensitivity levels. The sensor is commonly used for position sensing, proximity detection, and magnetic field detection.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "tested": false,
+  "variables": [
+    {
+      "name": "pin",
+      "required": true,
+      "description": "Digital input pin",
+      "default": null
+    }
+  ]
+} 
