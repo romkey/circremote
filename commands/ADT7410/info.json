@@ -2,7 +2,7 @@
   "description": "ADT7410 is a high-accuracy digital temperature sensor that provides ±0.5°C accuracy over a wide temperature range. It features low power consumption, fast response time, and includes configurable resolution and alert functionality.",
   "warn_offline": false,
   "warn_unavailable": false,
-  "tested": false,
+  "tested": true,
   "variables": [
     {
       "name": "sda",

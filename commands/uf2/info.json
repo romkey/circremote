@@ -1,7 +1,6 @@
 {
-  "description": "",
-  "warn_offline": false,
-  "warn_unavailable": false,
+  "description": "Reboot device in UF2 bootloader mode",
+  "warn_unavailable": true,
   "variables": [],
-  "tested": false
+  "tested": true
 }

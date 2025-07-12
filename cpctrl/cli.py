@@ -72,6 +72,31 @@ class CLI:
             sys.exit(1)
         self.debug("code.py exists in command directory", options)
 
+        # Check for requirements.txt and install dependencies with circup
+        requirements_file = command_dir / 'requirements.txt'
+        self.debug("Checking for requirements.txt in command directory", options)
+        
+        if requirements_file.exists() and not options.skip_circup:
+            self.debug("requirements.txt found, checking content", options)
+            with open(requirements_file, 'r') as f:
+                requirements_content = f.read()
+            
+            # Filter out comments and blank lines to check for actual requirements
+            actual_requirements = [
+                line.strip() for line in requirements_content.split('\n')
+                if line.strip() and not line.strip().startswith('#')
+            ]
+            
+            self.debug(f"Requirements content: {repr(requirements_content)}", options)
+            self.debug(f"Actual requirements after filtering: {actual_requirements}", options)
+            self.debug(f"Number of actual requirements: {len(actual_requirements)}", options)
+            
+            if actual_requirements:
+                self.debug("requirements.txt has actual content (after filtering comments/blanks), checking for circup", options)
+                self.handle_circup_installation(requirements_file, serial_port, password, options)
+            else:
+                self.debug("requirements.txt has no actual content (only comments/blanks), skipping circup", options)
+
         # Read and parse info.json file
         info_file = command_dir / 'info.json'
         info_data = None
@@ -163,25 +188,6 @@ class CLI:
                 sys.exit(1)
         else:
             self.debug("No template variables found in code", options)
-
-        # Check for requirements.txt and install dependencies with circup
-        requirements_file = command_dir / 'requirements.txt'
-        self.debug("Checking for requirements.txt in command directory", options)
-        
-        if requirements_file.exists() and not options.skip_circup:
-            self.debug("requirements.txt found, checking content", options)
-            with open(requirements_file, 'r') as f:
-                requirements_content = f.read()
-            
-            # Filter out comments and blank lines to check for actual requirements
-            actual_requirements = [
-                line.strip() for line in requirements_content.split('\n')
-                if line.strip() and not line.strip().startswith('#')
-            ]
-            
-            if actual_requirements:
-                self.debug("requirements.txt has actual content (after filtering comments/blanks), checking for circup", options)
-                self.handle_circup_installation(requirements_file, serial_port, options)
 
         # Establish connection using CircuitPythonConnection class
         try:
@@ -541,7 +547,7 @@ class CLI:
             print("Proceeding with untested code execution...")
             print()
 
-    def handle_circup_installation(self, requirements_file, serial_port, options):
+    def handle_circup_installation(self, requirements_file, serial_port, password, options):
         """Handle circup dependency installation."""
         # Check if circup exists and is executable
         circup_path = None
@@ -572,8 +578,8 @@ class CLI:
                 port = "80"  # Default port if not specified
             
             circup_args += ["--host", host, "--port", port]
-            if options.password:
-                circup_args += ["--password", options.password]
+            if password:
+                circup_args += ["--password", password]
         
         circup_args += ["install", "-r", str(requirements_file)]
         full_command = [circup_path] + circup_args
@@ -620,6 +626,20 @@ class CLI:
         
         try:
             result = subprocess.run(full_command, capture_output=True, text=True)
+            
+            # Display circup output
+            if result.stdout:
+                print("Circup output:")
+                print("-" * 40)
+                print(result.stdout)
+                print("-" * 40)
+            
+            if result.stderr:
+                print("Circup error output:")
+                print("-" * 40)
+                print(result.stderr)
+                print("-" * 40)
+            
             if result.returncode == 0:
                 print("✅ Dependencies installed successfully")
                 self.debug("Circup command completed successfully", options)

@@ -1,1 +1,1 @@
-adafruit_hdc3020
+adafruit_hdc302x

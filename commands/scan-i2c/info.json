@@ -2,6 +2,19 @@
   "description": "",
   "warn_offline": false,
   "warn_unavailable": false,
-  "variables": [],
-  "tested": false
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    }
+  ],
+  "tested": true
 }

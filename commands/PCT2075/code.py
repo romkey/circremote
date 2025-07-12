@@ -24,18 +24,10 @@ except Exception as e:
 print("PCT2075 Temperature Sensor")
 print("=" * 25)
 
-# Main reading loop
 while True:
-    try:
-        # Read sensor value
-        temperature = pct.temperature
+    temperature = pct.temperature
         
-        # Display reading
-        print(f"Temperature: {temperature:.2f}°C")
-        print("-" * 30)
+    print(f"Temperature: {temperature:.2f}°C")
+    print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+    time.sleep(30)

@@ -19,10 +19,6 @@ try:
 
     # Configure BME680 for high accuracy
     bme680.sea_level_pressure = 1013.25  # Set sea level pressure in hPa
-    bme680.temperature_oversample = adafruit_bme680.OVERSAMPLE_X8
-    bme680.humidity_oversample = adafruit_bme680.OVERSAMPLE_X2
-    bme680.pressure_oversample = adafruit_bme680.OVERSAMPLE_X4
-    bme680.filter_size = adafruit_bme680.FILTER_SIZE_3
     bme680.gas_heater_temperature = 320  # Celsius
     bme680.gas_heater_duration = 150  # milliseconds
     bme680.gas_heater_profile = 0
@@ -45,26 +41,18 @@ print(f"Gas Heater Profile: {bme680.gas_heater_profile}")
 print(f"Sea Level Pressure: {bme680.sea_level_pressure} hPa")
 print()
 
-# Main reading loop
 while True:
-    try:
-        # Read sensor values
-        temp = bme680.temperature
-        humidity = bme680.humidity
-        pressure = bme680.pressure
-        altitude = bme680.altitude
-        gas = bme680.gas
+    temp = bme680.temperature
+    humidity = bme680.humidity
+    pressure = bme680.pressure
+    altitude = bme680.altitude
+    gas = bme680.gas
         
-        # Display readings
-        print(f"Temperature: {temp:.1f}°C")
-        print(f"Humidity: {humidity:.1f}%")
-        print(f"Pressure: {pressure:.1f} hPa")
-        print(f"Altitude: {altitude:.1f} m")
-        print(f"Gas: {gas:.1f} kΩ")
-        print("-" * 30)
+    print(f"Temperature: {temp:.1f}°C")
+    print(f"Humidity: {humidity:.1f}%")
+    print(f"Pressure: {pressure:.1f} hPa")
+    print(f"Altitude: {altitude:.1f} m")
+    print(f"Gas: {gas:.1f} kΩ")
+    print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    time.sleep(30)

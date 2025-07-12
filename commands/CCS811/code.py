@@ -30,19 +30,12 @@ while not ccs.data_ready:
 
 # Main reading loop
 while True:
-    try:
-        if ccs.data_ready:
-            # Read sensor values
-            eco2 = ccs.eco2
-            tvoc = ccs.tvoc
+    if ccs.data_ready:
+        eco2 = ccs.eco2
+        tvoc = ccs.tvoc
             
-            # Display readings
-            print(f"eCO2: {eco2} ppm")
-            print(f"TVOC: {tvoc} ppb")
-            print("-" * 30)
+        print(f"eCO2: {eco2} ppm")
+        print(f"TVOC: {tvoc} ppb")
+        print("-" * 30)
         
         time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 

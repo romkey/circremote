@@ -24,18 +24,10 @@ except Exception as e:
 print("ADT7410 High-Accuracy Temperature Sensor")
 print("=" * 40)
 
-# Main reading loop
 while True:
-    try:
-        # Read sensor value
-        temperature = adt.temperature
+    temperature = adt.temperature
         
-        # Display reading
-        print(f"Temperature: {temperature:.2f}°C")
-        print("-" * 30)
+    print(f"Temperature: {temperature:.2f}°C")
+    print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+    time.sleep(30)

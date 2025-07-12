@@ -1,8 +1,8 @@
 {
-  "description": "CCS811 is a digital gas sensor that measures indoor air quality by detecting volatile organic compounds (VOCs) and carbon dioxide equivalent (eCO2). It features low power consumption and includes an integrated MCU for sensor processing and compensation algorithms.",
+  "description": "CCS811 is a digital gas sensor that measures indoor air quality by detecting volatile organic compounds (VOCs) and infering carbon dioxide equivalent (eCO2). It features low power consumption and includes an integrated MCU for sensor processing and compensation algorithms.",
   "warn_offline": false,
   "warn_unavailable": false,
-  "tested": false,
+    "tested": true,
   "variables": [
     {
       "name": "sda",

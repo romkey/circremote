@@ -24,21 +24,12 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-# Print sensor information
-print(f"Serial Number: {shtc3.serial_number}")
-
 print("\nStarting temperature and humidity measurements...")
 print("Readings:")
 
-# Main measurement loop
-try:
-    while True:
-        temperature, humidity = shtc3.measurements
-        print(f"Temperature: {temperature:.2f} °C")
-        print(f"Humidity: {humidity:.2f} %")
-        print("-" * 30)
-        time.sleep(30)
-except KeyboardInterrupt:
-    print("\nMeasurement stopped by user")
-except Exception as e:
-    print(f"\nError during measurement: {e}") 
+while True:
+    temperature, humidity = shtc3.measurements
+    print(f"Temperature: {temperature:.2f} °C")
+    print(f"Humidity: {humidity:.2f} %")
+    print("-" * 30)
+    time.sleep(30)

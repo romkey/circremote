@@ -29,46 +29,13 @@ print("=" * 35)
 
 # Display sensor information
 print(f"Resolution: {mcp9808.resolution}°C")
-print(f"Alert Temperature: {mcp9808.alert_temperature}°C")
-print(f"Alert Hysteresis: {mcp9808.alert_hysteresis}°C")
-print(f"Alert Mode: {mcp9808.alert_mode}")
-print(f"Alert Polarity: {mcp9808.alert_polarity}")
-print(f"Alert Status: {mcp9808.alert_status}")
 print()
 
 # Main reading loop
 while True:
-    try:
-        temp = mcp9808.temperature
+    temp = mcp9808.temperature
         
-        print(f"Temperature: {temp:.1f}°C")
-        print("-" * 30)
+    print(f"Temperature: {temp:.1f}°C")
+    print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Temperature: {temp:.2f}°C")
-        
-        # Determine temperature level
-        if temp < 0:
-            temp_level = "Freezing"
-        elif temp < 10:
-            temp_level = "Cold"
-        elif temp < 20:
-            temp_level = "Cool"
-        elif temp < 30:
-            temp_level = "Room Temperature"
-        elif temp < 40:
-            temp_level = "Warm"
-        else:
-            temp_level = "Hot"
-            
-        print(f"Temperature Level: {temp_level}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    time.sleep(30)

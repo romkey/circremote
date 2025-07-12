@@ -18,7 +18,7 @@ except:
 
 # Initialize SGP40 sensor
 try:
-    sgp40 = adafruit_sgp40.Adafruit_SGP40(i2c)
+    sgp40 = adafruit_sgp40.SGP40(i2c)
 except Exception as e:
     print(f"Error initializing SGP40: {e}")
     import sys
@@ -27,14 +27,8 @@ except Exception as e:
 print("\nStarting VOC measurements...")
 print("Readings:")
 
-# Main measurement loop
-try:
-    while True:
-        voc_index = sgp40.measure_index()
-        print(f"VOC Index: {voc_index:.1f}")
-        print("-" * 30)
-        time.sleep(30)
-except KeyboardInterrupt:
-    print("\nMeasurement stopped by user")
-except Exception as e:
-    print(f"\nError during measurement: {e}") 
+while True:
+    voc_index = sgp40.measure_index()
+    print(f"VOC Index: {voc_index:.1f}")
+    print("-" * 30)
+    time.sleep(30)

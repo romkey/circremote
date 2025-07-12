@@ -48,7 +48,8 @@ while True:
         
     except Exception as e:
         print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Temperature: {temp:.2f}°C")
+        time.sleep(5)
+        print(f"Temperature: {temp:.2f}°C")
         print(f"Humidity: {humidity:.2f}%")
         
         # Determine comfort level

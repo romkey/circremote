@@ -20,7 +20,6 @@ try:
     
     # Print sensor information
     print(f"Serial Number: {sgp30.serial}")
-    print(f"Feature Set: {sgp30.featureset}")
     
 except Exception as e:
     print(f"✗ Error initializing SGP30: {e}")
