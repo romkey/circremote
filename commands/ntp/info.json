@@ -1,0 +1,13 @@
+{
+  "description": "Get time via NTP",
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "server",
+      "required": false,
+      "description": "NTP server name",
+      "default": "pool.ntp.org"
+    }
+  ],
+  "tested": true
+}

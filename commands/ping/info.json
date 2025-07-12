@@ -1,0 +1,13 @@
+{
+  "description": "Ping a host",
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "target",
+      "required": true,
+      "description": "Host to ping",
+      "default": null
+    }
+  ],
+  "tested": false
+}
