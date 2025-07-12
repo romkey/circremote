@@ -1,7 +1,7 @@
 {
-  "description": "",
+  "description": "Simple Hello World program",
   "warn_offline": false,
   "warn_unavailable": false,
   "variables": [],
-  "tested": false
+  "tested": true
 }

@@ -1,7 +1,7 @@
 {
-  "description": "",
+  "description": "Show contents of settings.toml",
   "warn_offline": false,
   "warn_unavailable": false,
   "variables": [],
-  "tested": false
+  "tested": true
 }

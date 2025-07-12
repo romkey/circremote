@@ -2,5 +2,5 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-print("foobar")
-print("this actually worked!")
+print("Hello World")
+

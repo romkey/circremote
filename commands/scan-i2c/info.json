@@ -1,5 +1,5 @@
 {
-  "description": "",
+  "description": "Scan I2C bus and report active addresses",
   "warn_offline": false,
   "warn_unavailable": false,
   "variables": [

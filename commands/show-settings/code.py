@@ -4,9 +4,7 @@
 
 try:
     with open("/settings.toml", "r") as f:
-try:
         settings_content = f.read()
-except Exception as e:    print(f"Error initializing show-settings: {e}")    import sys    sys.exit(1)        
         if settings_content.strip():
             print("Current settings.toml contents:")
             print("-" * 40)

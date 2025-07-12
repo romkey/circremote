@@ -1,7 +1,7 @@
 {
-  "description": "",
+  "description": "Scan WiFi and report visible networks",
   "warn_offline": false,
   "warn_unavailable": false,
   "variables": [],
-  "tested": false
+  "tested": true
 }
