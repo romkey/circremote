@@ -9,6 +9,8 @@ import time
 import re
 import subprocess
 import signal
+import urllib.parse
+import requests
 from pathlib import Path
 from argparse import ArgumentParser, Namespace
 from typing import Dict, Any, Optional
@@ -42,6 +44,26 @@ class CLI:
         device_spec = remaining[0]
         command_name = remaining[1]
         
+        # Check if command_name looks like a URL and fetch content if so
+        file_content = None
+        info_data = None
+        
+        if self.looks_like_url(command_name):
+            self.debug(f"Command '{command_name}' looks like a URL, fetching content", options)
+            try:
+                file_content = self.fetch_url_content(command_name, options)
+                if file_content:
+                    print(f"Fetched {len(file_content.encode('utf-8'))} bytes from URL: {command_name}")
+                    # For URL commands, we'll skip the local file processing
+                    command_dir = None
+                    code_file = None
+                else:
+                    print(f"Failed to fetch content from URL: {command_name}")
+                    sys.exit(1)
+            except Exception as e:
+                print(f"Error fetching URL content: {e}")
+                sys.exit(1)
+        
         # Resolve device
         device_info = self.resolve_device(device_spec, options)
         
@@ -51,87 +73,90 @@ class CLI:
         # Parse variable assignments from remaining arguments
         variables = self.parse_command_line_variables(remaining[2:])
 
-        # Check if command directory exists and contains code.py
-        commands_dir = Path(__file__).parent.parent / 'commands'
-        command_dir = commands_dir / command_name
-        code_file = command_dir / 'code.py'
+        # Check if command directory exists and contains code.py (only for local commands)
+        if not file_content:  # Only check local files if we didn't fetch from URL
+            commands_dir = Path(__file__).parent.parent / 'commands'
+            command_dir = commands_dir / command_name
+            code_file = command_dir / 'code.py'
 
-        self.debug(f"Checking if command directory '{command_dir}' exists", options)
-        if not command_dir.exists():
-            print(f"Error: Command '{command_name}' not found")
-            print("Available commands:")
-            for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
-                print(f"  {cmd}")
-            sys.exit(1)
+            self.debug(f"Checking if command directory '{command_dir}' exists", options)
+            if not command_dir.exists():
+                print(f"Error: Command '{command_name}' not found")
+                print("Available commands:")
+                for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
+                    print(f"  {cmd}")
+                sys.exit(1)
 
-        self.debug(f"Command directory '{command_dir}' exists", options)
+            self.debug(f"Command directory '{command_dir}' exists", options)
 
-        self.debug("Checking if code.py exists in command directory", options)
-        if not code_file.exists():
-            print(f"Error: code.py not found in command directory '{command_dir}'")
-            sys.exit(1)
-        self.debug("code.py exists in command directory", options)
+            self.debug("Checking if code.py exists in command directory", options)
+            if not code_file.exists():
+                print(f"Error: code.py not found in command directory '{command_dir}'")
+                sys.exit(1)
+            self.debug("code.py exists in command directory", options)
 
-        # Check for requirements.txt and install dependencies with circup
-        requirements_file = command_dir / 'requirements.txt'
-        self.debug("Checking for requirements.txt in command directory", options)
-        
-        if requirements_file.exists() and not options.skip_circup:
-            self.debug("requirements.txt found, checking content", options)
-            with open(requirements_file, 'r') as f:
-                requirements_content = f.read()
+        # Check for requirements.txt and install dependencies with circup (only for local commands)
+        if not file_content and command_dir:  # Only for local commands
+            requirements_file = command_dir / 'requirements.txt'
+            self.debug("Checking for requirements.txt in command directory", options)
             
-            # Filter out comments and blank lines to check for actual requirements
-            actual_requirements = [
-                line.strip() for line in requirements_content.split('\n')
-                if line.strip() and not line.strip().startswith('#')
-            ]
-            
-            self.debug(f"Requirements content: {repr(requirements_content)}", options)
-            self.debug(f"Actual requirements after filtering: {actual_requirements}", options)
-            self.debug(f"Number of actual requirements: {len(actual_requirements)}", options)
-            
-            if actual_requirements:
-                self.debug("requirements.txt has actual content (after filtering comments/blanks), checking for circup", options)
-                self.handle_circup_installation(requirements_file, serial_port, password, options)
-            else:
-                self.debug("requirements.txt has no actual content (only comments/blanks), skipping circup", options)
+            if requirements_file.exists() and not options.skip_circup:
+                self.debug("requirements.txt found, checking content", options)
+                with open(requirements_file, 'r') as f:
+                    requirements_content = f.read()
+                
+                # Filter out comments and blank lines to check for actual requirements
+                actual_requirements = [
+                    line.strip() for line in requirements_content.split('\n')
+                    if line.strip() and not line.strip().startswith('#')
+                ]
+                
+                self.debug(f"Requirements content: {repr(requirements_content)}", options)
+                self.debug(f"Actual requirements after filtering: {actual_requirements}", options)
+                self.debug(f"Number of actual requirements: {len(actual_requirements)}", options)
+                
+                if actual_requirements:
+                    self.debug("requirements.txt has actual content (after filtering comments/blanks), checking for circup", options)
+                    self.handle_circup_installation(requirements_file, serial_port, password, options)
+                else:
+                    self.debug("requirements.txt has no actual content (only comments/blanks), skipping circup", options)
 
-        # Read and parse info.json file
-        info_file = command_dir / 'info.json'
-        info_data = None
-        self.debug("Reading info.json from command directory", options)
-        
-        if info_file.exists():
-            try:
-                with open(info_file, 'r') as f:
-                    info_content = f.read()
-                    info_data = json.loads(info_content)
-                    self.debug("Successfully parsed info.json", options)
-                    
-                    # Check for warn_offline flag
-                    if info_data.get('warn_offline'):
-                        self.show_offline_warning(options)
-                    
-                    # Check for tested flag
-                    if info_data.get('tested') is False:
-                        self.show_tested_warning(options)
-                    
-                    # Display module description if available
-                    if info_data.get('description'):
-                        print(f"Module: {command_name}")
-                        print(f"Description: {info_data['description']}")
-                        print()
+        # Read and parse info.json file (only for local commands)
+        if not file_content and command_dir:  # Only for local commands
+            info_file = command_dir / 'info.json'
+            info_data = None
+            self.debug("Reading info.json from command directory", options)
+            
+            if info_file.exists():
+                try:
+                    with open(info_file, 'r') as f:
+                        info_content = f.read()
+                        info_data = json.loads(info_content)
+                        self.debug("Successfully parsed info.json", options)
                         
-            except json.JSONDecodeError as e:
-                print(f"Warning: Could not parse info.json: {e}")
+                        # Check for warn_offline flag
+                        if info_data.get('warn_offline'):
+                            self.show_offline_warning(options)
+                        
+                        # Check for tested flag
+                        if info_data.get('tested') is False:
+                            self.show_tested_warning(options)
+                        
+                        # Display module description if available
+                        if info_data.get('description'):
+                            print(f"Module: {command_name}")
+                            print(f"Description: {info_data['description']}")
+                            print()
+                            
+                except json.JSONDecodeError as e:
+                    print(f"Warning: Could not parse info.json: {e}")
+                    print("Proceeding without module information...")
+                except Exception as e:
+                    print(f"Warning: Error reading info.json: {e}")
+                    print("Proceeding without module information...")
+            else:
+                print(f"Warning: info.json not found in command directory '{command_dir}'")
                 print("Proceeding without module information...")
-            except Exception as e:
-                print(f"Warning: Error reading info.json: {e}")
-                print("Proceeding without module information...")
-        else:
-            print(f"Warning: info.json not found in command directory '{command_dir}'")
-            print("Proceeding without module information...")
 
         # Add defaults from info.json for any missing variables
         variables = self.add_defaults_from_info(variables, info_data, command_name)
@@ -144,28 +169,29 @@ class CLI:
             # Validate variables against info.json
             self.validate_variables(variables, info_data, command_name)
 
-        # Read the file content
-        try:
-            self.debug("Reading code.py from command directory", options)
-            with open(code_file, 'r') as f:
-                file_content = f.read()
-            
-            self.debug(f"File content length: {len(file_content)} characters", options)
-            self.debug(f"File content bytes: {len(file_content.encode('utf-8'))} bytes", options)
-            print(f"Read {len(file_content.encode('utf-8'))} bytes from '{command_name}/code.py'")
-            
-            if options.verbose:
-                self.debug("File content preview (first 200 chars):", options)
-                preview = file_content[:200]
-                preview_lines = preview.split('\n')
-                for i, line in enumerate(preview_lines):
-                    self.debug(f"  Line {i+1}: {line}", options)
-                if len(file_content) > 200:
-                    self.debug("  ... (truncated)", options)
-                    
-        except Exception as e:
-            print(f"Error reading code.py: {e}")
-            sys.exit(1)
+        # Read the file content (only for local commands)
+        if not file_content:  # Only read local files if we didn't fetch from URL
+            try:
+                self.debug("Reading code.py from command directory", options)
+                with open(code_file, 'r') as f:
+                    file_content = f.read()
+                
+                self.debug(f"File content length: {len(file_content)} characters", options)
+                self.debug(f"File content bytes: {len(file_content.encode('utf-8'))} bytes", options)
+                print(f"Read {len(file_content.encode('utf-8'))} bytes from '{command_name}/code.py'")
+                
+                if options.verbose:
+                    self.debug("File content preview (first 200 chars):", options)
+                    preview = file_content[:200]
+                    preview_lines = preview.split('\n')
+                    for i, line in enumerate(preview_lines):
+                        self.debug(f"  Line {i+1}: {line}", options)
+                    if len(file_content) > 200:
+                        self.debug("  ... (truncated)", options)
+                        
+            except Exception as e:
+                print(f"Error reading code.py: {e}")
+                sys.exit(1)
 
         # Check for template variables and interpolate if needed
         template_vars = re.findall(r'\{\{\s*(\w+)\s*\}\}', file_content)
@@ -762,6 +788,70 @@ class CLI:
         
         self.debug("Output monitoring complete", options)
         self.debug(f"Final stats: bytes_read={bytes_read}, read_count={read_count}", options)
+
+    def looks_like_url(self, command_name):
+        """Check if the command name looks like a URL."""
+        # Check for common URL patterns
+        url_patterns = [
+            r'^https?://',  # http:// or https://
+            r'^ftp://',     # ftp://
+            r'^file://',    # file://
+        ]
+        
+        for pattern in url_patterns:
+            if re.match(pattern, command_name, re.IGNORECASE):
+                return True
+        
+        return False
+
+    def fetch_url_content(self, url, options):
+        """Fetch content from a URL, handling GitHub URLs specially."""
+        self.debug(f"Fetching content from URL: {url}", options)
+        
+        # Handle GitHub URLs - convert to raw content URL
+        if 'github.com' in url:
+            url = self.convert_github_url_to_raw(url)
+            self.debug(f"Converted GitHub URL to raw: {url}", options)
+        
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            content = response.text
+            self.debug(f"Successfully fetched {len(content)} characters from URL", options)
+            return content
+            
+        except requests.exceptions.RequestException as e:
+            self.debug(f"Failed to fetch URL: {e}", options)
+            raise e
+
+    def convert_github_url_to_raw(self, url):
+        """Convert a GitHub URL to a raw content URL."""
+        # Parse the URL
+        parsed = urllib.parse.urlparse(url)
+        
+        # Handle different GitHub URL formats
+        if parsed.netloc == 'github.com':
+            path_parts = parsed.path.strip('/').split('/')
+            
+            if len(path_parts) >= 3:  # owner/repo/blob/branch/path or owner/repo/tree/branch/path
+                owner = path_parts[0]
+                repo = path_parts[1]
+                
+                if path_parts[2] in ['blob', 'tree'] and len(path_parts) >= 4:
+                    branch = path_parts[3]
+                    file_path = '/'.join(path_parts[4:])
+                    
+                    # Convert to raw URL
+                    raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{file_path}"
+                    return raw_url
+                elif len(path_parts) == 2:  # owner/repo (root of repo)
+                    # Default to main branch
+                    raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md"
+                    return raw_url
+        
+        # If we can't parse it, return the original URL
+        return url
 
     def monitor_websocket_output(self, connection, options):
         """Monitor output from WebSocket connection."""
