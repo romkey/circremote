@@ -3,12 +3,12 @@
   "warn_unavailable": false,
   "variables": [
     {
-      "name": "target",
+      "name": "filename",
       "required": true,
-      "description": "Host to ping",
+      "description": "File to cat",
       "default": null
     }
   ],
   "tested": true,
-  "default_commandline": "target"
+  "default_commandline": "filename"
 }

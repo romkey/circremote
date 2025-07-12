@@ -64,14 +64,38 @@ class CLI:
                 print(f"Error fetching URL content: {e}")
                 sys.exit(1)
         
+        # Check for command aliases if not a URL
+        if not file_content:
+            alias_command = self.config.find_command_alias(command_name)
+            if alias_command:
+                self.debug(f"Found command alias '{command_name}' -> '{alias_command}'", options)
+                command_name = alias_command
+                
+                # Check if the aliased command is a URL
+                if self.looks_like_url(command_name):
+                    self.debug(f"Aliased command '{command_name}' looks like a URL, fetching content", options)
+                    try:
+                        file_content = self.fetch_url_content(command_name, options)
+                        if file_content:
+                            print(f"Fetched {len(file_content.encode('utf-8'))} bytes from aliased URL: {command_name}")
+                            # For URL commands, we'll skip the local file processing
+                            command_dir = None
+                            code_file = None
+                        else:
+                            print(f"Failed to fetch content from aliased URL: {command_name}")
+                            sys.exit(1)
+                    except Exception as e:
+                        print(f"Error fetching aliased URL content: {e}")
+                        sys.exit(1)
+        
         # Resolve device
         device_info = self.resolve_device(device_spec, options)
         
         serial_port = device_info['device']
         password = device_info.get('password') or options.password
         
-        # Parse variable assignments from remaining arguments
-        variables = self.parse_command_line_variables(remaining[2:])
+        # Store remaining arguments for later parsing after we have info.json
+        remaining_args = remaining[2:]
 
         # Check if command directory exists and contains code.py (only for local commands)
         if not file_content:  # Only check local files if we didn't fetch from URL
@@ -158,6 +182,22 @@ class CLI:
                 print(f"Warning: info.json not found in command directory '{command_dir}'")
                 print("Proceeding without module information...")
 
+        # Parse variables from command line arguments
+        variables = {}
+        
+        # First, try to parse as default commandline variables (positional arguments)
+        if info_data:
+            default_vars = self.parse_default_commandline_variables(remaining_args, info_data, command_name)
+            if default_vars:
+                variables.update(default_vars)
+                self.debug(f"Parsed {len(default_vars)} variables from default commandline", options)
+        
+        # Then, parse any explicit variable assignments (var=value format)
+        explicit_vars = self.parse_command_line_variables(remaining_args)
+        if explicit_vars:
+            variables.update(explicit_vars)
+            self.debug(f"Parsed {len(explicit_vars)} explicit variable assignments", options)
+        
         # Add defaults from info.json for any missing variables
         variables = self.add_defaults_from_info(variables, info_data, command_name)
         
@@ -181,13 +221,10 @@ class CLI:
                 print(f"Read {len(file_content.encode('utf-8'))} bytes from '{command_name}/code.py'")
                 
                 if options.verbose:
-                    self.debug("File content preview (first 200 chars):", options)
-                    preview = file_content[:200]
-                    preview_lines = preview.split('\n')
-                    for i, line in enumerate(preview_lines):
+                    self.debug("File content preview:", options)
+                    file_lines = file_content.split('\n')
+                    for i, line in enumerate(file_lines):
                         self.debug(f"  Line {i+1}: {line}", options)
-                    if len(file_content) > 200:
-                        self.debug("  ... (truncated)", options)
                         
             except Exception as e:
                 print(f"Error reading code.py: {e}")
@@ -204,6 +241,13 @@ class CLI:
                 file_content = self.interpolate_variables(file_content, variables, info_data, command_name)
                 self.debug(f"Code content after interpolation length: {len(file_content)} characters", options)
                 self.debug(f"Code content after interpolation bytes: {len(file_content.encode('utf-8'))} bytes", options)
+                
+                if options.verbose:
+                    self.debug("File content after variable interpolation:", options)
+                    file_lines = file_content.split('\n')
+                    for i, line in enumerate(file_lines):
+                        self.debug(f"  Line {i+1}: {line}", options)
+                        
             else:
                 print(f"❌ Error: Template variables found in code.py but no variables available (including defaults) for module '{command_name}':")
                 for var in template_vars:
@@ -360,7 +404,12 @@ class CLI:
 
     def show_help(self, parser):
         """Show help message with examples."""
-        print("Usage: cpctrl [options] <serial_port_or_ip> <command_name> [variable=value ...]")
+        print("Usage: cpctrl [options] <serial_port_or_ip> <command_name> [arguments...]")
+        print()
+        print("Arguments can be:")
+        print("  • Positional arguments (if command has default_commandline defined)")
+        print("  • Explicit variable assignments: variable=value")
+        print("  • Mix of both")
         print()
         print("Options:")
         print("  -v, --verbose                    Enable verbose debug output")
@@ -383,6 +432,8 @@ class CLI:
         print("  cpctrl /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")
         print("  cpctrl -C /dev/ttyUSB0 BME280")
         print("  cpctrl -y /dev/ttyUSB0 ADXL345                    # Skip confirmation for untested modules")
+        print("  cpctrl /dev/ttyUSB0 mycommand filename.txt         # Positional arguments (if default_commandline defined)")
+        print("  cpctrl /dev/ttyUSB0 mycommand filename.txt sda=board.IO1  # Mix of positional and explicit")
         print("\nAvailable commands:")
         
         commands_dir = Path(__file__).parent.parent / 'commands'
@@ -391,7 +442,7 @@ class CLI:
                 print(f"  {cmd}")
 
     def parse_command_line_variables(self, args):
-        """Parse variable assignments from command line arguments."""
+        """Parse explicit variable assignments from command line arguments (var=value format)."""
         variables = {}
         
         for arg in args:
@@ -404,11 +455,66 @@ class CLI:
                 value = value.strip('"\'')
                 
                 variables[var_name] = value
-            else:
-                print(f"❌ Error: Invalid variable format '{arg}'")
-                print("Variables must be in the format 'variable=value'")
-                print("Example: sda=board.IO1 scl=board.IO2")
+        
+        return variables
+
+    def parse_default_commandline_variables(self, args, info_data, command_name):
+        """Parse variables from positional arguments based on default_commandline in info.json."""
+        variables = {}
+        
+        # Check if default_commandline is defined in info.json
+        if not info_data or 'default_commandline' not in info_data:
+            return variables
+        
+        default_commandline = info_data['default_commandline']
+        if not isinstance(default_commandline, str):
+            print(f"❌ Error: default_commandline in info.json for '{command_name}' must be a string")
+            sys.exit(1)
+        
+        # Split the default_commandline into variable names
+        expected_vars = default_commandline.split()
+        
+        # Validate that all variables in default_commandline are defined in the variables section
+        if 'variables' in info_data:
+            valid_variables = [var['name'] for var in info_data['variables']]
+            invalid_default_vars = [var for var in expected_vars if var not in valid_variables]
+            if invalid_default_vars:
+                print(f"❌ Error: Variables in default_commandline for '{command_name}' are not defined in variables section:")
+                for var in invalid_default_vars:
+                    print(f"   - '{var}' is not a valid variable for this module")
+                print()
+                print("Valid variables for this module:")
+                if not valid_variables:
+                    print("   (none defined)")
+                else:
+                    for var in valid_variables:
+                        print(f"   - {var}")
+                print()
+                print("Please update the module's info.json file to include these variables.")
                 sys.exit(1)
+        
+        # Parse positional arguments as variables
+        for i, arg in enumerate(args):
+            if i < len(expected_vars):
+                var_name = expected_vars[i]
+                variables[var_name] = arg
+            else:
+                # Extra arguments beyond what's expected
+                print(f"❌ Error: Too many positional arguments for '{command_name}'")
+                print(f"Expected {len(expected_vars)} arguments: {default_commandline}")
+                print(f"Got {len(args)} arguments")
+                sys.exit(1)
+        
+        # Check if we have enough arguments
+        if len(args) < len(expected_vars):
+            print(f"❌ Error: Not enough positional arguments for '{command_name}'")
+            print(f"Expected {len(expected_vars)} arguments: {default_commandline}")
+            print(f"Got {len(args)} arguments")
+            print()
+            print("You can also use explicit variable assignments:")
+            for var in expected_vars:
+                print(f"   {var}=value")
+            sys.exit(1)
         
         return variables
 
