@@ -26,12 +26,15 @@ def main():
 
 
 class CLI:
-    def __init__(self):
-        self.config = Config()
+    def __init__(self, options=None):
+        self.config = Config(options)
 
     def run(self, args):
         """Run the CLI with the given arguments."""
         options, remaining = self.parse_options(args)
+        
+        # Update config with options for debug output
+        self.config.options = options
         
         if len(remaining) < 2:
             print("Usage: cpctrl [options] <device_name_or_path> <command_name> [variable=value ...]")
@@ -53,7 +56,7 @@ class CLI:
             try:
                 file_content = self.fetch_url_content(command_name, options)
                 if file_content:
-                    print(f"Fetched {len(file_content.encode('utf-8'))} bytes from URL: {command_name}")
+                    self.debug(f"Fetched {len(file_content.encode('utf-8'))} bytes from URL: {command_name}", options)
                     # For URL commands, we'll skip the local file processing
                     command_dir = None
                     code_file = None
@@ -77,7 +80,7 @@ class CLI:
                     try:
                         file_content = self.fetch_url_content(command_name, options)
                         if file_content:
-                            print(f"Fetched {len(file_content.encode('utf-8'))} bytes from aliased URL: {command_name}")
+                            self.debug(f"Fetched {len(file_content.encode('utf-8'))} bytes from aliased URL: {command_name}", options)
                             # For URL commands, we'll skip the local file processing
                             command_dir = None
                             code_file = None
@@ -203,8 +206,8 @@ class CLI:
         
         if variables:
             self.debug(f"Final variables (including defaults): {variables}", options)
-            print(f"Variables: {', '.join([f'{k}={v}' for k, v in variables.items()])}")
-            print()
+            self.debug(f"Variables: {', '.join([f'{k}={v}' for k, v in variables.items()])}", options)
+            self.debug("", options)
             
             # Validate variables against info.json
             self.validate_variables(variables, info_data, command_name)
@@ -218,7 +221,7 @@ class CLI:
                 
                 self.debug(f"File content length: {len(file_content)} characters", options)
                 self.debug(f"File content bytes: {len(file_content.encode('utf-8'))} bytes", options)
-                print(f"Read {len(file_content.encode('utf-8'))} bytes from '{command_name}/code.py'")
+                self.debug(f"Read {len(file_content.encode('utf-8'))} bytes from '{command_name}/code.py'", options)
                 
                 if options.verbose:
                     self.debug("File content preview:", options)
@@ -277,19 +280,19 @@ class CLI:
         try:
             self.debug("Starting CircuitPython REPL protocol", options)
             
-            print("Interrupting CircuitPython (Ctrl+C x3)...")
+            self.debug("Interrupting CircuitPython (Ctrl+C x3)...", options)
             self.debug("Sending 3 Ctrl+C characters (\\x03)", options)
             connection.write("\x03\x03\x03")  # Send Ctrl+C three times
             self.debug("Waiting 0.5 seconds after Ctrl+C", options)
             time.sleep(0.5)
             
-            print("Entering raw REPL mode (Ctrl+A)...")
+            self.debug("Entering raw REPL mode (Ctrl+A)...", options)
             self.debug("Sending Ctrl+A character (\\x01)", options)
             connection.write("\x01")  # Send Ctrl+A
             self.debug("Waiting 0.5 seconds after Ctrl+A", options)
             time.sleep(0.5)
             
-            print("Sending start marker...")
+            self.debug("Sending start marker...", options)
             self.debug("Sending: print('***START***')", options)
             start_marker = "print('***START***')\r\n"
             connection.write(start_marker)
@@ -298,7 +301,7 @@ class CLI:
             
             file_content = file_content.replace('\n', '\r\n')
 
-            print("Transmitting Python code...")
+            self.debug("Transmitting Python code...", options)
             self.debug(f"Transmitting {len(file_content.encode('utf-8'))} bytes of Python code", options)
             if options.verbose:
                 self.debug("Code transmission details:", options)
@@ -308,16 +311,16 @@ class CLI:
             connection.write(file_content)
             connection.flush()
             self.debug("Python code transmission complete and flushed", options)
-            print("Code transmission complete")
+            self.debug("Code transmission complete", options)
             
-            print("Sending end marker...")
+            self.debug("Sending end marker...", options)
             self.debug("Sending: print('***END***')", options)
             end_marker = "print('***END***')\r\n"
             connection.write(end_marker)
             connection.flush()
             self.debug("End marker sent and flushed", options)
             
-            print("Exiting raw REPL mode (Ctrl+D, Ctrl+B)...")
+            self.debug("Exiting raw REPL mode (Ctrl+D, Ctrl+B)...", options)
             self.debug("Sending Ctrl+D character (\\x04)", options)
             connection.write("\x04")  # Send Ctrl+D
             self.debug("Waiting 0.1 seconds after Ctrl+D", options)
@@ -327,7 +330,7 @@ class CLI:
             
             connection.flush()
             self.debug("REPL exit sequence complete and flushed", options)
-            print("REPL mode exit complete")
+            self.debug("REPL mode exit complete", options)
         except Exception as e:
             print(f"Error during CircuitPython communication: {e}")
             self.debug(f"CircuitPython communication error details: {type(e).__name__}: {e}", options)
@@ -338,8 +341,8 @@ class CLI:
             sys.exit(1)
 
         # Display output from connection for 10 seconds
-        print("Listening for output (10 seconds)...")
-        print("-" * 50)
+        self.debug("Listening for output (10 seconds)...", options)
+        self.debug("-" * 50, options)
 
         try:
             self.debug("Starting output monitoring with 10-second timeout", options)
@@ -365,9 +368,9 @@ class CLI:
             self.debug("Closing connection", options)
             connection.close()
             if connection.connection_type == 'serial':
-                print("Serial port closed")
+                self.debug("Serial port closed", options)
             else:
-                print("WebSocket connection closed")
+                self.debug("WebSocket connection closed", options)
 
     def parse_options(self, args):
         """Parse command line options."""
@@ -521,7 +524,7 @@ class CLI:
     def debug(self, message, options):
         """Print debug message if verbose mode is enabled."""
         if options and options.verbose:
-            print(f"[DEBUG] {message}")
+            print(message)
 
     def validate_variables(self, variables, info_data, command_name):
         """Validate variables against info.json."""

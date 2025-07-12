@@ -125,7 +125,8 @@ class CircuitPythonConnection:
             
             if self.connection and hasattr(self.connection, 'send'):
                 self.debug("WebSocket connection established")
-                print(f"Connected to CircuitPython Web Workflow at {host}:{port}")
+                if self.debug_options and self.debug_options.get('verbose'):
+                    print(f"Connected to CircuitPython Web Workflow at {host}:{port}")
             else:
                 raise RuntimeError("WebSocket connection failed to establish")
                 
@@ -153,7 +154,8 @@ class CircuitPythonConnection:
             )
             
             self.debug("Serial port opened successfully")
-            print(f"Opened serial port {self.connection_string} at 115200 bps")
+            if self.debug_options and self.debug_options.get('verbose'):
+                print(f"Opened serial port {self.connection_string} at 115200 bps")
             
         except Exception as e:
             print(f"Error opening serial port: {e}")
@@ -188,7 +190,7 @@ class CircuitPythonConnection:
     def _on_ws_error(self, ws, error):
         """Handle WebSocket error events."""
         if self.debug_options.get('verbose'):
-            print(f"[DEBUG] WebSocket error: {error}")
+            print(f"WebSocket error: {error}")
         for handler in self.ws_error_handlers:
             try:
                 handler(error)
@@ -198,7 +200,7 @@ class CircuitPythonConnection:
     def _on_ws_close(self, ws, close_status_code, close_msg):
         """Handle WebSocket close events."""
         if self.debug_options.get('verbose'):
-            print(f"[DEBUG] WebSocket closed: {close_status_code} - {close_msg}")
+            print(f"WebSocket closed: {close_status_code} - {close_msg}")
         for handler in self.ws_close_handlers:
             try:
                 handler(close_status_code, close_msg)
@@ -208,4 +210,4 @@ class CircuitPythonConnection:
     def debug(self, message):
         """Print debug message if verbose mode is enabled."""
         if self.debug_options.get('verbose'):
-            print(f"[DEBUG] {message}") 
+            print(message) 

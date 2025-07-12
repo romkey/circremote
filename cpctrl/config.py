@@ -10,10 +10,11 @@ from pathlib import Path
 
 
 class Config:
-    def __init__(self):
+    def __init__(self, options=None):
         self.config_path = Path.home() / '.cpctrl' / 'config.json'
         self.devices = {}
         self.command_aliases = {}
+        self.options = options
         self.load_config()
 
     def find_device(self, name):
@@ -32,15 +33,20 @@ class Config:
         """List all configured command alias names."""
         return list(self.command_aliases.keys())
 
+    def debug(self, message):
+        """Print debug message if verbose mode is enabled."""
+        if self.options and self.options.verbose:
+            print(message)
+
     def load_config(self):
         """Load device configuration from JSON file."""
-        print(f"[DEBUG] Looking for config file at: {self.config_path}")
+        self.debug(f"Looking for config file at: {self.config_path}")
         
         if not self.config_path.exists():
-            print("[DEBUG] Config file does not exist")
+            self.debug("Config file does not exist")
             return
             
-        print("[DEBUG] Config file exists")
+        self.debug("Config file exists")
 
         # Check file permissions - complain if world accessible
         self.check_file_permissions()
@@ -48,29 +54,29 @@ class Config:
         try:
             with open(self.config_path, 'r') as f:
                 config_content = f.read()
-                print(f"[DEBUG] Read config file, content length: {len(config_content)}")
+                self.debug(f"Read config file, content length: {len(config_content)}")
                 config_data = json.loads(config_content)
-                print("[DEBUG] Parsed JSON successfully")
+                self.debug("Parsed JSON successfully")
                 
                 # Load devices
                 if 'devices' in config_data and isinstance(config_data['devices'], list):
-                    print(f"[DEBUG] Found {len(config_data['devices'])} devices in config")
+                    self.debug(f"Found {len(config_data['devices'])} devices in config")
                     for device in config_data['devices']:
                         self.validate_device_config(device)
                         self.devices[device['name']] = device
-                        print(f"[DEBUG] Added device: {device['name']} -> {device['device']}")
+                        self.debug(f"Added device: {device['name']} -> {device['device']}")
                 else:
-                    print("[DEBUG] No 'devices' array found in config")
+                    self.debug("No 'devices' array found in config")
                 
                 # Load command aliases
                 if 'command_aliases' in config_data and isinstance(config_data['command_aliases'], list):
-                    print(f"[DEBUG] Found {len(config_data['command_aliases'])} command aliases in config")
+                    self.debug(f"Found {len(config_data['command_aliases'])} command aliases in config")
                     for alias in config_data['command_aliases']:
                         self.validate_command_alias_config(alias)
                         self.command_aliases[alias['name']] = alias['command']
-                        print(f"[DEBUG] Added command alias: {alias['name']} -> {alias['command']}")
+                        self.debug(f"Added command alias: {alias['name']} -> {alias['command']}")
                 else:
-                    print("[DEBUG] No 'command_aliases' array found in config")
+                    self.debug("No 'command_aliases' array found in config")
                     
         except json.JSONDecodeError as e:
             print(f"❌ Error: Config file {self.config_path} contains invalid JSON: {e}")
