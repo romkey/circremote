@@ -7,6 +7,38 @@ import sys
 import gc
 import board
 import microcontroller
+import re
+
+def natural_sort_key(s):
+    """Sort key function for natural sorting of strings with numbers."""
+    # Ensure we have a string to work with
+    if not isinstance(s, str):
+        s = str(s)
+    
+    # Simple implementation that works with CircuitPython's limited re support
+    # Split on digits manually and pad numbers with zeros for proper string sorting
+    result = ""
+    current_num = ""
+    
+    for char in s:
+        if char.isdigit():
+            current_num += char
+        else:
+            if current_num:
+                # Pad numbers with zeros to ensure proper sorting
+                while len(current_num) < 10:
+                    current_num = "0" + current_num
+                result += current_num
+                current_num = ""
+            result += char.lower()
+    
+    # Handle any remaining number at the end
+    if current_num:
+        while len(current_num) < 10:
+            current_num = "0" + current_num
+        result += current_num
+    
+    return result
 
 cp_info = os.uname().version.split(' on ')
 print(f'''CircuitPython Version: {cp_info[0]}
@@ -15,6 +47,8 @@ CircuitPython Date: {cp_info[1]}
 
 print(os.uname().machine)
 print(board.board_id)
+print()
+
 
 try:
 # SPDX-FileCopyrightText: 2020 anecdata
@@ -22,16 +56,29 @@ try:
 # SPDX-License-Identifier: MIT
 
 # from https://gist.github.com/anecdata/1c345cb2d137776d76b97a5d5678dc97
+    # Get all pin names and sort them naturally
+    pin_names = []
     for pin in dir(microcontroller.pin):
         if isinstance(getattr(microcontroller.pin, pin), microcontroller.Pin):
-            print("".join(("microcontroller.pin.", pin, "\t")), end=" ")
-            for alias in dir(board):
-                if getattr(board, alias) is getattr(microcontroller.pin, pin):
-                    print("".join(("", "board.", alias)), end=" ")
+            if isinstance(pin, str):
+                pin_names.append(pin)
+    
+    # Sort pin names using natural sorting
+    pin_names.sort(key=natural_sort_key)
+    
+    for pin in pin_names:
+        print("".join(("microcontroller.pin.", pin, "\t")), end=" ")
+        for alias in dir(board):
+            if getattr(board, alias) is getattr(microcontroller.pin, pin):
+                print("".join(("", "board.", alias)), end=" ")
         print()
+
+    print()
 
 except Exception as e:
     print(f"Could not get pin info (Error: {e})")
+    import traceback
+    traceback.print_exc()
 
 # SPDX-FileCopyrightText: 2025 John Romkey 
 #
