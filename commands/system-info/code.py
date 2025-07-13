@@ -62,10 +62,15 @@ try:
 
     radio = wifi.radio
     if radio.connected:
-        print(f'''Connected to: {radio.ap_info.ssid}
+        bssid = ":".join("%02x" % b for b in radio.ap_info.bssid)
+        mac_address =  ":".join("%02x" % b for b in wifi.radio.mac_address)
+
+        print(f'''SSID: {radio.ap_info.ssid}
+BSSID: {bssid}
 RSSI: {radio.ap_info.rssi} dBm
 Channel: {radio.ap_info.channel}
 IP Address: {radio.ipv4_address}
+MAC Address: {mac_address}
 ''')
     else:
         print('Wifi not connected')
