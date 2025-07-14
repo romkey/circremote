@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("MCP9600 Thermocouple Interface")
 print("=" * 35)
 
@@ -39,45 +36,31 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        temp = mcp9600.temperature
-        hot_junction = mcp9600.hot_junction_temperature
-        cold_junction = mcp9600.cold_junction_temperature
-        delta = mcp9600.temperature_delta
+    temp = mcp9600.temperature
+    hot_junction = mcp9600.hot_junction_temperature
+    cold_junction = mcp9600.cold_junction_temperature
+    delta_t = mcp9600.temperature_delta
+    
+    print(f"Temperature: {temp:.1f}°C")
+    print(f"Hot Junction: {hot_junction:.1f}°C")
+    print(f"Cold Junction: {cold_junction:.1f}°C")
+    print(f"Delta Temperature: {delta_t:.1f}°C")
+    
+    # Determine temperature level
+    if hot_junction < 0:
+        temp_level = "Freezing"
+    elif hot_junction < 50:
+        temp_level = "Cold"
+    elif hot_junction < 100:
+        temp_level = "Warm"
+    elif hot_junction < 200:
+        temp_level = "Hot"
+    elif hot_junction < 500:
+        temp_level = "Very Hot"
+    else:
+        temp_level = "Extreme"
         
-        print(f"Temperature: {temp:.1f}°C")
-        print(f"Hot Junction: {hot_junction:.1f}°C")
-        print(f"Cold Junction: {cold_junction:.1f}°C")
-        print(f"Delta: {delta:.1f}°C")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Hot Junction: {hot_junction:.1f}°C")
-        print(f"Cold Junction: {cold_junction:.1f}°C")
-        print(f"Delta Temperature: {delta_t:.1f}°C")
-        
-        # Determine temperature level
-        if hot_junction < 0:
-            temp_level = "Freezing"
-        elif hot_junction < 50:
-            temp_level = "Cold"
-        elif hot_junction < 100:
-            temp_level = "Warm"
-        elif hot_junction < 200:
-            temp_level = "Hot"
-        elif hot_junction < 500:
-            temp_level = "Very Hot"
-        else:
-            temp_level = "Extreme"
-            
-        print(f"Temperature Level: {temp_level}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    print(f"Temperature Level: {temp_level}")
+    print("-" * 30)
+    
+    time.sleep(30)

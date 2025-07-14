@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("APDS9960 Gesture & Color Sensor")
 print("=" * 35)
 
@@ -42,18 +39,27 @@ print()
 
 # Main reading loop
 while True:
-            print("Gesture: DOWN")
-        elif gesture == 0x03:
-            print("Gesture: LEFT")
-        elif gesture == 0x04:
-            print("Gesture: RIGHT")
-        else:
-            print("Gesture: None")
+    # Read color data
+    r, g, b, c = apds.color_data
+    print(f"Color: R={r}, G={g}, B={b}, C={c}")
+        
+    # Read proximity data
+    proximity = apds.proximity
+    print(f"Proximity: {proximity}")
+        
+    # Read gesture data
+    gesture = apds.gesture()
+    if gesture == 0x01:
+        print("Gesture: UP")
+    elif gesture == 0x02:
+        print("Gesture: DOWN")
+    elif gesture == 0x03:
+        print("Gesture: LEFT")
+    elif gesture == 0x04:
+        print("Gesture: RIGHT")
+    else:
+        print("Gesture: None")
             
-        print("-" * 30)
+    print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    time.sleep(30)

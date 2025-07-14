@@ -26,7 +26,6 @@ print("=" * 30)
 
 # Main reading loop
 while True:
-    try:
         # Read magnetometer values
         mag_x, mag_y, mag_z = lis2mdl.magnetic
         
@@ -36,8 +35,4 @@ while True:
         print(f"Z: {mag_z:.2f} µT")
         print("-" * 30)
         
-        time.sleep(1)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(1) 

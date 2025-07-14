@@ -26,7 +26,6 @@ print("=" * 25)
 
 # Main reading loop
 while True:
-    try:
         # Read sensor values
         pixels = amg.pixels
         
@@ -44,8 +43,4 @@ while True:
             print(" ".join([f"{temp:6.1f}" for temp in row]))
         
         print("-" * 30)
-        time.sleep(5)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
         time.sleep(5) 

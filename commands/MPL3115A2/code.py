@@ -29,7 +29,6 @@ mpl.sea_level_pressure = 1013.25
 
 # Main reading loop
 while True:
-    try:
         # Read sensor values
         pressure = mpl.pressure
         altitude = mpl.altitude
@@ -41,8 +40,4 @@ while True:
         print(f"Temperature: {temperature:.1f}°C")
         print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(30) 

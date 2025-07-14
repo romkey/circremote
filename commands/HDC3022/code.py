@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("HDC3022 Temperature & Humidity Sensor")
 print("=" * 40)
 

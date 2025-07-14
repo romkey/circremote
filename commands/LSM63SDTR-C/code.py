@@ -26,7 +26,6 @@ print("=" * 25)
 
 # Main reading loop
 while True:
-    try:
         # Read accelerometer values
         accel_x, accel_y, accel_z = lsm.acceleration
         
@@ -44,8 +43,4 @@ while True:
         print(f"  Z: {gyro_z:.2f}")
         print("-" * 30)
         
-        time.sleep(1)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(1) 

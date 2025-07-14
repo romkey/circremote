@@ -31,7 +31,6 @@ print()
 
 # Main reading loop
 while True:
-    try:
         # Read accelerometer values
         x, y, z = adxl.acceleration
         
@@ -41,8 +40,4 @@ while True:
         print(f"Z: {z:.2f} m/s²")
         print("-" * 30)
         
-        time.sleep(1)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(1) 

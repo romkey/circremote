@@ -26,7 +26,6 @@ print("=" * 30)
 
 # Main reading loop
 while True:
-    try:
         # Read sensor values
         visible = ltr.visible_plus_ir_light
         ir = ltr.ir_light
@@ -40,8 +39,4 @@ while True:
         print(f"Total Light: {visible:.1f} lux")
         print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(30) 

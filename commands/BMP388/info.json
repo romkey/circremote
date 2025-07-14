@@ -1,4 +1,4 @@
 {
-  "test": "value",
+  "description": "BMP388 is a high-precision, low-power digital barometric pressure sensor. It provides accurate pressure and temperature measurements for altitude sensing, weather monitoring, and indoor navigation applications.",
   "tested": false
 }

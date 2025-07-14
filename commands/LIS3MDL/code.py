@@ -32,7 +32,6 @@ print()
 
 # Main reading loop
 while True:
-    try:
         mag_x, mag_y, mag_z = lis3mdl.magnetic
         temp = lis3mdl.temperature
         
@@ -43,7 +42,3 @@ while True:
         print("-" * 30)
         
         time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)

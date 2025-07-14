@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("BH1750 Light Sensor")
 print("=" * 25)
 
@@ -35,39 +32,27 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        lux = bh1750.lux
+    lux = bh1750.lux
+    
+    print(f"Lux: {lux:.1f} lux")
+    
+    # Determine light level
+    if lux < 1:
+        light_level = "Very Dark"
+    elif lux < 10:
+        light_level = "Dark"
+    elif lux < 50:
+        light_level = "Low Light"
+    elif lux < 200:
+        light_level = "Indoor"
+    elif lux < 1000:
+        light_level = "Bright Indoor"
+    elif lux < 10000:
+        light_level = "Outdoor"
+    else:
+        light_level = "Bright Sunlight"
         
-        print(f"Light Level: {lux:.1f} lx")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Lux: {lux:.1f} lux")
-        
-        # Determine light level
-        if lux < 1:
-            light_level = "Very Dark"
-        elif lux < 10:
-            light_level = "Dark"
-        elif lux < 50:
-            light_level = "Low Light"
-        elif lux < 200:
-            light_level = "Indoor"
-        elif lux < 1000:
-            light_level = "Bright Indoor"
-        elif lux < 10000:
-            light_level = "Outdoor"
-        else:
-            light_level = "Bright Sunlight"
-            
-        print(f"Light Level: {light_level}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    print(f"Light Level: {light_level}")
+    print("-" * 30)
+    
+    time.sleep(30)

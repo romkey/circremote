@@ -15,12 +15,9 @@ except:
 
 # Initialize BMP390
 try:
-    bmp390 = adafruit_bmp3xx.BMP3XX_I2C(i2c, address={{ address }})
+    bmp390 = adafruit_bmp3xx.BMP390(i2c, address={{ address }})
 except Exception as e:
     print(f"Error initializing BMP390: {e}")
-    import sys
-    sys.exit(1)
-
     import sys
     sys.exit(1)
 

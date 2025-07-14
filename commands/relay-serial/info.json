@@ -2,6 +2,13 @@
   "description": "",
   "warn_offline": false,
   "warn_unavailable": false,
-  "variables": [],
+  "variables": [
+      {
+	  "name": "rx_pin",
+	  "required": false,
+	  "description": "CPU UART receive pin",
+	  "default": "board.RX"
+      }
+  ],
   "tested": false
 }

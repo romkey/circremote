@@ -38,31 +38,9 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        # Read temperature from all devices
-        for i, rom in enumerate(roms):
-            temp = ds18b20.read_temperature(rom)
-            print(f"Device {i+1} Temperature: {temp:.2f}°C")
-            
-            # Determine temperature level
-            if temp < 0:
-                temp_level = "Freezing"
-            elif temp < 10:
-                temp_level = "Cold"
-            elif temp < 20:
-                temp_level = "Cool"
-            elif temp < 30:
-                temp_level = "Room Temperature"
-            elif temp < 40:
-                temp_level = "Warm"
-            else:
-                temp_level = "Hot"
+    # Read temperature from all devices
+    for i, rom in enumerate(roms):
+        temp = ds18b20.read_temperature(rom)
+        print(f"Device {i+1} Temperature: {temp:.2f}°C")
                 
-            print(f"Temperature Level: {temp_level}")
-            print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+    time.sleep(30) 

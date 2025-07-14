@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("MCP9808 Temperature Sensor")
 print("=" * 35)
 

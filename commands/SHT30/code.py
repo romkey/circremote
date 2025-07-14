@@ -32,7 +32,6 @@ print()
 
 # Main reading loop
 while True:
-    try:
         temp = sht30.temperature
         humidity = sht30.relative_humidity
         
@@ -41,7 +40,3 @@ while True:
         print("-" * 30)
         
         time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)

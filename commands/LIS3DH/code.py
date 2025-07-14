@@ -21,10 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    print(f"Error initializing LIS3DH: {e}")
-    import sys
-    sys.exit(1)
-
 print("LIS3DH Accelerometer")
 print("=" * 25)
 
@@ -36,3 +32,10 @@ print()
 
 # Main reading loop
 while True:
+    # Read accelerometer data
+    x, y, z = lis3dh.acceleration
+    
+    print(f"Acceleration (m/s²): X={x:.2f}, Y={y:.2f}, Z={z:.2f}")
+    print("-" * 30)
+    
+    time.sleep(1)

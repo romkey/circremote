@@ -26,7 +26,6 @@ print("=" * 25)
 
 # Main reading loop
 while True:
-    try:
         # Read sensor values
         aqi = ens.AQI
         tvoc = ens.TVOC
@@ -38,8 +37,4 @@ while True:
         print(f"eCO2: {eco2:.1f} ppm")
         print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(30) 

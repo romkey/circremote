@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("SHT31-D Temperature & Humidity Sensor")
 print("=" * 40)
 
@@ -38,34 +35,21 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        temp = sht31d.temperature
-        humidity = sht31d.relative_humidity
+    temp = sht31d.temperature
+    humidity = sht31d.relative_humidity
+    
+    print(f"Temperature: {temp:.1f}°C")
+    print(f"Humidity: {humidity:.1f}%")
+    
+    # Determine comfort level
+    if humidity < 30:
+        comfort = "Too Dry"
+    elif humidity < 60:
+        comfort = "Comfortable"
+    else:
+        comfort = "Too Humid"
         
-        print(f"Temperature: {temp:.1f}°C")
-        print(f"Humidity: {humidity:.1f}%")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Temperature: {temp:.1f}°C")
-        print(f"Humidity: {humidity:.1f}%")
-        
-        # Determine comfort level
-        if humidity < 30:
-            comfort = "Too Dry"
-        elif humidity < 60:
-            comfort = "Comfortable"
-        else:
-            comfort = "Too Humid"
-            
-        print(f"Comfort Level: {comfort}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    print(f"Comfort Level: {comfort}")
+    print("-" * 30)
+    
+    time.sleep(30)

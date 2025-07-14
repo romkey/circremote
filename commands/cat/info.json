@@ -1,5 +1,5 @@
 {
-  "description": "Ping a host",
+  "description": "Output a file",
   "warn_unavailable": false,
   "variables": [
     {

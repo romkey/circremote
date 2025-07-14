@@ -29,7 +29,6 @@ bmp280.sea_level_pressure = 1013.25
 
 # Main reading loop
 while True:
-    try:
         # Read sensor values
         pressure = bmp280.pressure
         temperature = bmp280.temperature
@@ -41,8 +40,4 @@ while True:
         print(f"Altitude: {altitude:.1f} m")
         print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(30) 

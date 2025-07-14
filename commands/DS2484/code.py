@@ -26,7 +26,6 @@ print("=" * 30)
 
 # Main reading loop
 while True:
-    try:
         # Scan for 1-Wire devices
         devices = ds2484.scan()
         
@@ -35,8 +34,4 @@ while True:
             print(f"  Device {i+1}: {device}")
         
         print("-" * 30)
-        time.sleep(10)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(10) 

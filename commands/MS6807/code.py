@@ -26,7 +26,6 @@ print("=" * 25)
 
 # Main reading loop
 while True:
-    try:
         # Read sensor values
         pressure = ms6807.pressure
         temperature = ms6807.temperature
@@ -38,8 +37,4 @@ while True:
         print(f"Humidity: {humidity:.1f}%")
         print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(30) 

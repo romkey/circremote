@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("TSL2591 Light Sensor")
 print("=" * 30)
 
@@ -35,42 +32,29 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        lux = tsl2591.lux
-        infrared = tsl2591.infrared
-        visible = tsl2591.visible
+    lux = tsl.lux
+    infrared = tsl.infrared
+    visible = tsl.visible
+    full_spectrum = tsl.full_spectrum
+    
+    print(f"Lux: {lux:.1f} lux")
+    print(f"Infrared: {infrared}")
+    print(f"Visible: {visible}")
+    print(f"Full Spectrum: {full_spectrum}")
+    
+    # Determine light level
+    if lux < 10:
+        light_level = "Dark"
+    elif lux < 50:
+        light_level = "Low Light"
+    elif lux < 200:
+        light_level = "Indoor"
+    elif lux < 1000:
+        light_level = "Bright Indoor"
+    else:
+        light_level = "Outdoor"
         
-        print(f"Lux: {lux:.1f} lx")
-        print(f"Infrared: {infrared}")
-        print(f"Visible: {visible}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Lux: {lux:.1f} lux")
-        print(f"Infrared: {infrared}")
-        print(f"Visible: {visible}")
-        print(f"Full Spectrum: {full_spectrum}")
-        
-        # Determine light level
-        if lux < 10:
-            light_level = "Dark"
-        elif lux < 50:
-            light_level = "Low Light"
-        elif lux < 200:
-            light_level = "Indoor"
-        elif lux < 1000:
-            light_level = "Bright Indoor"
-        else:
-            light_level = "Outdoor"
-            
-        print(f"Light Level: {light_level}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    print(f"Light Level: {light_level}")
+    print("-" * 30)
+    
+    time.sleep(30)

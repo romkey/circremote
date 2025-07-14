@@ -26,7 +26,6 @@ print("=" * 20)
 
 # Main reading loop
 while True:
-    try:
         if scd.data_available:
             # Read sensor values
             co2 = scd.CO2
@@ -39,8 +38,4 @@ while True:
             print(f"Humidity: {humidity:.1f}%")
             print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(30) 

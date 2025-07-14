@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("VL53L0X Time-of-Flight Distance Sensor")
 print("=" * 45)
 
@@ -37,38 +34,29 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        distance = vl53l0x.range
+    distance = vl53.range
+    signal_rate = vl53.signal_rate
+    ambient_rate = vl53.ambient_rate
+    spad_count = vl53.spad_count
+    
+    print(f"Distance: {distance} mm")
+    print(f"Signal Rate: {signal_rate:.2f} MCPS")
+    print(f"Ambient Rate: {ambient_rate:.2f} MCPS")
+    print(f"SPAD Count: {spad_count}")
+    
+    # Determine distance level
+    if distance < 50:
+        distance_level = "Very Close"
+    elif distance < 100:
+        distance_level = "Close"
+    elif distance < 500:
+        distance_level = "Medium"
+    elif distance < 1000:
+        distance_level = "Far"
+    else:
+        distance_level = "Very Far"
         
-        print(f"Distance: {distance} mm")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"Distance: {distance} mm")
-        print(f"Signal Rate: {signal_rate:.2f} MCPS")
-        print(f"Ambient Rate: {ambient_rate:.2f} MCPS")
-        print(f"SPAD Count: {spad_count}")
-        
-        # Determine distance level
-        if distance < 50:
-            distance_level = "Very Close"
-        elif distance < 100:
-            distance_level = "Close"
-        elif distance < 500:
-            distance_level = "Medium"
-        elif distance < 1000:
-            distance_level = "Far"
-        else:
-            distance_level = "Very Far"
-            
-        print(f"Distance Level: {distance_level}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    print(f"Distance Level: {distance_level}")
+    print("-" * 30)
+    
+    time.sleep(30)

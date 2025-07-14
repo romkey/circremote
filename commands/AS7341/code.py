@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("AS7341 Color & Spectral Sensor")
 print("=" * 35)
 
@@ -36,23 +33,26 @@ print()
 
 # Main reading loop
 while True:
-        # Calculate color temperature approximation
-        if red > 0 and blue > 0:
-            ratio = red / blue
-            if ratio > 2:
-                temp_desc = "Warm"
-            elif ratio > 1:
-                temp_desc = "Neutral"
-            else:
-                temp_desc = "Cool"
+    # Read color data
+    red = as7341.channel_415nm + as7341.channel_445nm + as7341.channel_480nm
+    green = as7341.channel_515nm + as7341.channel_555nm + as7341.channel_590nm
+    blue = as7341.channel_630nm + as7341.channel_680nm
+        
+    print(f"Color: R={red}, G={green}, B={blue}")
+        
+    # Calculate color temperature approximation
+    if red > 0 and blue > 0:
+        ratio = red / blue
+        if ratio > 2:
+            temp_desc = "Warm"
+        elif ratio > 1:
+            temp_desc = "Neutral"
         else:
-            temp_desc = "Unknown"
+            temp_desc = "Cool"
+    else:
+        temp_desc = "Unknown"
             
-        print(f"Color Temperature: {temp_desc}")
-        print("-" * 30)
+    print(f"Color Temperature: {temp_desc}")
+    print("-" * 30)
         
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    time.sleep(30)

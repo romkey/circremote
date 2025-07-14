@@ -21,7 +21,6 @@ print("=" * 25)
 
 # Main reading loop
 while True:
-    try:
         # Read sensor value
         detected = sensor.value
         
@@ -32,8 +31,4 @@ while True:
             print("Magnetic Field: NOT DETECTED")
         print("-" * 30)
         
-        time.sleep(0.5)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(0.5) 

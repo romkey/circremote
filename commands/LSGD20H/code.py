@@ -26,7 +26,6 @@ print("=" * 25)
 
 # Main reading loop
 while True:
-    try:
         # Read gyroscope values
         gyro_x, gyro_y, gyro_z = lsm.gyro
         
@@ -36,8 +35,4 @@ while True:
         print(f"Z: {gyro_z:.2f} rad/s")
         print("-" * 30)
         
-        time.sleep(1)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5) 
+        time.sleep(1) 

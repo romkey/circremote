@@ -16,5 +16,5 @@
       "default": "board.SCL"
     }
   ],
-  "tested": test
+  "tested": true
 }

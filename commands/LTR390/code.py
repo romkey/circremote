@@ -21,9 +21,6 @@ except Exception as e:
     import sys
     sys.exit(1)
 
-    import sys
-    sys.exit(1)
-
 print("LTR390 UV Light Sensor")
 print("=" * 30)
 
@@ -37,42 +34,29 @@ print()
 
 # Main reading loop
 while True:
-    try:
-        uv = ltr390.uvs
-        lux = ltr390.light
-        uvi = ltr390.uvi
+    uv_raw = ltr.uvs
+    uv_index = ltr.uvi
+    light = ltr.light
+    lux = ltr.lux
+    
+    print(f"UV Raw: {uv_raw}")
+    print(f"UV Index: {uv_index:.2f}")
+    print(f"Light: {light}")
+    print(f"Lux: {lux:.1f} lux")
+    
+    # Determine UV level
+    if uv_index < 3:
+        uv_level = "Low"
+    elif uv_index < 6:
+        uv_level = "Moderate"
+    elif uv_index < 8:
+        uv_level = "High"
+    elif uv_index < 11:
+        uv_level = "Very High"
+    else:
+        uv_level = "Extreme"
         
-        print(f"UV: {uv}")
-        print(f"Light: {lux:.1f} lx")
-        print(f"UVI: {uvi:.1f}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)        print(f"UV Raw: {uv_raw}")
-        print(f"UV Index: {uv_index:.2f}")
-        print(f"Light: {light}")
-        print(f"Lux: {lux:.1f} lux")
-        
-        # Determine UV level
-        if uv_index < 3:
-            uv_level = "Low"
-        elif uv_index < 6:
-            uv_level = "Moderate"
-        elif uv_index < 8:
-            uv_level = "High"
-        elif uv_index < 11:
-            uv_level = "Very High"
-        else:
-            uv_level = "Extreme"
-            
-        print(f"UV Level: {uv_level}")
-        print("-" * 30)
-        
-        time.sleep(30)
-        
-    except Exception as e:
-        print(f"Error reading sensor: {e}")
-        time.sleep(5)
+    print(f"UV Level: {uv_level}")
+    print("-" * 30)
+    
+    time.sleep(30)
