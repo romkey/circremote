@@ -231,4 +231,60 @@ class TestCLI:
         """Test debug message handling with no options."""
         with patch('builtins.print') as mock_print:
             cli_instance.debug("Test message", None)
-            mock_print.assert_not_called() 
+            mock_print.assert_not_called()
+
+    def test_parse_options_with_timeout(self, cli_instance):
+        """Test parsing options with timeout."""
+        args = ['-t', '30', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.timeout == 30.0
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_timeout_zero(self, cli_instance):
+        """Test parsing options with timeout set to zero."""
+        args = ['-t', '0', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.timeout == 0.0
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_timeout_float(self, cli_instance):
+        """Test parsing options with fractional timeout."""
+        args = ['-t', '5.5', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.timeout == 5.5
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_timeout_default(self, cli_instance):
+        """Test parsing options without timeout (should use default)."""
+        args = ['/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.timeout == 10.0  # Default value
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_timeout_long_form(self, cli_instance):
+        """Test parsing options with long form timeout."""
+        args = ['--timeout', '15', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.timeout == 15.0
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_invalid_timeout(self, cli_instance):
+        """Test parsing options with invalid timeout value."""
+        args = ['-t', 'invalid', '/dev/ttyUSB0', 'BME280']
+        
+        with pytest.raises(SystemExit):
+            cli_instance.parse_options(args)
+
+    def test_parse_options_with_negative_timeout(self, cli_instance):
+        """Test parsing options with negative timeout value."""
+        args = ['-t', '-5', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        # Should accept negative values (though they may not make sense)
+        assert options.timeout == -5.0
+        assert remaining == ['/dev/ttyUSB0', 'BME280'] 

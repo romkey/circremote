@@ -389,6 +389,8 @@ class CLI:
                           help='Skip circup dependency installation')
         parser.add_argument('-y', '--yes', action='store_true',
                           help='Skip confirmation prompts (run untested commands without asking)')
+        parser.add_argument('-t', '--timeout', type=float, default=10.0,
+                          help='Timeout in seconds for receiving data (0 = wait indefinitely)')
         parser.add_argument('-h', '--help', action='store_true',
                           help='Show this help message')
         
@@ -420,6 +422,7 @@ class CLI:
         print("  -d, --double-exit                Send additional Ctrl+D after Ctrl+B to exit raw REPL")
         print("  -C, --skip-circup                Skip circup dependency installation")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
+        print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
         print("  -h, --help                       Show this help message")
         print()
         print("Examples:")
@@ -435,6 +438,8 @@ class CLI:
         print("  cpctrl /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")
         print("  cpctrl -C /dev/ttyUSB0 BME280")
         print("  cpctrl -y /dev/ttyUSB0 ADXL345                    # Skip confirmation for untested modules")
+        print("  cpctrl -t 30 /dev/ttyUSB0 BME280                  # Wait 30 seconds for output")
+        print("  cpctrl -t 0 /dev/ttyUSB0 BME280                   # Wait indefinitely for output")
         print("  cpctrl /dev/ttyUSB0 mycommand filename.txt         # Positional arguments (if default_commandline defined)")
         print("  cpctrl /dev/ttyUSB0 mycommand filename.txt sda=board.IO1  # Mix of positional and explicit")
         print("\nAvailable commands:")
@@ -789,15 +794,20 @@ class CLI:
         print()
 
     def monitor_output(self, connection, options):
-        """Monitor output from the connection for 10 seconds."""
+        """Monitor output from the connection with configurable timeout."""
         import signal
         
-        # Set up timeout
+        # Get timeout from options, default to 10 seconds if not specified
+        timeout = getattr(options, 'timeout', 10.0)
+        
+        # Set up timeout handler for serial connections
         def timeout_handler(signum, frame):
             raise TimeoutError("Timeout reached")
         
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(10)
+        # Only set up signal-based timeout for serial connections if timeout > 0
+        if connection.connection_type == 'serial' and timeout > 0:
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(int(timeout))
         
         try:
             if connection.connection_type == 'serial':
@@ -805,7 +815,9 @@ class CLI:
             else:
                 self.monitor_websocket_output(connection, options)
         finally:
-            signal.alarm(0)  # Cancel the alarm
+            # Cancel the alarm if it was set
+            if connection.connection_type == 'serial' and timeout > 0:
+                signal.alarm(0)
 
     def monitor_serial_output(self, connection, options):
         """Monitor output from serial connection."""
@@ -1044,10 +1056,16 @@ class CLI:
         
         connection.on_message(message_handler)
         
+        # Get timeout from options, default to 10 seconds if not specified
+        timeout = getattr(options, 'timeout', 10.0)
+        
         # Wait for output with timeout
         start_time = time.time()
-        while time.time() - start_time < 10:
+        while True:
             if found_end:
+                break
+            # If timeout is 0, wait indefinitely
+            if timeout > 0 and time.time() - start_time >= timeout:
                 break
             time.sleep(0.1)
         
