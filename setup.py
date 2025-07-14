@@ -34,6 +34,19 @@ setup(
         "websocket-client>=1.0.0",
         "requests>=2.25.0",
     ],
+    extras_require={
+        "dev": [
+            "pytest>=6.0",
+            "pytest-cov>=2.10",
+            "pytest-mock>=3.0",
+            "tox>=3.0",
+            "flake8>=3.8",
+            "black>=21.0",
+            "isort>=5.0",
+            "sphinx>=3.0",
+            "sphinx-rtd-theme>=0.5",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "cpctrl=cpctrl.cli:main",

@@ -954,10 +954,12 @@ class CLI:
                     # Convert to raw URL
                     raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{file_path}"
                     return raw_url
-                elif len(path_parts) == 2:  # owner/repo (root of repo)
-                    # Default to main branch
-                    raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md"
-                    return raw_url
+            elif len(path_parts) == 2:  # owner/repo (root of repo)
+                owner = path_parts[0]
+                repo = path_parts[1]
+                # Default to main branch
+                raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/README.md"
+                return raw_url
         
         # If we can't parse it, return the original URL
         return url
