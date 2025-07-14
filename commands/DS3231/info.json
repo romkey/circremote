@@ -1,0 +1,20 @@
+{
+  "description": "DS3231 is a highly accurate real-time clock (RTC) with an integrated temperature-compensated crystal oscillator (TCXO) and crystal. It provides extremely accurate timekeeping with ±2ppm accuracy from 0°C to +40°C and ±3.5ppm accuracy from -40°C to +85°C. Features include I2C interface, battery backup, and alarm functions.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    }
+  ],
+  "tested": true
+} 

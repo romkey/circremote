@@ -1,0 +1,20 @@
+{
+  "description": "PCF8523 is a low-power real-time clock (RTC) and calendar chip that provides accurate time and date information. It features a 32.768 kHz quartz crystal oscillator, automatic leap year compensation, and I2C communication interface. The sensor can maintain time for years on a single coin cell battery.",
+  "warn_offline": false,
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    }
+  ],
+  "tested": true
+} 
