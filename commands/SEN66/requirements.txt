@@ -1,1 +1,1 @@
-adafruit_pm25
+adafruit_sen6x

@@ -1,54 +1,67 @@
-# SPDX-FileCopyrightText: 2025 John Romkey 
+# SPDX-FileCopyrightText: 2025 John Romkey
 #
 # SPDX-License-Identifier: CC0-1.0
 
 import time
 import board
 import busio
-import adafruit_pm25
+import adafruit_sen6x
 
-
-print("SEN66 Particulate Matter Sensor")
+print("SEN66 Environmental Sensor")
 print("=" * 40)
 
-# Initialize UART for SEN66 sensor
+# Initialize I2C bus (support template pins, fallback to board.I2C)
 try:
-    uart = busio.UART(board.TX, board.RX, baudrate=9600)
-except Exception as e:
-    print(f"Error initializing SEN66: {e}")
-    import sys
-    sys.exit(1)
+    i2c = busio.I2C({{ scl }}, {{ sda }})
+except Exception:
+    i2c = board.I2C()
 
 # Initialize SEN66 sensor
 try:
-    pm25 = adafruit_pm25.PM25_UART(uart)
+    sen66 = adafruit_sen6x.SEN66(i2c)
     print("✓ SEN66 sensor initialized successfully")
-    
+    print(f"Serial Number: {sen66.serial_number}")
 except Exception as e:
     print(f"✗ Error initializing SEN66: {e}")
     import sys
     sys.exit(1)
 
-print("\nStarting particulate matter measurements...")
-print("PM readings (μg/m³):")
+print("\nStarting environmental measurements...")
+print("Readings:")
 
-# Main measurement loop
 while True:
-    # Read particulate matter data
-    aqdata = pm25.read()
+    sen66.start_measurement()
+    time.sleep(2)
+
+    if sen66.data_ready:
+        sen66.check_sensor_errors()
+
+        data = sen66.all_measurements()
         
-    if aqdata is not None:
-        print(f"PM1.0: {aqdata['pm10 standard']} μg/m³")
-        print(f"PM2.5: {aqdata['pm25 standard']} μg/m³")
-        print(f"PM10: {aqdata['pm100 standard']} μg/m³")
-        print(f"Particles >0.3μm: {aqdata['particles 03um']}")
-        print(f"Particles >0.5μm: {aqdata['particles 05um']}")
-        print(f"Particles >1.0μm: {aqdata['particles 10um']}")
-        print(f"Particles >2.5μm: {aqdata['particles 25um']}")
-        print(f"Particles >5.0μm: {aqdata['particles 50um']}")
-        print(f"Particles >10μm: {aqdata['particles 100um']}")
-    else:
-        print("No data available")
+        print("All Measurements:")
+        # Sort by key and format for display
+        sorted_items = sorted(data.items())
         
+        # Calculate display keys and max length
+        display_keys = []
+        for key, value in sorted_items:
+            if key.startswith('pm'):
+                display_key = 'PM' + key[2:].upper()
+            else:
+                # Manual capitalization for CircuitPython
+                display_key = key[0].upper() + key[1:].lower()
+            display_keys.append(display_key)
+        
+        max_key_length = max(len(display_key) for display_key in display_keys)
+        
+        for i, (key, value) in enumerate(sorted_items):
+            display_key = display_keys[i]
+            
+            # Align the fields
+            if isinstance(value, float):
+                print(f"  {display_key:<{max_key_length}}: {value:.2f}")
+            else:
+                print(f"  {display_key:<{max_key_length}}: {value}")
+
     print("-" * 30)
-    time.sleep(30)  # Wait 30 seconds between readings
+    time.sleep(30)
