@@ -103,6 +103,28 @@ class CircuitPythonConnection:
             headers['Authorization'] = f"Basic {auth_string}"
             self.debug("Added basic auth header")
         
+        # Track connection status
+        connection_error = None
+        connection_established = False
+        
+        def on_error(ws, error):
+            nonlocal connection_error
+            connection_error = error
+            self.debug(f"WebSocket connection error: {error}")
+            
+            # Check for 401 unauthorized error
+            if hasattr(error, 'status_code') and error.status_code == 401:
+                connection_error = "Bad password - authentication failed"
+            elif hasattr(error, 'args') and len(error.args) > 0:
+                error_str = str(error.args[0])
+                if '401' in error_str or 'unauthorized' in error_str.lower():
+                    connection_error = "Bad password - authentication failed"
+        
+        def on_open(ws):
+            nonlocal connection_established
+            connection_established = True
+            self.debug("WebSocket connection opened successfully")
+        
         try:
             self.debug("Attempting to connect to WebSocket")
             
@@ -110,8 +132,9 @@ class CircuitPythonConnection:
             self.connection = websocket.WebSocketApp(
                 ws_url,
                 header=headers,
+                on_open=on_open,
                 on_message=self._on_ws_message,
-                on_error=self._on_ws_error,
+                on_error=on_error,
                 on_close=self._on_ws_close
             )
             
@@ -120,10 +143,28 @@ class CircuitPythonConnection:
             ws_thread.daemon = True
             ws_thread.start()
             
-            # Wait for connection to establish
-            time.sleep(1)
+            # Wait for connection to establish or fail
+            timeout = 5  # 5 second timeout
+            start_time = time.time()
+            while not connection_established and connection_error is None:
+                if time.time() - start_time > timeout:
+                    connection_error = "Connection timeout"
+                    break
+                time.sleep(0.1)
             
-            if self.connection and hasattr(self.connection, 'send'):
+            # Check for connection errors
+            if connection_error:
+                if "Bad password" in connection_error:
+                    print(f"❌ {connection_error}")
+                    print("Please check your password and try again.")
+                    print("Use the -p option to specify the correct password:")
+                    print(f"  cpctrl -p <password> {self.connection_string} <command>")
+                else:
+                    print(f"Error connecting to WebSocket: {connection_error}")
+                self.debug(f"WebSocket connection failed: {connection_error}")
+                raise RuntimeError(connection_error)
+            
+            if connection_established:
                 self.debug("WebSocket connection established")
                 if self.debug_options and self.debug_options.get('verbose'):
                     print(f"Connected to CircuitPython Web Workflow at {host}:{port}")
@@ -131,8 +172,9 @@ class CircuitPythonConnection:
                 raise RuntimeError("WebSocket connection failed to establish")
                 
         except Exception as e:
-            print(f"Error connecting to WebSocket: {e}")
-            self.debug(f"WebSocket error details: {type(e).__name__}: {e}")
+            if "Bad password" not in str(e):
+                print(f"Error connecting to WebSocket: {e}")
+                self.debug(f"WebSocket error details: {type(e).__name__}: {e}")
             raise
 
     def establish_serial_connection(self):
