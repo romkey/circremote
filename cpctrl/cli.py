@@ -272,9 +272,18 @@ class CLI:
             )
             connection_type = connection.connection_type
         except Exception as e:
-            print(f"Error establishing connection: {e}")
-            self.debug(f"Connection error details: {type(e).__name__}: {e}", options)
-            sys.exit(1)
+            # Don't show duplicate error messages for connection refused or bad password
+            error_str = str(e)
+            if ("Connection refused" in error_str or 
+                "Bad password" in error_str or 
+                "ConnectionRefusedError" in error_str or
+                isinstance(e, ConnectionRefusedError)):
+                # Error message already shown by connection.py, just exit
+                sys.exit(1)
+            else:
+                print(f"Error establishing connection: {e}")
+                self.debug(f"Connection error details: {type(e).__name__}: {e}", options)
+                sys.exit(1)
 
         # CircuitPython REPL protocol
         try:

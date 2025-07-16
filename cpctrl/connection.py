@@ -119,6 +119,13 @@ class CircuitPythonConnection:
                 error_str = str(error.args[0])
                 if '401' in error_str or 'unauthorized' in error_str.lower():
                     connection_error = "Bad password - authentication failed"
+            # Check for connection refused error
+            elif isinstance(error, ConnectionRefusedError):
+                connection_error = "Connection refused"
+            elif hasattr(error, 'args') and len(error.args) > 0:
+                error_str = str(error.args[0])
+                if 'connection refused' in error_str.lower() or 'refused' in error_str.lower():
+                    connection_error = "Connection refused"
         
         def on_open(ws):
             nonlocal connection_established
@@ -154,15 +161,31 @@ class CircuitPythonConnection:
             
             # Check for connection errors
             if connection_error:
-                if "Bad password" in connection_error:
-                    print(f"❌ {connection_error}")
+                error_str = str(connection_error)
+                if "Bad password" in error_str:
+                    print(f"❌ {error_str}")
                     print("Please check your password and try again.")
                     print("Use the -p option to specify the correct password:")
                     print(f"  cpctrl -p <password> {self.connection_string} <command>")
+                elif "Connection refused" in error_str:
+                    print(f"❌ {error_str}")
+                    print("The connection was refused. This could be due to:")
+                    print("  • Incorrect IP address or hostname")
+                    print("  • Wrong port number")
+                    print("  • Device not running CircuitPython Web Workflow")
+                    print("  • Firewall blocking the connection")
+                    print()
+                    print("To enable Web Workflow on your CircuitPython device:")
+                    print("  • Visit: https://docs.circuitpython.org/en/latest/docs/workflow.html")
+                    print("  • Add 'CIRCUITPY_WEB_API_PASSWORD = \"your_password\"' to boot.py")
+                    print("  • Restart the device")
+                    print()
+                    print("Check your connection string and try again:")
+                    print(f"  cpctrl {self.connection_string} <command>")
                 else:
-                    print(f"Error connecting to WebSocket: {connection_error}")
-                self.debug(f"WebSocket connection failed: {connection_error}")
-                raise RuntimeError(connection_error)
+                    print(f"Error connecting to WebSocket: {error_str}")
+                self.debug(f"WebSocket connection failed: {error_str}")
+                raise RuntimeError(error_str)
             
             if connection_established:
                 self.debug("WebSocket connection established")
@@ -172,7 +195,26 @@ class CircuitPythonConnection:
                 raise RuntimeError("WebSocket connection failed to establish")
                 
         except Exception as e:
-            if "Bad password" not in str(e):
+            error_str = str(e)
+            if "Bad password" in error_str:
+                # Already handled above, don't show duplicate message
+                pass
+            elif isinstance(e, ConnectionRefusedError) or "ConnectionRefusedError" in error_str:
+                print("❌ Connection refused")
+                print("The connection was refused. This could be due to:")
+                print("  • Incorrect IP address or hostname")
+                print("  • Wrong port number")
+                print("  • Device not running CircuitPython Web Workflow")
+                print("  • Firewall blocking the connection")
+                print()
+                print("To enable Web Workflow on your CircuitPython device:")
+                print("  • Visit: https://docs.circuitpython.org/en/latest/docs/workflow.html")
+                print("  • Add 'CIRCUITPY_WEB_API_PASSWORD = \"your_password\"' to boot.py")
+                print("  • Restart the device")
+                print()
+                print("Check your connection string and try again:")
+                print(f"  cpctrl {self.connection_string} <command>")
+            else:
                 print(f"Error connecting to WebSocket: {e}")
                 self.debug(f"WebSocket error details: {type(e).__name__}: {e}")
             raise
