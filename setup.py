@@ -9,13 +9,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="cpctrl",
+    name="circremote",
     version="1.0.0",
     author="John Romkey",
     description="A command-line tool for uploading and running Python code on CircuitPython devices",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "circremote": ["commands/*/*", "commands/*/code.py", "commands/*/info.json", "commands/*/requirements.txt"],
+    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -49,7 +53,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "cpctrl=cpctrl.cli:main",
+            "circremote=circremote.cli:main",
         ],
     },
 ) 

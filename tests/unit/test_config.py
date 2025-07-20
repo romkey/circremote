@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch, mock_open
 
-from cpctrl.config import Config
+from circremote.config import Config
 
 class TestConfig:
     def test_init_sets_attributes(self):
@@ -58,7 +58,7 @@ class TestConfig:
                 {'name': 'bar', 'command': 'SHT30'}
             ]
         }
-        config_dir = tmp_path / '.cpctrl'
+        config_dir = tmp_path / '.circremote'
         config_dir.mkdir()
         config_path = config_dir / 'config.json'
         config_path.write_text(json.dumps(config_data))
@@ -71,7 +71,7 @@ class TestConfig:
 
     def test_load_config_file_missing(self, tmp_path):
         # No config file present
-        config_dir = tmp_path / '.cpctrl'
+        config_dir = tmp_path / '.circremote'
         config_dir.mkdir()
         with patch('pathlib.Path.home', return_value=tmp_path):
             config = Config()
@@ -79,7 +79,7 @@ class TestConfig:
             assert config.command_aliases == {}
 
     def test_load_config_file_invalid_json(self, tmp_path):
-        config_dir = tmp_path / '.cpctrl'
+        config_dir = tmp_path / '.circremote'
         config_dir.mkdir()
         config_path = config_dir / 'config.json'
         config_path.write_text('invalid json')

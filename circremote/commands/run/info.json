@@ -1,0 +1,14 @@
+{
+  "description": "Execute the contents of a file",
+  "warn_unavailable": false,
+  "variables": [
+    {
+      "name": "filename",
+      "required": true,
+      "description": "File to execute",
+      "default": null
+    }
+  ],
+  "tested": true,
+  "default_commandline": "filename"
+}

@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from argparse import Namespace
 
-from cpctrl.cli import CLI
+from circremote.cli import CLI
 
 
 class TestErrorHandling:
@@ -16,7 +16,7 @@ class TestErrorHandling:
 
     def test_missing_command_directory(self, cli_instance):
         """Test error when command directory doesn't exist."""
-        with patch('cpctrl.cli.Path') as mock_path:
+        with patch('circremote.cli.Path') as mock_path:
             mock_path.return_value.parent.parent.__truediv__.return_value.exists.return_value = False
             
             with pytest.raises(SystemExit):
@@ -24,7 +24,7 @@ class TestErrorHandling:
 
     def test_missing_code_py(self, cli_instance):
         """Test error when code.py doesn't exist in command directory."""
-        with patch('cpctrl.cli.Path') as mock_path:
+        with patch('circremote.cli.Path') as mock_path:
             # Mock commands directory exists
             mock_path.return_value.parent.parent.__truediv__.return_value.exists.return_value = True
             # Mock code.py doesn't exist
@@ -35,14 +35,14 @@ class TestErrorHandling:
 
     def test_invalid_variables(self, cli_instance, sample_command_files):
         """Test error when invalid variables are provided."""
-        with patch('cpctrl.cli.CircuitPythonConnection'):
+        with patch('circremote.cli.CircuitPythonConnection'):
             with patch.object(cli_instance.config, 'find_device') as mock_find_device:
                 mock_find_device.return_value = {'device': '/dev/ttyUSB0'}
                 
                 with patch.object(cli_instance.config, 'find_command_alias') as mock_find_alias:
                     mock_find_alias.return_value = None
                     
-                    with patch('cpctrl.cli.Path') as mock_path:
+                    with patch('circremote.cli.Path') as mock_path:
                         mock_path.return_value.parent.parent.__truediv__.return_value = sample_command_files.parent
                         
                         with pytest.raises(SystemExit):
@@ -79,7 +79,7 @@ import {{missing_var}}
             import json
             json.dump(info_json, f, indent=2)
         
-        with patch('cpctrl.cli.Path') as mock_path:
+        with patch('circremote.cli.Path') as mock_path:
             mock_path.return_value.parent.parent.__truediv__.return_value = temp_command_dir.parent
             
             with pytest.raises(SystemExit):
@@ -87,7 +87,7 @@ import {{missing_var}}
 
     def test_connection_error(self, cli_instance, sample_command_files):
         """Test error when connection fails."""
-        with patch('cpctrl.cli.CircuitPythonConnection') as mock_conn_class:
+        with patch('circremote.cli.CircuitPythonConnection') as mock_conn_class:
             mock_conn_class.side_effect = Exception("Connection failed")
             
             with patch.object(cli_instance.config, 'find_device') as mock_find_device:
@@ -96,7 +96,7 @@ import {{missing_var}}
                 with patch.object(cli_instance.config, 'find_command_alias') as mock_find_alias:
                     mock_find_alias.return_value = None
                     
-                    with patch('cpctrl.cli.Path') as mock_path:
+                    with patch('circremote.cli.Path') as mock_path:
                         mock_path.return_value.parent.parent.__truediv__.return_value = sample_command_files.parent
                         
                         with pytest.raises(SystemExit):
@@ -116,14 +116,14 @@ import {{missing_var}}
 
     def test_too_many_positional_arguments(self, cli_instance, sample_command_files):
         """Test error when too many positional arguments are provided."""
-        with patch('cpctrl.cli.CircuitPythonConnection'):
+        with patch('circremote.cli.CircuitPythonConnection'):
             with patch.object(cli_instance.config, 'find_device') as mock_find_device:
                 mock_find_device.return_value = {'device': '/dev/ttyUSB0'}
                 
                 with patch.object(cli_instance.config, 'find_command_alias') as mock_find_alias:
                     mock_find_alias.return_value = None
                     
-                    with patch('cpctrl.cli.Path') as mock_path:
+                    with patch('circremote.cli.Path') as mock_path:
                         mock_path.return_value.parent.parent.__truediv__.return_value = sample_command_files.parent
                         
                         with pytest.raises(SystemExit):
@@ -131,14 +131,14 @@ import {{missing_var}}
 
     def test_not_enough_positional_arguments(self, cli_instance, sample_command_files):
         """Test error when not enough positional arguments are provided."""
-        with patch('cpctrl.cli.CircuitPythonConnection'):
+        with patch('circremote.cli.CircuitPythonConnection'):
             with patch.object(cli_instance.config, 'find_device') as mock_find_device:
                 mock_find_device.return_value = {'device': '/dev/ttyUSB0'}
                 
                 with patch.object(cli_instance.config, 'find_command_alias') as mock_find_alias:
                     mock_find_alias.return_value = None
                     
-                    with patch('cpctrl.cli.Path') as mock_path:
+                    with patch('circremote.cli.Path') as mock_path:
                         mock_path.return_value.parent.parent.__truediv__.return_value = sample_command_files.parent
                         
                         with pytest.raises(SystemExit):
@@ -166,7 +166,7 @@ import {{missing_var}}
         with open(code_file, 'w') as f:
             f.write('# Test code\n')
         
-        with patch('cpctrl.cli.Path') as mock_path:
+        with patch('circremote.cli.Path') as mock_path:
             mock_path.return_value.parent.parent.__truediv__.return_value = temp_command_dir.parent
             
             with pytest.raises(SystemExit):

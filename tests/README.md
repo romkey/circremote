@@ -1,6 +1,6 @@
-# Testing Infrastructure
+# circremote-python Test Suite
 
-This directory contains the comprehensive testing infrastructure for cpctrl-python.
+This directory contains the comprehensive testing infrastructure for circremote-python.
 
 ## Directory Structure
 
@@ -76,7 +76,7 @@ pytest tests/functional/test_smoke.py
 
 ### Run with Coverage
 ```bash
-pytest --cov=cpctrl --cov-report=html --cov-report=term-missing
+pytest --cov=circremote --cov-report=html --cov-report=term-missing
 ```
 
 ### Run with Tox (Multi-environment)
@@ -155,7 +155,7 @@ Test component interactions:
 ```python
 def test_basic_command_execution_flow(self, cli_instance, sample_command_files):
     """Test basic command execution flow with mocked connection."""
-    with patch('cpctrl.cli.CircuitPythonConnection') as mock_conn_class:
+    with patch('circremote.cli.CircuitPythonConnection') as mock_conn_class:
         # Mock connection and run command
         # Verify expected interactions
 ```

@@ -1,5 +1,5 @@
 """
-Pytest configuration and common fixtures for cpctrl-python tests.
+Pytest configuration and common fixtures for circremote-python tests.
 """
 
 import pytest
@@ -9,15 +9,15 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from argparse import Namespace
 
-from cpctrl.cli import CLI
-from cpctrl.config import Config
-from cpctrl.connection import CircuitPythonConnection
+from circremote.cli import CLI
+from circremote.config import Config
+from circremote.connection import CircuitPythonConnection
 
 
 @pytest.fixture
 def commands_dir():
     """Return the path to the commands directory."""
-    return Path(__file__).parent.parent / 'commands'
+    return Path(__file__).parent.parent / 'circremote' / 'commands'
 
 
 @pytest.fixture

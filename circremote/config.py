@@ -11,7 +11,7 @@ from pathlib import Path
 
 class Config:
     def __init__(self, options=None):
-        self.config_path = Path.home() / '.cpctrl' / 'config.json'
+        self.config_path = Path.home() / '.circremote' / 'config.json'
         self.devices = {}
         self.command_aliases = {}
         self.options = options

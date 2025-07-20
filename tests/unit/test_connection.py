@@ -8,7 +8,7 @@ import websocket
 from unittest.mock import Mock, patch, MagicMock
 from argparse import Namespace
 
-from cpctrl.connection import CircuitPythonConnection
+from circremote.connection import CircuitPythonConnection
 
 
 class TestCircuitPythonConnection:

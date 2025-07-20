@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 import pytest
 
-COMMANDS_DIR = Path(__file__).parent.parent.parent / "commands"
+COMMANDS_DIR = Path(__file__).parent.parent.parent / "circremote" / "commands"
 
 # Collect all code.py, info.json, and requirements.txt files
 code_py_files = sorted(COMMANDS_DIR.glob("*/code.py"))

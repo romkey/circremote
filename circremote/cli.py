@@ -20,7 +20,7 @@ from .connection import CircuitPythonConnection
 
 
 def main():
-    """Main entry point for the cpctrl command."""
+    """Main entry point for the circremote command."""
     cli = CLI()
     cli.run(sys.argv[1:])
 
@@ -37,10 +37,10 @@ class CLI:
         self.config.options = options
         
         if len(remaining) < 2:
-            print("Usage: cpctrl [options] <device_name_or_path> <command_name> [variable=value ...]")
-            print("Example: cpctrl /dev/ttyUSB0 BME280")
-            print("Example: cpctrl sign-1 BME280 sda=board.IO1 scl=board.IO2")
-            print("Example: cpctrl 10.0.1.230:8080 BME280")
+            print("Usage: circremote [options] <device_name_or_path> <command_name> [variable=value ...]")
+            print("Example: circremote /dev/ttyUSB0 BME280")
+            print("Example: circremote sign-1 BME280 sda=board.IO1 scl=board.IO2")
+            print("Example: circremote 10.0.1.230:8080 BME280")
             print("Use -h for more options")
             sys.exit(1)
 
@@ -102,7 +102,7 @@ class CLI:
 
         # Check if command directory exists and contains code.py (only for local commands)
         if not file_content:  # Only check local files if we didn't fetch from URL
-            commands_dir = Path(__file__).parent.parent / 'commands'
+            commands_dir = Path(__file__).parent / 'commands'
             command_dir = commands_dir / command_name
             code_file = command_dir / 'code.py'
 
@@ -257,7 +257,7 @@ class CLI:
                     print(f"   - '{{{{ {var} }}}}' requires a value (e.g., {var}=value)")
                 print()
                 print("Please provide values for all template variables on the command line.")
-                print(f"Example: cpctrl /dev/ttyUSB0 {command_name} {template_vars[0]}=value")
+                print(f"Example: circremote /dev/ttyUSB0 {command_name} {template_vars[0]}=value")
                 sys.exit(1)
         else:
             self.debug("No template variables found in code", options)
@@ -418,7 +418,7 @@ class CLI:
 
     def show_help(self, parser):
         """Show help message with examples."""
-        print("Usage: cpctrl [options] <serial_port_or_ip> <command_name> [arguments...]")
+        print("Usage: circremote [options] <serial_port_or_ip> <command_name> [arguments...]")
         print()
         print("Arguments can be:")
         print("  • Positional arguments (if command has default_commandline defined)")
@@ -435,25 +435,25 @@ class CLI:
         print("  -h, --help                       Show this help message")
         print()
         print("Examples:")
-        print("  cpctrl /dev/ttyUSB0 BME280")
-        print("  cpctrl sign-1 BME280                    # Using config device name")
-        print("  cpctrl -v /dev/ttyACM0 VL53L1X")
-        print("  cpctrl 192.168.1.100 SHT30")
-        print("  cpctrl -p mypassword 192.168.1.100:8080 show-settings")
-        print("  cpctrl -d /dev/ttyUSB0 system-info")
-        print("  cpctrl -v -d -p mypassword 192.168.1.100 scan-i2c")
-        print("  cpctrl /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2")
-        print("  cpctrl sign-1 BME280 sda=board.IO1 scl=board.IO2  # With variables")
-        print("  cpctrl /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")
-        print("  cpctrl -C /dev/ttyUSB0 BME280")
-        print("  cpctrl -y /dev/ttyUSB0 ADXL345                    # Skip confirmation for untested modules")
-        print("  cpctrl -t 30 /dev/ttyUSB0 BME280                  # Wait 30 seconds for output")
-        print("  cpctrl -t 0 /dev/ttyUSB0 BME280                   # Wait indefinitely for output")
-        print("  cpctrl /dev/ttyUSB0 mycommand filename.txt         # Positional arguments (if default_commandline defined)")
-        print("  cpctrl /dev/ttyUSB0 mycommand filename.txt sda=board.IO1  # Mix of positional and explicit")
+        print("  circremote /dev/ttyUSB0 BME280")
+        print("  circremote sign-1 BME280                    # Using config device name")
+        print("  circremote -v /dev/ttyACM0 VL53L1X")
+        print("  circremote 192.168.1.100 SHT30")
+        print("  circremote -p mypassword 192.168.1.100:8080 show-settings")
+        print("  circremote -d /dev/ttyUSB0 system-info")
+        print("  circremote -v -d -p mypassword 192.168.1.100 scan-i2c")
+        print("  circremote /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2")
+        print("  circremote sign-1 BME280 sda=board.IO1 scl=board.IO2  # With variables")
+        print("  circremote /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")
+        print("  circremote -C /dev/ttyUSB0 BME280")
+        print("  circremote -y /dev/ttyUSB0 ADXL345                    # Skip confirmation for untested modules")
+        print("  circremote -t 30 /dev/ttyUSB0 BME280                  # Wait 30 seconds for output")
+        print("  circremote -t 0 /dev/ttyUSB0 BME280                   # Wait indefinitely for output")
+        print("  circremote /dev/ttyUSB0 mycommand filename.txt         # Positional arguments (if default_commandline defined)")
+        print("  circremote /dev/ttyUSB0 mycommand filename.txt sda=board.IO1  # Mix of positional and explicit")
         print("\nAvailable commands:")
         
-        commands_dir = Path(__file__).parent.parent / 'commands'
+        commands_dir = Path(__file__).parent / 'commands'
         if commands_dir.exists():
             for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
                 print(f"  {cmd}")

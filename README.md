@@ -1,4 +1,4 @@
-# cpctrl
+# circremote
 
 A command-line tool for uploading and running Python code on CircuitPython devices via serial or WebSocket connections, with support for dependency management and sensor libraries.
 
@@ -7,14 +7,14 @@ A command-line tool for uploading and running Python code on CircuitPython devic
 ### From PyPI
 
 ```bash
-pip install cpctrl
+pip install circremote
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/cpctrl-python.git
-cd cpctrl-python
+git clone https://github.com/yourusername/circremote-python.git
+cd circremote-python
 pip install -e .
 ```
 
@@ -23,7 +23,7 @@ pip install -e .
 ### Basic Usage
 
 ```bash
-cpctrl [options] <serial_port_or_ip> <command_name>
+circremote [options] <serial_port_or_ip> <command_name>
 ```
 
 ### Examples
@@ -31,28 +31,28 @@ cpctrl [options] <serial_port_or_ip> <command_name>
 #### Serial Connection
 ```bash
 # Run BME280 sensor code on serial port
-cpctrl /dev/ttyUSB0 BME280
+circremote /dev/ttyUSB0 BME280
 
 # Run with verbose output
-cpctrl -v /dev/ttyACM0 VL53L1X
+circremote -v /dev/ttyACM0 VL53L1X
 
 # Run with double exit (additional Ctrl+D)
-cpctrl -d /dev/ttyUSB0 system-info
+circremote -d /dev/ttyUSB0 system-info
 ```
 
 #### WebSocket Connection (CircuitPython Web Workflow)
 ```bash
 # Connect to CircuitPython device via IP
-cpctrl 192.168.1.100 SHT30
+circremote 192.168.1.100 SHT30
 
 # Connect with custom port
-cpctrl 192.168.1.100:8080 show-settings
+circremote 192.168.1.100:8080 show-settings
 
 # Connect with HTTP basic auth password
-cpctrl -p mypassword 192.168.1.100 scan-i2c
+circremote -p mypassword 192.168.1.100 scan-i2c
 
 # Combine options
-cpctrl -v -d -p mypassword 192.168.1.100:8080 BME680
+circremote -v -d -p mypassword 192.168.1.100:8080 BME680
 ```
 
 ## Options
@@ -106,7 +106,7 @@ The tool comes with a collection of pre-built sensor and utility commands:
 ## Features
 
 ### Automatic Dependency Management
-When a command has a `requirements.txt` file, cpctrl can automatically install CircuitPython libraries using `circup`:
+When a command has a `requirements.txt` file, circremote can automatically install CircuitPython libraries using `circup`:
 
 - Detects if `circup` is available
 - Prompts user to install dependencies

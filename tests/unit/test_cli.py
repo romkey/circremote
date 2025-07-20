@@ -7,7 +7,7 @@ import sys
 from unittest.mock import Mock, patch, mock_open
 from argparse import Namespace
 
-from cpctrl.cli import CLI
+from circremote.cli import CLI
 
 
 class TestCLI:

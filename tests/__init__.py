@@ -1,1 +1,1 @@
-# Tests package for cpctrl-python 
+# Tests package for circremote-python 
