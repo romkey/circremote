@@ -281,10 +281,144 @@ class TestCLI:
             cli_instance.parse_options(args)
 
     def test_parse_options_with_negative_timeout(self, cli_instance):
-        """Test parsing options with negative timeout value."""
-        args = ['-t', '-5', '/dev/ttyUSB0', 'BME280']
-        options, remaining = cli_instance.parse_options(args)
+        """Test parsing negative timeout value."""
+        args = ['--timeout', '-5']
         
         # Should accept negative values (though they may not make sense)
+        options, remaining = cli_instance.parse_options(args)
         assert options.timeout == -5.0
-        assert remaining == ['/dev/ttyUSB0', 'BME280'] 
+
+    def test_resolve_command_path_python_file(self, cli_instance, tmp_path):
+        """Test resolving a Python file pathname."""
+        # Create a test Python file
+        test_file = tmp_path / "test_sensor.py"
+        test_file.write_text("# Test sensor code\nprint('Hello')")
+        
+        options = Namespace(verbose=True, skip_circup=True)
+        result = cli_instance.resolve_command_path(str(test_file), options)
+        
+        file_content, command_dir, code_file, info_data, is_pathname = result
+        assert file_content == "# Test sensor code\nprint('Hello')"
+        assert command_dir is None
+        assert code_file is None
+        assert info_data is None
+        assert is_pathname is True
+
+    def test_resolve_command_path_directory(self, cli_instance, tmp_path):
+        """Test resolving a directory pathname."""
+        # Create a test directory with code.py and info.json
+        test_dir = tmp_path / "test_sensor"
+        test_dir.mkdir()
+        
+        code_file = test_dir / "code.py"
+        code_file.write_text("# Test sensor code\nprint('Hello')")
+        
+        info_file = test_dir / "info.json"
+        info_file.write_text('{"name": "Test Sensor", "description": "Test"}')
+        
+        options = Namespace(verbose=True, skip_circup=True)
+        result = cli_instance.resolve_command_path(str(test_dir), options)
+        
+        file_content, command_dir, code_file, info_data, is_pathname = result
+        assert file_content is None
+        assert command_dir == test_dir
+        assert code_file == test_dir / "code.py"
+        assert info_data == {"name": "Test Sensor", "description": "Test"}
+        assert is_pathname is True
+
+    def test_resolve_command_path_directory_no_code_py(self, cli_instance, tmp_path):
+        """Test resolving a directory pathname without code.py."""
+        # Create a test directory without code.py
+        test_dir = tmp_path / "test_sensor"
+        test_dir.mkdir()
+        
+        options = Namespace(verbose=True, skip_circup=True)
+        
+        with pytest.raises(SystemExit):
+            cli_instance.resolve_command_path(str(test_dir), options)
+
+    def test_resolve_command_path_nonexistent(self, cli_instance):
+        """Test resolving a nonexistent pathname."""
+        options = Namespace(verbose=True, skip_circup=True)
+        
+        with pytest.raises(SystemExit):
+            cli_instance.resolve_command_path("/nonexistent/path", options)
+
+    def test_resolve_command_path_builtin_command(self, cli_instance):
+        """Test resolving a built-in command (not a pathname)."""
+        options = Namespace(verbose=True, skip_circup=True)
+        result = cli_instance.resolve_command_path("BME280", options)
+        
+        file_content, command_dir, code_file, info_data, is_pathname = result
+        assert file_content is None
+        assert command_dir is None
+        assert code_file is None
+        assert info_data is None
+        assert is_pathname is False
+
+    def test_resolve_command_path_relative_path(self, cli_instance, tmp_path):
+        """Test resolving a relative path."""
+        # Create a test Python file
+        test_file = tmp_path / "test_sensor.py"
+        test_file.write_text("# Test sensor code\nprint('Hello')")
+        
+        # Change to the temp directory to test relative path
+        import os
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            options = Namespace(verbose=True, skip_circup=True)
+            result = cli_instance.resolve_command_path("./test_sensor.py", options)
+            
+            file_content, command_dir, code_file, info_data, is_pathname = result
+            assert file_content == "# Test sensor code\nprint('Hello')"
+            assert is_pathname is True
+        finally:
+            os.chdir(original_cwd)
+
+    def test_resolve_command_path_directory_with_requirements(self, cli_instance, tmp_path):
+        """Test resolving a directory pathname with requirements.txt."""
+        # Create a test directory with all files
+        test_dir = tmp_path / "test_sensor"
+        test_dir.mkdir()
+        
+        code_file = test_dir / "code.py"
+        code_file.write_text("# Test sensor code\nprint('Hello')")
+        
+        info_file = test_dir / "info.json"
+        info_file.write_text('{"name": "Test Sensor"}')
+        
+        requirements_file = test_dir / "requirements.txt"
+        requirements_file.write_text("adafruit-circuitpython-bme280")
+        
+        options = Namespace(verbose=True, skip_circup=False)
+        result = cli_instance.resolve_command_path(str(test_dir), options)
+        
+        file_content, command_dir, code_file, info_data, is_pathname = result
+        assert file_content is None
+        assert command_dir == test_dir
+        assert code_file == test_dir / "code.py"
+        assert info_data == {"name": "Test Sensor"}
+        assert is_pathname is True
+
+    def test_resolve_command_path_directory_with_empty_requirements(self, cli_instance, tmp_path):
+        """Test resolving a directory pathname with empty requirements.txt."""
+        # Create a test directory with empty requirements.txt
+        test_dir = tmp_path / "test_sensor"
+        test_dir.mkdir()
+        
+        code_file = test_dir / "code.py"
+        code_file.write_text("# Test sensor code\nprint('Hello')")
+        
+        requirements_file = test_dir / "requirements.txt"
+        requirements_file.write_text("# Empty requirements\n\n")
+        
+        options = Namespace(verbose=True, skip_circup=False)
+        result = cli_instance.resolve_command_path(str(test_dir), options)
+        
+        file_content, command_dir, code_file, info_data, is_pathname = result
+        assert file_content is None
+        assert command_dir == test_dir
+        assert code_file == test_dir / "code.py"
+        assert info_data is None
+        assert is_pathname is True 

@@ -37,10 +37,15 @@ class CLI:
         self.config.options = options
         
         if len(remaining) < 2:
-            print("Usage: circremote [options] <device_name_or_path> <command_name> [variable=value ...]")
-            print("Example: circremote /dev/ttyUSB0 BME280")
-            print("Example: circremote sign-1 BME280 sda=board.IO1 scl=board.IO2")
-            print("Example: circremote 10.0.1.230:8080 BME280")
+            print("Usage: circremote [options] <device_name_or_path> <command_name_or_path> [variable=value ...]")
+            print("Built-in commands:")
+            print("  Example: circremote /dev/ttyUSB0 BME280")
+            print("  Example: circremote sign-1 BME280 sda=board.IO1 scl=board.IO2")
+            print("  Example: circremote 10.0.1.230:8080 BME280")
+            print("Pathname commands:")
+            print("  Example: circremote /dev/ttyUSB0 ./my_sensor.py")
+            print("  Example: circremote /dev/ttyUSB0 /path/to/sensor/directory")
+            print("  Example: circremote /dev/ttyUSB0 ../custom_sensors/BME280")
             print("Use -h for more options")
             sys.exit(1)
 
@@ -67,8 +72,11 @@ class CLI:
                 print(f"Error fetching URL content: {e}")
                 sys.exit(1)
         
-        # Check for command aliases if not a URL
-        if not file_content:
+        # Resolve command path and get file_content, command_dir, code_file, info_data
+        file_content, command_dir, code_file, info_data, is_pathname = self.resolve_command_path(command_name, options)
+        
+        # If it's not a pathname, check for command aliases and built-in commands
+        if not is_pathname:
             alias_command = self.config.find_command_alias(command_name)
             if alias_command:
                 self.debug(f"Found command alias '{command_name}' -> '{alias_command}'", options)
@@ -90,6 +98,28 @@ class CLI:
                     except Exception as e:
                         print(f"Error fetching aliased URL content: {e}")
                         sys.exit(1)
+            
+            # If still not resolved, check for built-in command
+            if not file_content:
+                commands_dir = Path(__file__).parent / 'commands'
+                command_dir = commands_dir / command_name
+                code_file = command_dir / 'code.py'
+
+                self.debug(f"Checking if built-in command directory '{command_dir}' exists", options)
+                if not command_dir.exists():
+                    print(f"Error: Command '{command_name}' not found")
+                    print("Available commands:")
+                    for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
+                        print(f"  {cmd}")
+                    sys.exit(1)
+
+                self.debug(f"Built-in command directory '{command_dir}' exists", options)
+
+                self.debug("Checking if code.py exists in command directory", options)
+                if not code_file.exists():
+                    print(f"Error: code.py not found in command directory '{command_dir}'")
+                    sys.exit(1)
+                self.debug("code.py exists in command directory", options)
         
         # Resolve device
         device_info = self.resolve_device(device_spec, options)
@@ -99,28 +129,6 @@ class CLI:
         
         # Store remaining arguments for later parsing after we have info.json
         remaining_args = remaining[2:]
-
-        # Check if command directory exists and contains code.py (only for local commands)
-        if not file_content:  # Only check local files if we didn't fetch from URL
-            commands_dir = Path(__file__).parent / 'commands'
-            command_dir = commands_dir / command_name
-            code_file = command_dir / 'code.py'
-
-            self.debug(f"Checking if command directory '{command_dir}' exists", options)
-            if not command_dir.exists():
-                print(f"Error: Command '{command_name}' not found")
-                print("Available commands:")
-                for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
-                    print(f"  {cmd}")
-                sys.exit(1)
-
-            self.debug(f"Command directory '{command_dir}' exists", options)
-
-            self.debug("Checking if code.py exists in command directory", options)
-            if not code_file.exists():
-                print(f"Error: code.py not found in command directory '{command_dir}'")
-                sys.exit(1)
-            self.debug("code.py exists in command directory", options)
 
         # Check for requirements.txt and install dependencies with circup (only for local commands)
         if not file_content and command_dir:  # Only for local commands
@@ -151,7 +159,6 @@ class CLI:
         # Read and parse info.json file (only for local commands)
         if not file_content and command_dir:  # Only for local commands
             info_file = command_dir / 'info.json'
-            info_data = None
             self.debug("Reading info.json from command directory", options)
             
             if info_file.exists():
@@ -215,13 +222,19 @@ class CLI:
         # Read the file content (only for local commands)
         if not file_content:  # Only read local files if we didn't fetch from URL
             try:
-                self.debug("Reading code.py from command directory", options)
+                if is_pathname:
+                    self.debug(f"Reading code.py from pathname directory: {code_file}", options)
+                    debug_source = f"'{command_name}/code.py'"
+                else:
+                    self.debug("Reading code.py from built-in command directory", options)
+                    debug_source = f"'{command_name}/code.py'"
+                
                 with open(code_file, 'r') as f:
                     file_content = f.read()
                 
                 self.debug(f"File content length: {len(file_content)} characters", options)
                 self.debug(f"File content bytes: {len(file_content.encode('utf-8'))} bytes", options)
-                self.debug(f"Read {len(file_content.encode('utf-8'))} bytes from '{command_name}/code.py'", options)
+                self.debug(f"Read {len(file_content.encode('utf-8'))} bytes from {debug_source}", options)
                 
                 if options.verbose:
                     self.debug("File content preview:", options)
@@ -435,6 +448,7 @@ class CLI:
         print("  -h, --help                       Show this help message")
         print()
         print("Examples:")
+        print("Built-in commands:")
         print("  circremote /dev/ttyUSB0 BME280")
         print("  circremote sign-1 BME280                    # Using config device name")
         print("  circremote -v /dev/ttyACM0 VL53L1X")
@@ -451,6 +465,12 @@ class CLI:
         print("  circremote -t 0 /dev/ttyUSB0 BME280                   # Wait indefinitely for output")
         print("  circremote /dev/ttyUSB0 mycommand filename.txt         # Positional arguments (if default_commandline defined)")
         print("  circremote /dev/ttyUSB0 mycommand filename.txt sda=board.IO1  # Mix of positional and explicit")
+        print()
+        print("Pathname commands:")
+        print("  circremote /dev/ttyUSB0 ./my_sensor.py                 # Python file directly")
+        print("  circremote /dev/ttyUSB0 /path/to/sensor/directory      # Directory with code.py, info.json, requirements.txt")
+        print("  circremote /dev/ttyUSB0 ../custom_sensors/BME280       # Relative path to sensor directory")
+        print("  circremote /dev/ttyUSB0 /home/user/sensors/BME280.py   # Absolute path to Python file")
         print("\nAvailable commands:")
         
         commands_dir = Path(__file__).parent / 'commands'
@@ -647,6 +667,85 @@ class CLI:
             'name': device_spec,
             'device': device_spec
         }
+
+    def resolve_command_path(self, command_name, options):
+        """
+        Resolve a command name to either a pathname or built-in command.
+        
+        Returns:
+            tuple: (file_content, command_dir, code_file, info_data, is_pathname)
+        """
+        command_path = Path(command_name)
+        
+        # Check if it's an absolute or relative path
+        if command_path.is_absolute() or command_name.startswith('./') or command_name.startswith('../'):
+            self.debug(f"Command '{command_name}' appears to be a pathname", options)
+            
+            # Check if it's a Python file
+            if command_path.is_file() and command_path.suffix == '.py':
+                self.debug(f"Pathname '{command_name}' is a Python file", options)
+                try:
+                    with open(command_path, 'r') as f:
+                        file_content = f.read()
+                    self.debug(f"Read {len(file_content.encode('utf-8'))} bytes from Python file: {command_name}", options)
+                    return file_content, None, None, None, True
+                except Exception as e:
+                    print(f"Error reading Python file '{command_name}': {e}")
+                    sys.exit(1)
+            
+            # Check if it's a directory
+            elif command_path.is_dir():
+                self.debug(f"Pathname '{command_name}' is a directory", options)
+                code_file = command_path / 'code.py'
+                info_file = command_path / 'info.json'
+                requirements_file = command_path / 'requirements.txt'
+                
+                if not code_file.exists():
+                    print(f"Error: code.py not found in directory '{command_name}'")
+                    sys.exit(1)
+                
+                # Read info.json if it exists
+                info_data = None
+                if info_file.exists():
+                    try:
+                        with open(info_file, 'r') as f:
+                            info_content = f.read()
+                            info_data = json.loads(info_content)
+                            self.debug("Successfully parsed info.json from pathname directory", options)
+                    except json.JSONDecodeError as e:
+                        print(f"Warning: Could not parse info.json in '{command_name}': {e}")
+                        print("Proceeding without module information...")
+                    except Exception as e:
+                        print(f"Warning: Error reading info.json in '{command_name}': {e}")
+                        print("Proceeding without module information...")
+                
+                # Handle requirements.txt if it exists
+                if requirements_file.exists() and not options.skip_circup:
+                    self.debug("requirements.txt found in pathname directory, checking content", options)
+                    with open(requirements_file, 'r') as f:
+                        requirements_content = f.read()
+                    
+                    # Filter out comments and blank lines to check for actual requirements
+                    actual_requirements = [
+                        line.strip() for line in requirements_content.split('\n')
+                        if line.strip() and not line.strip().startswith('#')
+                    ]
+                    
+                    if actual_requirements:
+                        self.debug("requirements.txt has actual content, will handle circup later", options)
+                        # Note: We'll handle circup installation later in the main flow
+                    else:
+                        self.debug("requirements.txt has no actual content, skipping circup", options)
+                
+                return None, command_path, code_file, info_data, True
+            
+            else:
+                print(f"Error: Pathname '{command_name}' does not exist")
+                sys.exit(1)
+        
+        # Not a pathname, treat as built-in command
+        self.debug(f"Command '{command_name}' is not a pathname, treating as built-in command", options)
+        return None, None, None, None, False
 
     def show_offline_warning(self, options):
         """Show warning for modules that may make device unreachable."""
