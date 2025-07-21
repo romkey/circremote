@@ -3,19 +3,29 @@
 ## General Questions
 
 ### What is circremote?
-circremote is a command-line tool for uploading and running Python code on CircuitPython devices. It supports both serial connections and WebSocket connections (via CircuitPython Web Workflow), making it easy to remotely control and program CircuitPython boards.
+circremote is a command-line tool for uploading and running Python code on CircuitPython devices. It supports both local serial connections and networked WebSocket connections (via CircuitPython Web Workflow), making it easy to remotely control and run programs on CircuitPython boards.
 
 ### How do I install circremote?
+
+```bash
+pip install git+https://github.com/romkey/circremote
+```
+
+*Note this does not yet work as we're not yet listed in PyPI, for now please use the development install)*
 ```bash
 pip install circremote
 ```
 
 For development, you can install in editable mode:
 ```bash
-git clone <repository>
+git clone https://github.com/romkey/circremote
 cd circremote-python
 pip install -e .
 ```
+
+### How do I use circremote under Windows?
+
+I do not have access to a Windows machine and have not tried to use circremote on one. I cannot make any promises or offer any support for Windows users, sorry.
 
 ### What devices does circremote support?
 circremote works with any CircuitPython-compatible board, including:
@@ -45,6 +55,9 @@ circremote /dev/ttyUSB0 mycommand board.IO1 board.IO2 address=0x76
 ```
 
 ### How do I connect to a device over WiFi?
+
+You *must* configure the device to support [Web Workflow](https://learn.adafruit.com/getting-started-with-web-workflow-using-the-code-editor/overview) in order to connect over WiFi. Only devices with integrated WiFi (ESP32s, Raspberry Pi Pico W) support Web Workflow. Devices using an external ESP32 as a WiFi coprocessor, like the Adafruit Matrix Portal M4 - this is a limitation of CircuitPython.
+
 ```bash
 # Using IP address (default port 80)
 circremote 192.168.1.100 BME280
@@ -524,3 +537,11 @@ Examples:
 - Open an issue on the GitHub repository
 - Include the circremote version, your operating system, and steps to reproduce
 - Use the `-v` flag and include the debug output 
+
+### How do I check the circremote version?
+```bash
+circremote --version
+# or
+circremote -V
+```
+This will print the installed version of circremote and exit. 

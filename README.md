@@ -26,6 +26,13 @@ pip install -e .
 circremote [options] <serial_port_or_ip> <command_name>
 ```
 
+### Show Version
+```bash
+circremote --version
+# or
+circremote -V
+```
+
 ### Examples
 
 #### Serial Connection
@@ -72,6 +79,7 @@ circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
 - `-l, --list`: List all available commands from all sources
 - `-h, --help`: Show help message
 - `-h COMMAND`: Show help for a specific command
+- `-V, --version`: Show version and exit
 
 ## Available Commands
 

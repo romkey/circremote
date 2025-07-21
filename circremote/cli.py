@@ -474,6 +474,8 @@ class CLI:
                           help='Timeout in seconds for receiving data (0 = wait indefinitely)')
         parser.add_argument('-l', '--list', action='store_true',
                           help='List all available commands from all sources')
+        parser.add_argument('-V', '--version', action='store_true',
+                          help='Show version and exit')
         parser.add_argument('-h', '--help', action='store_true',
                           help='Show this help message')
         
@@ -486,6 +488,11 @@ class CLI:
         # Handle help manually - but only if no command is specified
         if options.help and len(remaining) == 0:
             self.show_help(parser)
+            sys.exit(0)
+        # Handle version
+        if options.version:
+            from .version import VERSION
+            print(f"circremote version {VERSION}")
             sys.exit(0)
         
         return options, remaining
@@ -508,6 +515,7 @@ class CLI:
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
         print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
         print("  -l, --list                       List all available commands from all sources")
+        print("  -V, --version                    Show version and exit")
         print("  -h, --help                       Show this help message")
         print("  -h COMMAND                       Show help for a specific command")
         print()

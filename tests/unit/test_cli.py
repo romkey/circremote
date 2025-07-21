@@ -690,3 +690,24 @@ class TestCLI:
             
             # Check that error was displayed
             mock_print.assert_called() 
+
+    def test_version_option(self, cli_instance):
+        """Test that --version and -V print the version and exit."""
+        from circremote.version import VERSION
+        import builtins
+        import io
+        from unittest.mock import patch
+        
+        # Test --version
+        with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            with pytest.raises(SystemExit):
+                cli_instance.run(["--version"])
+            output = mock_stdout.getvalue()
+            assert f"circremote version {VERSION}" in output
+        
+        # Test -V
+        with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            with pytest.raises(SystemExit):
+                cli_instance.run(["-V"])
+            output = mock_stdout.getvalue()
+            assert f"circremote version {VERSION}" in output 
