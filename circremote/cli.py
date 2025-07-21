@@ -760,8 +760,8 @@ class CLI:
         # Show command aliases if any
         if self.config.command_aliases:
             print("Command aliases:")
-            for alias in self.config.command_aliases:
-                print(f"  {alias['name']} -> {alias['command']}")
+            for alias_name, command_name in self.config.command_aliases.items():
+                print(f"  {alias_name} -> {command_name}")
             print()
         
         # Show total count
