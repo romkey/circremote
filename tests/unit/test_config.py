@@ -119,4 +119,147 @@ class TestConfig:
             config.validate_command_alias_config({'name': 'foo'})
         # Wrong type
         with pytest.raises(ValueError):
-            config.validate_command_alias_config('not a dict') 
+            config.validate_command_alias_config('not a dict')
+
+    def test_validate_search_path_config(self):
+        config = Config()
+        # Valid search path
+        config.validate_search_path_config('/path/to/commands')
+        config.validate_search_path_config('~/commands')
+        # Empty string
+        with pytest.raises(ValueError):
+            config.validate_search_path_config('')
+        # Whitespace only
+        with pytest.raises(ValueError):
+            config.validate_search_path_config('   ')
+        # Wrong type
+        with pytest.raises(ValueError):
+            config.validate_search_path_config(123)
+
+    def test_load_config_file_with_search_paths(self, tmp_path):
+        # Prepare a config file with search paths
+        config_data = {
+            'search_paths': [
+                '/tmp/test_commands',
+                '/nonexistent/path',
+                '~/custom_commands'
+            ]
+        }
+        config_dir = tmp_path / '.circremote'
+        config_dir.mkdir()
+        config_path = config_dir / 'config.json'
+        config_path.write_text(json.dumps(config_data))
+        
+        # Create one of the search paths
+        test_commands_dir = tmp_path / 'tmp' / 'test_commands'
+        test_commands_dir.mkdir(parents=True)
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            config = Config()
+            # Should only include existing paths
+            assert len(config.search_paths) == 1
+            # The path should be resolved to the actual path
+            assert any('/tmp/test_commands' in path for path in config.search_paths)
+
+    def test_find_command_in_search_paths(self, tmp_path):
+        config = Config()
+        
+        # Create a test command in a search path
+        search_path = tmp_path / 'test_commands'
+        search_path.mkdir()
+        command_dir = search_path / 'test_sensor'
+        command_dir.mkdir()
+        code_file = command_dir / 'code.py'
+        code_file.write_text('# Test sensor code')
+        
+        config.search_paths = [str(search_path)]
+        
+        # Should find the command
+        result = config.find_command_in_search_paths('test_sensor')
+        assert result == command_dir
+        
+        # Should not find non-existent command
+        result = config.find_command_in_search_paths('nonexistent')
+        assert result is None
+
+    def test_find_command_in_search_paths_no_code_py(self, tmp_path):
+        config = Config()
+        
+        # Create a directory without code.py
+        search_path = tmp_path / 'test_commands'
+        search_path.mkdir()
+        command_dir = search_path / 'test_sensor'
+        command_dir.mkdir()
+        # No code.py file
+        
+        config.search_paths = [str(search_path)]
+        
+        # Should not find the command
+        result = config.find_command_in_search_paths('test_sensor')
+        assert result is None
+
+    def test_find_command_in_user_commands(self, tmp_path):
+        config = Config()
+        
+        # Create a test command in user commands directory
+        user_commands_dir = tmp_path / '.circremote' / 'commands'
+        user_commands_dir.mkdir(parents=True)
+        command_dir = user_commands_dir / 'test_sensor'
+        command_dir.mkdir()
+        code_file = command_dir / 'code.py'
+        code_file.write_text('# Test sensor code')
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            # Should find the command
+            result = config.find_command_in_search_paths('test_sensor')
+            assert result == command_dir
+
+    def test_find_command_search_order(self, tmp_path):
+        config = Config()
+        
+        # Create commands in multiple locations
+        search_path1 = tmp_path / 'search1'
+        search_path1.mkdir()
+        command1_dir = search_path1 / 'test_sensor'
+        command1_dir.mkdir()
+        code_file1 = command1_dir / 'code.py'
+        code_file1.write_text('# Search path 1 code')
+        
+        search_path2 = tmp_path / 'search2'
+        search_path2.mkdir()
+        command2_dir = search_path2 / 'test_sensor'
+        command2_dir.mkdir()
+        code_file2 = command2_dir / 'code.py'
+        code_file2.write_text('# Search path 2 code')
+        
+        # Set search paths in order
+        config.search_paths = [str(search_path1), str(search_path2)]
+        
+        # Should find the command in the first search path
+        result = config.find_command_in_search_paths('test_sensor')
+        assert result == command1_dir
+
+    def test_search_paths_warning_for_nonexistent(self, tmp_path, capsys):
+        # Prepare a config file with nonexistent search paths
+        config_data = {
+            'search_paths': [
+                '/nonexistent/path1',
+                '/another/nonexistent/path'
+            ]
+        }
+        config_dir = tmp_path / '.circremote'
+        config_dir.mkdir()
+        config_path = config_dir / 'config.json'
+        config_path.write_text(json.dumps(config_data))
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            config = Config()
+            captured = capsys.readouterr()
+            
+            # Should show warnings for nonexistent paths
+            assert 'Warning: Search path' in captured.out
+            assert '/nonexistent/path1' in captured.out
+            assert '/another/nonexistent/path' in captured.out
+            
+            # Should have no search paths
+            assert config.search_paths == [] 

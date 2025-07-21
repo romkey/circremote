@@ -36,6 +36,17 @@ class CLI:
         # Update config with options for debug output
         self.config.options = options
         
+        # Check for command help request: -h COMMAND
+        if options.help and len(remaining) >= 1:
+            command_name = remaining[0]
+            self.show_command_help(command_name, options)
+            sys.exit(0)
+        
+        # Check for list commands request: -l
+        if options.list:
+            self.list_all_commands(options)
+            sys.exit(0)
+        
         if len(remaining) < 2:
             print("Usage: circremote [options] <device_name_or_path> <command_name_or_path> [variable=value ...]")
             print("Built-in commands:")
@@ -47,6 +58,7 @@ class CLI:
             print("  Example: circremote /dev/ttyUSB0 /path/to/sensor/directory")
             print("  Example: circremote /dev/ttyUSB0 ../custom_sensors/BME280")
             print("Use -h for more options")
+            print("Use -h COMMAND for help on a specific command")
             sys.exit(1)
 
         device_spec = remaining[0]
@@ -99,27 +111,72 @@ class CLI:
                         print(f"Error fetching aliased URL content: {e}")
                         sys.exit(1)
             
-            # If still not resolved, check for built-in command
+            # If still not resolved, check search paths and built-in commands
             if not file_content:
-                commands_dir = Path(__file__).parent / 'commands'
-                command_dir = commands_dir / command_name
-                code_file = command_dir / 'code.py'
+                # First, check search paths
+                command_dir = self.config.find_command_in_search_paths(command_name)
+                if command_dir:
+                    code_file = command_dir / 'code.py'
+                    self.debug(f"Found command '{command_name}' in search path: {command_dir}", options)
+                else:
+                    # Fall back to built-in commands
+                    commands_dir = Path(__file__).parent / 'commands'
+                    command_dir = commands_dir / command_name
+                    code_file = command_dir / 'code.py'
 
-                self.debug(f"Checking if built-in command directory '{command_dir}' exists", options)
-                if not command_dir.exists():
-                    print(f"Error: Command '{command_name}' not found")
-                    print("Available commands:")
-                    for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
-                        print(f"  {cmd}")
-                    sys.exit(1)
+                    self.debug(f"Checking if built-in command directory '{command_dir}' exists", options)
+                    if not command_dir.exists():
+                        print(f"Error: Command '{command_name}' not found")
+                        print("Available commands:")
+                        
+                        # List commands from search paths first
+                        search_path_commands = set()
+                        for search_path in self.config.search_paths:
+                            search_dir = Path(search_path)
+                            if search_dir.exists():
+                                for cmd in search_dir.iterdir():
+                                    if cmd.is_dir() and cmd.name not in ['.', '..']:
+                                        code_file_check = cmd / 'code.py'
+                                        if code_file_check.exists():
+                                            search_path_commands.add(cmd.name)
+                        
+                        # List commands from user commands directory
+                        user_commands_dir = Path.home() / '.circremote' / 'commands'
+                        if user_commands_dir.exists():
+                            for cmd in user_commands_dir.iterdir():
+                                if cmd.is_dir() and cmd.name not in ['.', '..']:
+                                    code_file_check = cmd / 'code.py'
+                                    if code_file_check.exists():
+                                        search_path_commands.add(cmd.name)
+                        
+                        # List built-in commands
+                        builtin_commands = set()
+                        if commands_dir.exists():
+                            for cmd in commands_dir.iterdir():
+                                if cmd.is_dir() and cmd.name not in ['.', '..']:
+                                    builtin_commands.add(cmd.name)
+                        
+                        # Display all available commands
+                        if search_path_commands:
+                            print("Search path commands:")
+                            for cmd in sorted(search_path_commands):
+                                print(f"  {cmd}")
+                            print()
+                        
+                        if builtin_commands:
+                            print("Built-in commands:")
+                            for cmd in sorted(builtin_commands):
+                                print(f"  {cmd}")
+                        
+                        sys.exit(1)
 
-                self.debug(f"Built-in command directory '{command_dir}' exists", options)
+                    self.debug(f"Built-in command directory '{command_dir}' exists", options)
 
-                self.debug("Checking if code.py exists in command directory", options)
-                if not code_file.exists():
-                    print(f"Error: code.py not found in command directory '{command_dir}'")
-                    sys.exit(1)
-                self.debug("code.py exists in command directory", options)
+                    self.debug("Checking if code.py exists in command directory", options)
+                    if not code_file.exists():
+                        print(f"Error: code.py not found in command directory '{command_dir}'")
+                        sys.exit(1)
+                    self.debug("code.py exists in command directory", options)
         
         # Resolve device
         device_info = self.resolve_device(device_spec, options)
@@ -413,6 +470,8 @@ class CLI:
                           help='Skip confirmation prompts (run untested commands without asking)')
         parser.add_argument('-t', '--timeout', type=float, default=10.0,
                           help='Timeout in seconds for receiving data (0 = wait indefinitely)')
+        parser.add_argument('-l', '--list', action='store_true',
+                          help='List all available commands from all sources')
         parser.add_argument('-h', '--help', action='store_true',
                           help='Show this help message')
         
@@ -422,8 +481,8 @@ class CLI:
             print(f"❌ Error parsing options: {e}")
             sys.exit(1)
         
-        # Handle help manually
-        if options.help:
+        # Handle help manually - but only if no command is specified
+        if options.help and len(remaining) == 0:
             self.show_help(parser)
             sys.exit(0)
         
@@ -445,7 +504,9 @@ class CLI:
         print("  -C, --skip-circup                Skip circup dependency installation")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
         print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
+        print("  -l, --list                       List all available commands from all sources")
         print("  -h, --help                       Show this help message")
+        print("  -h COMMAND                       Show help for a specific command")
         print()
         print("Examples:")
         print("Built-in commands:")
@@ -471,12 +532,240 @@ class CLI:
         print("  circremote /dev/ttyUSB0 /path/to/sensor/directory      # Directory with code.py, info.json, requirements.txt")
         print("  circremote /dev/ttyUSB0 ../custom_sensors/BME280       # Relative path to sensor directory")
         print("  circremote /dev/ttyUSB0 /home/user/sensors/BME280.py   # Absolute path to Python file")
-        print("\nAvailable commands:")
+        print()
+        print("Command help:")
+        print("  circremote -h BME280                                    # Show help for BME280 command")
+        print("  circremote -h clean                                     # Show help for clean command")
+        print()
+        print("List commands:")
+        print("  circremote -l                                           # List all available commands")
+
+    def show_command_help(self, command_name, options):
+        """Show help for a specific command."""
+        print(f"Help for command: {command_name}")
+        print("=" * (len(command_name) + 20))
+        print()
         
+        # Resolve command path and get info data
+        file_content, command_dir, code_file, info_data, is_pathname = self.resolve_command_path(command_name, options)
+        
+        # If it's not a pathname, check for built-in commands
+        if not is_pathname and not info_data:
+            # Check for command aliases first
+            alias_command = self.config.find_command_alias(command_name)
+            if alias_command:
+                self.debug(f"Found command alias '{command_name}' -> '{alias_command}'", options)
+                command_name = alias_command
+            
+            # Check search paths
+            command_dir = self.config.find_command_in_search_paths(command_name)
+            if command_dir:
+                code_file = command_dir / 'code.py'
+                info_file = command_dir / 'info.json'
+                self.debug(f"Found command '{command_name}' in search path: {command_dir}", options)
+            else:
+                # Fall back to built-in commands
+                commands_dir = Path(__file__).parent / 'commands'
+                command_dir = commands_dir / command_name
+                code_file = command_dir / 'code.py'
+                info_file = command_dir / 'info.json'
+                self.debug(f"Checking if built-in command directory '{command_dir}' exists", options)
+            
+            # Read info.json if it exists
+            if command_dir and command_dir.exists() and info_file.exists():
+                try:
+                    with open(info_file, 'r') as f:
+                        info_content = f.read()
+                        info_data = json.loads(info_content)
+                        self.debug("Successfully parsed info.json from command directory", options)
+                except json.JSONDecodeError as e:
+                    print(f"Warning: Could not parse info.json for '{command_name}': {e}")
+                    print("Proceeding without module information...")
+                except Exception as e:
+                    print(f"Warning: Error reading info.json for '{command_name}': {e}")
+                    print("Proceeding without module information...")
+        
+        if not info_data:
+            print(f"❌ Error: Command '{command_name}' not found or has no info.json file")
+            print()
+            print("Available commands:")
+            
+            # List commands from search paths first
+            search_path_commands = set()
+            for search_path in self.config.search_paths:
+                search_dir = Path(search_path)
+                if search_dir.exists():
+                    for cmd in search_dir.iterdir():
+                        if cmd.is_dir() and cmd.name not in ['.', '..']:
+                            code_file_check = cmd / 'code.py'
+                            if code_file_check.exists():
+                                search_path_commands.add(cmd.name)
+            
+            # List commands from user commands directory
+            user_commands_dir = Path.home() / '.circremote' / 'commands'
+            if user_commands_dir.exists():
+                for cmd in user_commands_dir.iterdir():
+                    if cmd.is_dir() and cmd.name not in ['.', '..']:
+                        code_file_check = cmd / 'code.py'
+                        if code_file_check.exists():
+                            search_path_commands.add(cmd.name)
+            
+            # List built-in commands
+            builtin_commands = set()
+            commands_dir = Path(__file__).parent / 'commands'
+            if commands_dir.exists():
+                for cmd in commands_dir.iterdir():
+                    if cmd.is_dir() and cmd.name not in ['.', '..']:
+                        builtin_commands.add(cmd.name)
+            
+            # Display all available commands
+            if search_path_commands:
+                print("Search path commands:")
+                for cmd in sorted(search_path_commands):
+                    print(f"  {cmd}")
+                print()
+            
+            if builtin_commands:
+                print("Built-in commands:")
+                for cmd in sorted(builtin_commands):
+                    print(f"  {cmd}")
+            return
+        
+        # Show command name (if specified in info.json)
+        if 'name' in info_data:
+            print(f"Name: {info_data['name']}")
+            print()
+        
+        # Show file location
+        if command_dir and command_dir.exists():
+            print("Location:")
+            print(f"  {command_dir}")
+            print()
+        
+        # Show description
+        if 'description' in info_data:
+            print("Description:")
+            print(f"  {info_data['description']}")
+            print()
+        
+        # Show command line format
+        if 'default_commandline' in info_data:
+            print("Command line format:")
+            print(f"  circremote <device> {command_name} {info_data['default_commandline']}")
+            print()
+            print("Or with explicit variable assignments:")
+            print(f"  circremote <device> {command_name} [variable=value ...]")
+            print()
+        else:
+            print("Command line format:")
+            print(f"  circremote <device> {command_name} [variable=value ...]")
+            print()
+        
+        # Show variables
+        if 'variables' in info_data and info_data['variables']:
+            print("Arguments:")
+            for var in info_data['variables']:
+                var_name = var['name']
+                description = var.get('description', 'No description available')
+                required = var.get('required', False)
+                default = var.get('default', None)
+                
+                # Format the variable display
+                if required:
+                    status = "REQUIRED"
+                else:
+                    status = "optional"
+                
+                print(f"  {var_name} ({status})")
+                print(f"    {description}")
+                
+                if default is not None:
+                    print(f"    Default: {default}")
+                print()
+        else:
+            print("Arguments: None")
+            print()
+        
+        # Show examples
+        print("Examples:")
+        if 'default_commandline' in info_data:
+            # Show example with positional arguments
+            print(f"  circremote /dev/ttyUSB0 {command_name} {info_data['default_commandline']}")
+        
+        # Show example with explicit assignments
+        if 'variables' in info_data and info_data['variables']:
+            var_examples = []
+            for var in info_data['variables']:
+                var_name = var['name']
+                default = var.get('default', 'value')
+                var_examples.append(f"{var_name}={default}")
+            
+            if var_examples:
+                print(f"  circremote /dev/ttyUSB0 {command_name} {' '.join(var_examples)}")
+        
+        # Show simple example
+        print(f"  circremote /dev/ttyUSB0 {command_name}")
+        print()
+
+    def list_all_commands(self, options):
+        """List all available commands from all sources."""
+        print("Available commands:")
+        print("=" * 50)
+        print()
+        
+        # List commands from search paths first
+        search_path_commands = set()
+        for search_path in self.config.search_paths:
+            search_dir = Path(search_path)
+            if search_dir.exists():
+                for cmd in search_dir.iterdir():
+                    if cmd.is_dir() and cmd.name not in ['.', '..']:
+                        code_file_check = cmd / 'code.py'
+                        if code_file_check.exists():
+                            search_path_commands.add(cmd.name)
+        
+        # List commands from user commands directory
+        user_commands_dir = Path.home() / '.circremote' / 'commands'
+        if user_commands_dir.exists():
+            for cmd in user_commands_dir.iterdir():
+                if cmd.is_dir() and cmd.name not in ['.', '..']:
+                    code_file_check = cmd / 'code.py'
+                    if code_file_check.exists():
+                        search_path_commands.add(cmd.name)
+        
+        # List built-in commands
+        builtin_commands = set()
         commands_dir = Path(__file__).parent / 'commands'
         if commands_dir.exists():
-            for cmd in sorted([d.name for d in commands_dir.iterdir() if d.is_dir() and d.name not in ['.', '..']]):
+            for cmd in commands_dir.iterdir():
+                if cmd.is_dir() and cmd.name not in ['.', '..']:
+                    builtin_commands.add(cmd.name)
+        
+        # Display all available commands
+        if search_path_commands:
+            print("Search path commands:")
+            for cmd in sorted(search_path_commands):
                 print(f"  {cmd}")
+            print()
+        
+        if builtin_commands:
+            print("Built-in commands:")
+            for cmd in sorted(builtin_commands):
+                print(f"  {cmd}")
+            print()
+        
+        # Show command aliases if any
+        if self.config.command_aliases:
+            print("Command aliases:")
+            for alias in self.config.command_aliases:
+                print(f"  {alias['name']} -> {alias['command']}")
+            print()
+        
+        # Show total count
+        total_commands = len(search_path_commands) + len(builtin_commands)
+        print(f"Total: {total_commands} commands available")
+        print()
+        print("Use 'circremote -h COMMAND' for detailed help on any command")
 
     def parse_command_line_variables(self, args):
         """Parse explicit variable assignments from command line arguments (var=value format)."""

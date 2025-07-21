@@ -6,6 +6,7 @@ import pytest
 import sys
 from unittest.mock import Mock, patch, mock_open
 from argparse import Namespace
+import json
 
 from circremote.cli import CLI
 
@@ -421,4 +422,68 @@ class TestCLI:
         assert command_dir == test_dir
         assert code_file == test_dir / "code.py"
         assert info_data is None
-        assert is_pathname is True 
+        assert is_pathname is True
+
+    def test_find_command_in_search_paths(self, cli_instance, tmp_path):
+        """Test finding commands in search paths."""
+        # Create a test command in a search path
+        search_path = tmp_path / 'test_commands'
+        search_path.mkdir()
+        command_dir = search_path / 'test_sensor'
+        command_dir.mkdir()
+        code_file = command_dir / 'code.py'
+        code_file.write_text('# Test sensor code')
+        
+        # Mock config to return the search path
+        cli_instance.config.search_paths = [str(search_path)]
+        
+        # Should find the command
+        result = cli_instance.config.find_command_in_search_paths('test_sensor')
+        assert result == command_dir
+        
+        # Should not find non-existent command
+        result = cli_instance.config.find_command_in_search_paths('nonexistent')
+        assert result is None
+
+    def test_find_command_in_user_commands(self, cli_instance, tmp_path):
+        """Test finding commands in user commands directory."""
+        # Create a test command in user commands directory
+        user_commands_dir = tmp_path / '.circremote' / 'commands'
+        user_commands_dir.mkdir(parents=True)
+        command_dir = user_commands_dir / 'test_sensor'
+        command_dir.mkdir()
+        code_file = command_dir / 'code.py'
+        code_file.write_text('# Test sensor code')
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            # Should find the command
+            result = cli_instance.config.find_command_in_search_paths('test_sensor')
+            assert result == command_dir
+
+    def test_search_paths_warning_for_nonexistent(self, cli_instance, tmp_path, capsys):
+        """Test warning for nonexistent search paths."""
+        # Prepare a config file with nonexistent search paths
+        config_data = {
+            'search_paths': [
+                '/nonexistent/path1',
+                '/another/nonexistent/path'
+            ]
+        }
+        config_dir = tmp_path / '.circremote'
+        config_dir.mkdir()
+        config_path = config_dir / 'config.json'
+        config_path.write_text(json.dumps(config_data))
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            # Create new config instance to trigger loading
+            from circremote.config import Config
+            config = Config()
+            captured = capsys.readouterr()
+            
+            # Should show warnings for nonexistent paths
+            assert 'Warning: Search path' in captured.out
+            assert '/nonexistent/path1' in captured.out
+            assert '/another/nonexistent/path' in captured.out
+            
+            # Should have no search paths
+            assert config.search_paths == [] 

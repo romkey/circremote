@@ -14,6 +14,7 @@ class Config:
         self.config_path = Path.home() / '.circremote' / 'config.json'
         self.devices = {}
         self.command_aliases = {}
+        self.search_paths = []
         self.options = options
         self.load_config()
 
@@ -32,6 +33,35 @@ class Config:
     def list_command_aliases(self):
         """List all configured command alias names."""
         return list(self.command_aliases.keys())
+
+    def find_command_in_search_paths(self, command_name):
+        """
+        Search for a command in the configured search paths.
+        
+        Returns:
+            Path: Path to the command directory if found, None otherwise
+        """
+        # Search in configured search paths first
+        for search_path in self.search_paths:
+            command_path = Path(search_path) / command_name
+            if command_path.exists() and command_path.is_dir():
+                code_file = command_path / 'code.py'
+                if code_file.exists():
+                    self.debug(f"Found command '{command_name}' in search path: {search_path}")
+                    return command_path
+        
+        # Search in ~/.circremote/commands
+        user_commands_dir = Path.home() / '.circremote' / 'commands'
+        if user_commands_dir.exists():
+            command_path = user_commands_dir / command_name
+            if command_path.exists() and command_path.is_dir():
+                code_file = command_path / 'code.py'
+                if code_file.exists():
+                    self.debug(f"Found command '{command_name}' in user commands: {user_commands_dir}")
+                    return command_path
+        
+        # Not found in search paths
+        return None
 
     def debug(self, message):
         """Print debug message if verbose mode is enabled."""
@@ -77,6 +107,20 @@ class Config:
                         self.debug(f"Added command alias: {alias['name']} -> {alias['command']}")
                 else:
                     self.debug("No 'command_aliases' array found in config")
+                
+                # Load search paths
+                if 'search_paths' in config_data and isinstance(config_data['search_paths'], list):
+                    self.debug(f"Found {len(config_data['search_paths'])} search paths in config")
+                    for search_path in config_data['search_paths']:
+                        self.validate_search_path_config(search_path)
+                        path = Path(search_path).expanduser().resolve()
+                        if path.exists() and path.is_dir():
+                            self.search_paths.append(str(path))
+                            self.debug(f"Added search path: {path}")
+                        else:
+                            print(f"Warning: Search path '{search_path}' does not exist or is not accessible")
+                else:
+                    self.debug("No 'search_paths' array found in config")
                     
         except json.JSONDecodeError as e:
             print(f"❌ Error: Config file {self.config_path} contains invalid JSON: {e}")
@@ -138,4 +182,12 @@ class Config:
             raise ValueError("Command alias configuration must have a 'name' string field")
 
         if 'command' not in alias or not isinstance(alias['command'], str):
-            raise ValueError("Command alias configuration must have a 'command' string field") 
+            raise ValueError("Command alias configuration must have a 'command' string field")
+
+    def validate_search_path_config(self, search_path):
+        """Validate search path configuration."""
+        if not isinstance(search_path, str):
+            raise ValueError("Search path must be a string")
+        
+        if not search_path.strip():
+            raise ValueError("Search path cannot be empty") 
