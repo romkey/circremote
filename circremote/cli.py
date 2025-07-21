@@ -466,6 +466,8 @@ class CLI:
                           help='Send additional Ctrl+D after Ctrl+B to exit raw REPL')
         parser.add_argument('-C', '--skip-circup', action='store_true',
                           help='Skip circup dependency installation')
+        parser.add_argument('-c', '--circup', type=str,
+                          help='Path to circup executable')
         parser.add_argument('-y', '--yes', action='store_true',
                           help='Skip confirmation prompts (run untested commands without asking)')
         parser.add_argument('-t', '--timeout', type=float, default=10.0,
@@ -502,6 +504,7 @@ class CLI:
         print("  -p, --password PASSWORD          HTTP basic auth password for WebSocket connections")
         print("  -d, --double-exit                Send additional Ctrl+D after Ctrl+B to exit raw REPL")
         print("  -C, --skip-circup                Skip circup dependency installation")
+        print("  -c, --circup PATH                Path to circup executable")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
         print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
         print("  -l, --list                       List all available commands from all sources")
@@ -1086,17 +1089,15 @@ class CLI:
 
     def handle_circup_installation(self, requirements_file, serial_port, password, options):
         """Handle circup dependency installation."""
-        # Check if circup exists and is executable
-        circup_path = None
-        for path in ['circup', '/usr/local/bin/circup', '/opt/homebrew/bin/circup']:
-            if os.path.exists(path) and os.access(path, os.X_OK):
-                circup_path = path
-                break
+        # Get circup path from config with precedence handling
+        circup_path = self.config.get_circup_path()
         
-        if not circup_path:
-            print("⚠️  Warning: requirements.txt found but 'circup' not found or not executable")
+        # Check if the specified circup path exists and is executable
+        if not os.path.exists(circup_path) or not os.access(circup_path, os.X_OK):
+            print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
             print("   Please install circup to automatically install dependencies:")
             print("   pip install circup")
+            print("   Or specify the correct path with -c PATH or in config file")
             print("   Continuing without installing dependencies...")
             print()
             return

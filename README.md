@@ -53,6 +53,12 @@ circremote -p mypassword 192.168.1.100 scan-i2c
 
 # Combine options
 circremote -v -d -p mypassword 192.168.1.100:8080 BME680
+
+# Skip dependency installation
+circremote -C /dev/ttyUSB0 BME280
+
+# Specify custom circup path
+circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
 ```
 
 ## Options
@@ -62,6 +68,7 @@ circremote -v -d -p mypassword 192.168.1.100:8080 BME680
 - `-d, --double-exit`: Send additional Ctrl+D after Ctrl+B to exit raw REPL
 - `-y, --yes`: Skip confirmation prompts (run untested commands without asking)
 - `-C, --skip-circup`: Skip circup dependency installation
+- `-c, --circup PATH`: Path to circup executable
 - `-l, --list`: List all available commands from all sources
 - `-h, --help`: Show help message
 - `-h COMMAND`: Show help for a specific command

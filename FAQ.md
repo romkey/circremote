@@ -66,6 +66,27 @@ circremote -v /dev/ttyUSB0 BME280
 circremote -C /dev/ttyUSB0 BME280
 ```
 
+### How do I specify a custom circup path?
+```bash
+# Command line option
+circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
+circremote -c ~/venv/bin/circup /dev/ttyUSB0 BME280
+
+# Config file option
+```
+
+Add to your `~/.circremote/config.json`:
+```json
+{
+  "circup": "/usr/local/bin/circup"
+}
+```
+
+**Precedence order:**
+1. Command line option (`-c PATH`) - highest priority
+2. Config file setting (`"circup": "PATH"`)
+3. System PATH resolution (`circup`) - default
+
 ### How do I set a timeout for output?
 ```bash
 # Wait 30 seconds for output
@@ -293,6 +314,27 @@ Install circup to manage CircuitPython dependencies:
 pip install circup
 ```
 
+If circup is installed but not found, specify the path:
+```bash
+# Command line
+circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
+
+# Config file
+```
+
+Add to `~/.circremote/config.json`:
+```json
+{
+  "circup": "/usr/local/bin/circup"
+}
+```
+
+Common circup locations:
+- `/usr/local/bin/circup` (pip install)
+- `/opt/homebrew/bin/circup` (Homebrew on macOS)
+- `~/venv/bin/circup` (virtual environment)
+- `circup` (system PATH)
+
 ### Device not responding
 1. Check the connection (serial port or IP address)
 2. Try pressing the reset button on the device
@@ -359,7 +401,8 @@ chmod 600 ~/.circremote/config.json
   "search_paths": [
     "~/my_commands",
     "/opt/custom_sensors"
-  ]
+  ],
+  "circup": "/usr/local/bin/circup"
 }
 ```
 

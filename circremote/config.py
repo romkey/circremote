@@ -15,6 +15,7 @@ class Config:
         self.devices = {}
         self.command_aliases = {}
         self.search_paths = []
+        self.circup_path = None
         self.options = options
         self.load_config()
 
@@ -65,7 +66,7 @@ class Config:
 
     def debug(self, message):
         """Print debug message if verbose mode is enabled."""
-        if self.options and self.options.verbose:
+        if self.options and hasattr(self.options, 'verbose') and self.options.verbose:
             print(message)
 
     def load_config(self):
@@ -121,6 +122,13 @@ class Config:
                             print(f"Warning: Search path '{search_path}' does not exist or is not accessible")
                 else:
                     self.debug("No 'search_paths' array found in config")
+                
+                # Load circup path
+                if 'circup' in config_data and isinstance(config_data['circup'], str):
+                    self.circup_path = config_data['circup']
+                    self.debug(f"Found circup path in config: {self.circup_path}")
+                else:
+                    self.debug("No 'circup' path found in config")
                     
         except json.JSONDecodeError as e:
             print(f"❌ Error: Config file {self.config_path} contains invalid JSON: {e}")
@@ -190,4 +198,25 @@ class Config:
             raise ValueError("Search path must be a string")
         
         if not search_path.strip():
-            raise ValueError("Search path cannot be empty") 
+            raise ValueError("Search path cannot be empty")
+
+    def get_circup_path(self):
+        """
+        Get the circup executable path with precedence:
+        1. Command line option (-c)
+        2. Config file setting
+        3. System PATH resolution (default)
+        
+        Returns:
+            str: Path to circup executable
+        """
+        # Command line option takes precedence
+        if self.options and hasattr(self.options, 'circup') and self.options.circup:
+            return self.options.circup
+        
+        # Config file setting
+        if self.circup_path:
+            return self.circup_path
+        
+        # Default to system PATH resolution
+        return 'circup' 

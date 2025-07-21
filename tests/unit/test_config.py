@@ -262,4 +262,76 @@ class TestConfig:
             assert '/another/nonexistent/path' in captured.out
             
             # Should have no search paths
-            assert config.search_paths == [] 
+            assert config.search_paths == []
+
+    def test_load_config_file_with_circup_path(self, tmp_path):
+        """Test loading config file with circup path."""
+        config_data = {
+            'circup': '/usr/local/bin/circup'
+        }
+        config_dir = tmp_path / '.circremote'
+        config_dir.mkdir()
+        config_path = config_dir / 'config.json'
+        config_path.write_text(json.dumps(config_data))
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            config = Config()
+            assert config.circup_path == '/usr/local/bin/circup'
+
+    def test_load_config_file_without_circup_path(self, tmp_path):
+        """Test loading config file without circup path."""
+        config_data = {
+            'devices': []
+        }
+        config_dir = tmp_path / '.circremote'
+        config_dir.mkdir()
+        config_path = config_dir / 'config.json'
+        config_path.write_text(json.dumps(config_data))
+        
+        with patch('pathlib.Path.home', return_value=tmp_path):
+            config = Config()
+            assert config.circup_path is None
+
+    def test_get_circup_path_command_line_precedence(self):
+        """Test that command line option takes precedence over config file."""
+        from argparse import Namespace
+        
+        config = Config()
+        config.circup_path = '/opt/homebrew/bin/circup'  # Config file setting
+        options = Namespace(circup='/usr/local/bin/circup')  # Command line option
+        
+        config.options = options
+        assert config.get_circup_path() == '/usr/local/bin/circup'
+
+    def test_get_circup_path_config_file(self):
+        """Test that config file setting is used when no command line option."""
+        config = Config()
+        config.circup_path = '/opt/homebrew/bin/circup'
+        
+        assert config.get_circup_path() == '/opt/homebrew/bin/circup'
+
+    def test_get_circup_path_default(self):
+        """Test that default 'circup' is returned when no custom path specified."""
+        config = Config()
+        config.circup_path = None
+        
+        assert config.get_circup_path() == 'circup'
+
+    def test_get_circup_path_no_options(self):
+        """Test get_circup_path when options is None."""
+        config = Config()
+        config.options = None
+        config.circup_path = '/opt/homebrew/bin/circup'
+        
+        assert config.get_circup_path() == '/opt/homebrew/bin/circup'
+
+    def test_get_circup_path_options_no_circup(self):
+        """Test get_circup_path when options has no circup attribute."""
+        from argparse import Namespace
+        
+        config = Config()
+        config.circup_path = '/opt/homebrew/bin/circup'
+        options = Namespace(verbose=True)  # No circup attribute
+        
+        config.options = options
+        assert config.get_circup_path() == '/opt/homebrew/bin/circup' 

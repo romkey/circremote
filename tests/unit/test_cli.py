@@ -486,4 +486,204 @@ class TestCLI:
             assert '/another/nonexistent/path' in captured.out
             
             # Should have no search paths
-            assert config.search_paths == [] 
+            assert config.search_paths == []
+
+    def test_parse_options_with_circup_path(self, cli_instance):
+        """Test parsing -c option for circup path."""
+        args = ['-c', '/usr/local/bin/circup', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.circup == '/usr/local/bin/circup'
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_circup_path_long_form(self, cli_instance):
+        """Test parsing --circup option for circup path."""
+        args = ['--circup', '/opt/homebrew/bin/circup', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.circup == '/opt/homebrew/bin/circup'
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_parse_options_with_circup_and_other_options(self, cli_instance):
+        """Test parsing -c option with other options."""
+        args = ['-v', '-c', '/usr/local/bin/circup', '-C', '/dev/ttyUSB0', 'BME280']
+        options, remaining = cli_instance.parse_options(args)
+        
+        assert options.verbose is True
+        assert options.circup == '/usr/local/bin/circup'
+        assert options.skip_circup is True
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_show_command_help_builtin_command(self, cli_instance, tmp_path):
+        """Test showing help for a built-in command."""
+        # Create a mock BME280 command directory
+        commands_dir = tmp_path / 'commands'
+        commands_dir.mkdir()
+        bme280_dir = commands_dir / 'BME280'
+        bme280_dir.mkdir()
+        
+        info_file = bme280_dir / 'info.json'
+        info_data = {
+            'description': 'BME280 temperature sensor',
+            'variables': [
+                {
+                    'name': 'sda',
+                    'description': 'I2C SDA pin',
+                    'default': 'board.SDA'
+                }
+            ]
+        }
+        info_file.write_text(json.dumps(info_data))
+        
+        # Mock the resolve_command_path method to return our test data
+        with patch.object(cli_instance, 'resolve_command_path') as mock_resolve:
+            mock_resolve.return_value = (None, bme280_dir, bme280_dir / 'code.py', info_data, False)
+            
+            # Test that the method runs without error
+            options = Namespace(skip_circup=False, verbose=False)
+            cli_instance.show_command_help('BME280', options)
+
+    def test_show_command_help_nonexistent_command(self, cli_instance, capsys):
+        """Test showing help for a nonexistent command."""
+        cli_instance.show_command_help('nonexistent', None)
+        
+        # Check that error was displayed
+        captured = capsys.readouterr()
+        assert 'Command \'nonexistent\' not found' in captured.out
+
+    def test_list_all_commands(self, cli_instance, tmp_path, capsys):
+        """Test listing all commands."""
+        # Create mock command directories
+        commands_dir = tmp_path / 'commands'
+        commands_dir.mkdir()
+        
+        # Create some built-in commands
+        (commands_dir / 'BME280').mkdir()
+        (commands_dir / 'BME280' / 'code.py').write_text('# BME280 code')
+        (commands_dir / 'SHT30').mkdir()
+        (commands_dir / 'SHT30' / 'code.py').write_text('# SHT30 code')
+        
+        with patch('circremote.cli.Path') as mock_path:
+            # Mock the Path(__file__).parent / 'commands' call
+            mock_parent = Mock()
+            mock_parent.__truediv__ = Mock(return_value=commands_dir)
+            mock_path.return_value.parent = mock_parent
+            
+            # Test that the method runs without error
+            cli_instance.list_all_commands(None)
+            
+            # Check that some output was captured
+            captured = capsys.readouterr()
+            assert 'Available commands:' in captured.out
+
+    def test_list_all_commands_with_search_paths(self, cli_instance, tmp_path):
+        """Test listing commands including search paths."""
+        # Create search path commands
+        search_path = tmp_path / 'search_commands'
+        search_path.mkdir()
+        (search_path / 'custom_sensor').mkdir()
+        (search_path / 'custom_sensor' / 'code.py').write_text('# Custom sensor')
+        
+        # Create built-in commands
+        commands_dir = tmp_path / 'commands'
+        commands_dir.mkdir()
+        (commands_dir / 'BME280').mkdir()
+        (commands_dir / 'BME280' / 'code.py').write_text('# BME280 code')
+        
+        # Set up config with search paths
+        cli_instance.config.search_paths = [str(search_path)]
+        
+        with patch('circremote.cli.Path') as mock_path:
+            mock_parent = Mock()
+            mock_parent.__truediv__ = Mock(return_value=commands_dir)
+            mock_path.return_value.parent = mock_parent
+            
+            # Test that the method runs without error
+            cli_instance.list_all_commands(None)
+
+    def test_list_all_commands_with_aliases(self, cli_instance, tmp_path):
+        """Test listing commands including aliases."""
+        # Set up config with aliases
+        cli_instance.config.command_aliases = {
+            'temp': 'BME280',
+            'light': 'TSL2591'
+        }
+        
+        # Create built-in commands
+        commands_dir = tmp_path / 'commands'
+        commands_dir.mkdir()
+        (commands_dir / 'BME280').mkdir()
+        (commands_dir / 'BME280' / 'code.py').write_text('# BME280 code')
+        
+        with patch('circremote.cli.Path') as mock_path:
+            mock_parent = Mock()
+            mock_parent.__truediv__ = Mock(return_value=commands_dir)
+            mock_path.return_value.parent = mock_parent
+            
+            # Test that the method runs without error
+            cli_instance.list_all_commands(None)
+
+    def test_handle_circup_installation_with_custom_path(self, cli_instance, tmp_path):
+        """Test circup installation with custom path from config."""
+        # Create a requirements file
+        requirements_file = tmp_path / 'requirements.txt'
+        requirements_file.write_text('adafruit_bme280\n')
+        
+        # Set up config with custom circup path
+        cli_instance.config.circup_path = '/usr/local/bin/circup'
+        
+        with patch('os.path.exists', return_value=True), \
+             patch('os.access', return_value=True), \
+             patch('builtins.print') as mock_print:
+            
+            cli_instance.handle_circup_installation(requirements_file, '/dev/ttyUSB0', None, None)
+            
+            # Check that the custom path was used
+            mock_print.assert_called()
+            calls = [call[0][0] for call in mock_print.call_args_list]
+            assert any('Found circup at: /usr/local/bin/circup' in call for call in calls)
+
+    def test_handle_circup_installation_with_command_line_path(self, cli_instance, tmp_path):
+        """Test circup installation with command line path."""
+        # Create a requirements file
+        requirements_file = tmp_path / 'requirements.txt'
+        requirements_file.write_text('adafruit_bme280\n')
+        
+        # Set up config with custom circup path
+        cli_instance.config.circup_path = '/opt/homebrew/bin/circup'
+        
+        # Set up options with command line path
+        from argparse import Namespace
+        options = Namespace(circup='/usr/local/bin/circup')
+        cli_instance.config.options = options
+        
+        with patch('os.path.exists', return_value=True), \
+             patch('os.access', return_value=True), \
+             patch('builtins.print') as mock_print:
+            
+            cli_instance.handle_circup_installation(requirements_file, '/dev/ttyUSB0', None, options)
+            
+            # Check that the command line path was used (takes precedence)
+            mock_print.assert_called()
+            calls = [call[0][0] for call in mock_print.call_args_list]
+            assert any('Found circup at: /usr/local/bin/circup' in call for call in calls)
+
+    def test_handle_circup_installation_path_not_found(self, cli_instance, tmp_path):
+        """Test circup installation when specified path is not found."""
+        # Create a requirements file
+        requirements_file = tmp_path / 'requirements.txt'
+        requirements_file.write_text('adafruit_bme280\n')
+        
+        # Set up config with custom circup path
+        cli_instance.config.circup_path = '/nonexistent/circup'
+        
+        with patch('os.path.exists', return_value=False), \
+             patch('builtins.print') as mock_print:
+            
+            cli_instance.handle_circup_installation(requirements_file, '/dev/ttyUSB0', None, None)
+            
+            # Check that error was displayed
+            mock_print.assert_called()
+            calls = [call[0][0] for call in mock_print.call_args_list]
+            assert any('circup not found or not executable at: /nonexistent/circup' in call for call in calls)
+            assert any('specify the correct path with -c PATH' in call for call in calls) 
