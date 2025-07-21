@@ -4,13 +4,22 @@
 # SPDX-License-Identifier: MIT
 
 from setuptools import setup, find_packages
+import re
+
+def read_version():
+    with open("circremote/version.py", "r") as f:
+        content = f.read()
+    match = re.search(r'VERSION\s*=\s*["\']([^"\']+)["\']', content)
+    if not match:
+        raise RuntimeError("Cannot find VERSION in circremote/version.py")
+    return match.group(1)
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="circremote",
-    version="1.0.0",
+    version=read_version(),
     author="John Romkey",
     description="A command-line tool for uploading and running Python code on CircuitPython devices",
     long_description=long_description,
