@@ -1,0 +1,2 @@
+# No external dependencies required
+# This command uses only standard library modules (os, re) 

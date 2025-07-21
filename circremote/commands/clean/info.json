@@ -1,0 +1,13 @@
+{
+  "name": "Clean",
+  "description": "Find and optionally remove unwanted files left by operating systems and editors",
+  "tested": true,
+  "variables": [
+    {
+      "name": "delete",
+      "description": "Whether to delete the unwanted files (0=false, 1=true)",
+      "default": "0"
+    }
+  ],
+  "default_commandline": "delete"
+} 
