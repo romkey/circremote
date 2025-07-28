@@ -98,6 +98,18 @@ Add to your `~/.circremote/config.json`:
 **Precedence order:**
 1. Command line option (`-c PATH`) - highest priority
 2. Config file setting (`"circup": "PATH"`)
+
+### How do I use a custom config file?
+```bash
+# Use a different config file
+circremote -f /path/to/custom.json /dev/ttyUSB0 BME280
+circremote -f ~/projects/my_config.json 192.168.1.100 BME280
+
+# Useful for:
+# - Testing different configurations
+# - Using different device sets for different projects
+# - Sharing configurations with team members
+```
 3. System PATH resolution (`circup`) - default
 
 ### How do I set a timeout for output?

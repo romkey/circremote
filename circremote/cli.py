@@ -33,6 +33,10 @@ class CLI:
         """Run the CLI with the given arguments."""
         options, remaining = self.parse_options(args)
         
+        # Reinitialize config with custom config file path if specified
+        if options.config:
+            self.config = Config(options)
+        
         # Update config with options for debug output
         self.config.options = options
         
@@ -468,6 +472,8 @@ class CLI:
                           help='Skip circup dependency installation')
         parser.add_argument('-c', '--circup', type=str,
                           help='Path to circup executable')
+        parser.add_argument('-f', '--config', type=str,
+                          help='Path to circremote.json config file')
         parser.add_argument('-y', '--yes', action='store_true',
                           help='Skip confirmation prompts (run untested commands without asking)')
         parser.add_argument('-t', '--timeout', type=float, default=10.0,
@@ -510,7 +516,7 @@ class CLI:
         print("  -v, --verbose                    Enable verbose debug output")
         print("  -p, --password PASSWORD          HTTP basic auth password for WebSocket connections")
         print("  -d, --double-exit                Send additional Ctrl+D after Ctrl+B to exit raw REPL")
-        print("  -C, --skip-circup                Skip circup dependency installation")
+        print("  -f, --config PATH                Path to circremote.json config file")
         print("  -c, --circup PATH                Path to circup executable")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
         print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
@@ -528,6 +534,7 @@ class CLI:
         print("  circremote -p mypassword 192.168.1.100:8080 show-settings")
         print("  circremote -d /dev/ttyUSB0 system-info")
         print("  circremote -v -d -p mypassword 192.168.1.100 scan-i2c")
+        print("  circremote -f /path/to/custom.json /dev/ttyUSB0 BME280  # Use custom config")
         print("  circremote /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2")
         print("  circremote sign-1 BME280 sda=board.IO1 scl=board.IO2  # With variables")
         print("  circremote /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")

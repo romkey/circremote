@@ -11,7 +11,12 @@ from pathlib import Path
 
 class Config:
     def __init__(self, options=None):
-        self.config_path = Path.home() / '.circremote' / 'config.json'
+        # Use custom config file path if specified in options
+        if options and hasattr(options, 'config') and options.config:
+            self.config_path = Path(options.config)
+        else:
+            self.config_path = Path.home() / '.circremote' / 'config.json'
+        
         self.devices = {}
         self.command_aliases = {}
         self.search_paths = []

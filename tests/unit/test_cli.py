@@ -710,4 +710,55 @@ class TestCLI:
             with pytest.raises(SystemExit):
                 cli_instance.run(["-V"])
             output = mock_stdout.getvalue()
-            assert f"circremote version {VERSION}" in output 
+            assert f"circremote version {VERSION}" in output
+
+    def test_parse_options_with_config_file(self, cli_instance):
+        """Test the -f/--config option."""
+        options, remaining = cli_instance.parse_options(['-f', '/path/to/config.json'])
+        assert options.config == '/path/to/config.json'
+        assert remaining == []
+
+    def test_parse_options_with_config_file_long_form(self, cli_instance):
+        """Test the --config option."""
+        options, remaining = cli_instance.parse_options(['--config', '/path/to/config.json'])
+        assert options.config == '/path/to/config.json'
+        assert remaining == []
+
+    def test_parse_options_with_config_and_other_options(self, cli_instance):
+        """Test config option with other options."""
+        options, remaining = cli_instance.parse_options([
+            '-f', '/path/to/config.json',
+            '-v',
+            '-c', '/usr/local/bin/circup',
+            '/dev/ttyUSB0', 'BME280'
+        ])
+        assert options.config == '/path/to/config.json'
+        assert options.verbose is True
+        assert options.circup == '/usr/local/bin/circup'
+        assert remaining == ['/dev/ttyUSB0', 'BME280']
+
+    def test_cli_uses_custom_config_file(self, cli_instance, tmp_path):
+        """Test that CLI uses custom config file when specified."""
+        # Create a custom config file
+        config_file = tmp_path / 'custom_config.json'
+        config_data = {
+            'devices': [
+                {
+                    'name': 'test_device',
+                    'device': '/dev/ttyUSB0',
+                    'friendly_name': 'Test Device'
+                }
+            ]
+        }
+        config_file.write_text(json.dumps(config_data))
+        
+        # Test that the config path is set correctly when options are passed
+        from argparse import Namespace
+        options = Namespace(config=str(config_file), verbose=False)
+        
+        # Create a new Config instance with the options
+        from circremote.config import Config
+        config = Config(options)
+        
+        # Verify the config path is set to our custom file
+        assert config.config_path == config_file 
