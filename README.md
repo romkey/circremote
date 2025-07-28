@@ -1,6 +1,38 @@
 # circremote
 
-A command-line tool for uploading and running Python code on CircuitPython devices via serial or WebSocket connections, with support for dependency management and sensor libraries.
+A command-line tool for uploading and running Python code on CircuitPython devices via serial or Web Workflow websocket connections, with support for dependency management and sensor libraries.
+
+## About This Project
+
+I've been wanting a tool like circremote for quite a while. I have CircuitPython devices which are long running but which occasionally I'd like to run a diagnostic on. I also often bring up new sensors or test hardware using CircuitPython - I've run an I2C scanner countless times and always end up copying and pasting the code. circremote allows me to run code on the device without disturbing whatever is installed on it, and lets me very conveniently reuse code across devices and time. It lets me focus on managing the code rather than the device.
+
+While I wanted a tool like this I was also busy and didn't feel like writing it. I'm a competent Python programmer but idiomatic Python isn't intuitive to me yet and while I'm enthusiastic about Python (and particularly CircuitPython) I'm not skilled enough to call myself a Pythonista.
+
+And being a developer, I fundamentally want to do more with less.
+
+Like many experienced developers, I've tried using LLMs to write code. My first results were poor, to put it kindly. The LLMs were not well trained in the areas I was working in. I asked for an ESP32 program and they hallucinated Adafruit libraries that didn't exist. The code didn't even compile. But the rate at which LLMs are improving is incredible. What was difficult for an LLM a few months ago it may now do flawlessly.
+
+A friend was very excited about Cursor, so I decided that I'd try it out. The results were suprisingly good. My first go at it never got Web Workflow's websocket support in Python working but many other functions worked well. I'm more proficient in Ruby so I had Cursor rewrite circremote in Ruby, and it got websockets with the Web Workflow right on the first try. So I continued to iterate on the design in Ruby but the idea of telling the CircuitPython community that they needed to install Ruby in order to run circremote felt absurd. So I asked Cursor to rewrite it in Python again and it worked! Even the websocket support for Web Workflow.
+
+This has been such a positive experience that it's really shifted my view on using an LLM to write code.
+
+It also leaves me very concerned about maintenance. Fundamentally I designed this code but I didn't write it. I don't know it very well. I've gone down some rabbit holes with Cursor trying to correct bugs... and generally it's been okay but sometimes it goes down a dead end and builds up more and more cruft in the code with failed attempts... unwinding that can be tedious and difficult. Good git hygiene helps a lot but it's still too easy to end up with some twisted code from misugided attempts to fix things which never pan out.
+
+I'm happy to say that almost all of the code and text in circremote was written by Cursor under my guidance. I've tweaked  the code directly here and there (mostly in some of the commands where Cursor was really not having a good time, and in parts of the text like this chunk and other places where there were nuances and useful information that Cursor just didn't get a grip on.
+
+## Overview
+
+This project maintains a set of snippets of CircuitPython code - things like an I2C scanner, a program which cleans up unwanted files left by text editors and operating systems, code for a large variety of sensors which will output the sensor's current readings, and other small programs. It can interrupt a program currently running on a CircuitPython device and transmit and execute this code over a USB serial connection. It also works with CircuitPython devices that are configured to use the "Web Workflow", which allows you to access files and run code over a small HTTP server that CircuitPython itself manages - so you can run code on a remote CircuitPython device that you're not physically connected to.
+
+The snippets can include dependencies; each has its own `requirements.txt` file and circremote can automatically use `circup` to install those dependencies either locally to `CIRCUITPY` or over a network using the Web Workflow.
+
+It can also pull code from a web server, so you can run Adafruit example code directly from Github if you want.
+
+It supports a search path for code locations, so you can define your own or use other people's libraries, and fall back to the ones bundled with circremote.
+
+One thing it currently does not do is support Microsoft Windows. I do not have a Windows machine and have no way to test it with Windows. I understand that a lot of people use Windows and that the lack of support means that a lot of people who might benefit from circremote won't be able to use it. While I'm happy to spend some time and resources on continuing to develop circremote and support users, I don't have the time, energy or desire to bring up a new platform and get it working on it. If a motivated co-maintainer comes along who'd like to get circremote working properly with Windows and then support it, I'd be happy to bring someone like that onto the project.
+
+From here, see how to install circremote and then please check out the [FAQ](FAQ.md) to see how to use it.
 
 ## Installation
 
@@ -13,7 +45,7 @@ pip install circremote
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/circremote-python.git
+git clone https://github.com/romkey/circremote
 cd circremote-python
 pip install -e .
 ```
@@ -23,7 +55,7 @@ pip install -e .
 ### Basic Usage
 
 ```bash
-circremote [options] <serial_port_or_ip> <command_name>
+circremote [options] <serial_port_or_ip:port> <command_name>
 ```
 
 ### Show Version
@@ -112,13 +144,24 @@ The tool comes with a collection of pre-built sensor and utility commands:
 - `SGP30` - Air quality sensor
 - `SGP40` - VOC air quality sensor
 - `PMS5003` - Particulate matter sensor
+- `PMSA003I` - I2C particulate matter sensor
 
 ### Utility Commands
+- `blink` - blinks a simple LED
+- `cat` - cat a file
+- `clean` - clean unwanted files like ._file_, file~ and others from the device
+-  `hello` - Hello world
+- `neopixel-blink` - blinks a NeoPixel LED
+- `neopixel-rainbow` - cycles through rainbow colors on a NeoPixel LED
+- `ntp` - get the time from an NTP server
+- `ping` - ping (ICMP Echo Request) another device
+- `reset` - restart the device (`microcontroller.reset()`)
+- `run` - reads a file on the device and executes it
+- `scan-i2c` - Scan for I2C devices 
+- `scan-wifi` - Scan for WiFi networks 
+- `show-settings` - Display contents of `settings.toml` (same as `cat settings.toml`) 
 - `system-info` - Display system information
-- `scan-i2c` - Scan for I2C devices
-- `scan_wifi` - Scan for WiFi networks
-- `show-settings` - Display current settings
-- `simple` - Simple test command
+- `uf2` - restart compatible devices in UF2 bootloader mode (this will take the device offline if it's on wifi)
 
 ## Configuration
 

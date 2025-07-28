@@ -25,7 +25,7 @@ print("PMA003I Particulate Matter Sensor")
 print("=" * 40)
 
 # Display sensor information
-print("Sensor Type: PMA003I")
+print("Sensor Type: PMSA003I")
 print("Interface: UART (9600 baud)")
 print("Particle Size Range: 0.3 - 10 μm")
 print()

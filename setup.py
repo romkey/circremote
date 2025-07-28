@@ -21,7 +21,8 @@ setup(
     name="circremote",
     version=read_version(),
     author="John Romkey",
-    description="A command-line tool for uploading and running Python code on CircuitPython devices",
+    author_email="58883+romkey@users.noreply.github.com",
+    description="A command-line tool for uploading and running code on CircuitPython devices",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -31,15 +32,12 @@ setup(
     },
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
+        "Framework :: Pytest",
+        "Intended Audience :: Other Audience",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+        "Topic :: Utilties"
     ],
     python_requires=">=3.7",
     install_requires=[

@@ -56,7 +56,7 @@ circremote /dev/ttyUSB0 mycommand board.IO1 board.IO2 address=0x76
 
 ### How do I connect to a device over WiFi?
 
-You *must* configure the device to support [Web Workflow](https://learn.adafruit.com/getting-started-with-web-workflow-using-the-code-editor/overview) in order to connect over WiFi. Only devices with integrated WiFi (ESP32s, Raspberry Pi Pico W) support Web Workflow. Devices using an external ESP32 as a WiFi coprocessor, like the Adafruit Matrix Portal M4 - this is a limitation of CircuitPython.
+You *must* configure the device to support [Web Workflow](https://learn.adafruit.com/getting-started-with-web-workflow-using-the-code-editor) in order to connect over WiFi. Only devices with integrated WiFi (ESP32s, Raspberry Pi Pico W) support Web Workflow. Devices using an external ESP32 as a WiFi coprocessor, like the Adafruit Matrix Portal M4 - this is a limitation of CircuitPython.
 
 ```bash
 # Using IP address (default port 80)
@@ -240,27 +240,31 @@ print(f"Temperature: {bme280.temperature}°C")
 ```
 
 ## Loading Commands from the Web
+circremote is able to download code from a web server and send it to a CircuitPython device. It currently only downloads the code; it cannot handle library dependencies or get information about the code from an `info.json` file.
+
+Please be careful downloading random code from a web site. Even on a CircuitPython device it could contain malicious code which could share your WiFi credentials or other information stored on the device with bad actors.
 
 ### How do I run a command from GitHub?
+circremote automatically rewrites Github URLs to properly access the file managed at that URL. These two examples are identical:
+
 ```bash
 # Direct GitHub URL
-circremote /dev/ttyUSB0 https://github.com/user/repo/blob/main/sensor.py
+circremote /dev/ttyUSB0 https://github.com/adafruit/Adafruit_CircuitPython_BME680/blob/main/examples/bme680_simpletest.py`
 
 # GitHub raw URL
-circremote /dev/ttyUSB0 https://raw.githubusercontent.com/user/repo/main/sensor.py
+circremote /dev/ttyUSB0 https://raw.githubusercontent.com/adafruit/Adafruit_CircuitPython_BME680/main/examples/bme680_simpletest.py
 ```
+
+Be aware that circremote will not automatically install the BME680 library if you run this code this way. It will if you run the local `BME680` command.
 
 ### How do I run a command from other websites?
 ```bash
 # Any HTTP/HTTPS URL
-circremote /dev/ttyUSB0 https://example.com/sensor.py
-circremote /dev/ttyUSB0 http://my-server.com/code.py
+circremote /dev/ttyUSB0 https://romkey.com/circup/hello.py
 ```
 
 ### Can I use GitHub URLs with directories?
-Yes! circremote automatically converts GitHub URLs to raw content:
-- `https://github.com/user/repo/blob/main/sensors/bme280.py` → `https://raw.githubusercontent.com/user/repo/main/sensors/bme280.py`
-- `https://github.com/user/repo/tree/main/sensors` → `https://raw.githubusercontent.com/user/repo/main/sensors`
+No, circremote does not currently support remote directories or remote `info.json` or `requirements.txt` files.
 
 ## Troubleshooting
 
@@ -272,7 +276,7 @@ This usually means:
 
 Check available commands:
 ```bash
-circremote --help
+circremote -l
 ```
 
 ### "Connection refused" error
@@ -283,13 +287,13 @@ For serial connections:
 
 For WebSocket connections:
 - Verify the IP address and port
-- Check if CircuitPython Web Workflow is enabled
+- Check if CircuitPython [Web Workflow](https://learn.adafruit.com/getting-started-with-web-workflow-using-the-code-editor) is enabled on the device
 - Ensure the device is on the same network
 
 ### "Bad password" error
 For WebSocket connections:
 - Check your password in the config or `-p` option
-- Verify the password matches `CIRCUITPY_WEB_API_PASSWORD` in boot.py
+- Verify the password matches `CIRCUITPY_WEB_API_PASSWORD` in `settings.toml` on the device
 - Restart the device after changing the password
 
 ### "Permission denied" error
@@ -371,8 +375,8 @@ circremote -t 5 /dev/ttyUSB0 BME280
 circremote -t 0 /dev/ttyUSB0 BME280
 ```
 
-### How do I use double exit mode?
-Some devices need an extra Ctrl+D to exit properly:
+### How do I use "double exit" mode?
+Use "double exit mode" to send an extra ^D to the device in order to re-start the program in `code.py`:
 ```bash
 circremote -d /dev/ttyUSB0 BME280
 ```
@@ -383,6 +387,7 @@ circremote -y /dev/ttyUSB0 untested_command
 ```
 
 ### How do I see what's happening internally?
+If something goes wrong and you want detailed debugging info, use the `-v` or `--verbose` flag.
 ```bash
 circremote -v /dev/ttyUSB0 BME280
 ```
