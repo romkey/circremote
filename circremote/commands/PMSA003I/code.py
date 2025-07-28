@@ -26,7 +26,7 @@ print("=" * 40)
 
 # Display sensor information
 print("Sensor Type: PMSA003I")
-print("Interface: UART (9600 baud)")
+print("Interface: I2C")
 print("Particle Size Range: 0.3 - 10 μm")
 print()
 
