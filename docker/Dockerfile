@@ -21,6 +21,9 @@ WORKDIR /app
 # Copy the circremote source code
 COPY . .
 
+# Install circup for CircuitPython dependency management
+RUN pip install circup
+
 # Install circremote in development mode
 RUN pip install -e .
 

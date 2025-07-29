@@ -53,11 +53,14 @@ pip install -e .
 ### Using Docker
 
 ```bash
-# Build the Docker image
+# Build the Docker image (includes circup for dependency management)
 docker build -f docker/Dockerfile -t circremote:latest .
 
 # Run circremote in a container
 docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 BME280
+
+# Test circup installation
+docker run --rm circremote:latest circup --version
 
 # For more Docker options, see [docker/README.md](docker/README.md)
 ```

@@ -46,6 +46,8 @@ The Docker setup mounts several important directories:
   - Current directory for accessing local commands and files
 - `/dev/bus/usb` → `/dev/bus/usb` (read-only)
   - USB device access for Linux systems
+- `~/.cache/circup` → `/home/circremote/.cache/circup` (read-write)
+  - circup cache for faster dependency installation
 
 ## Device Access
 
@@ -53,6 +55,14 @@ The container has access to common serial devices:
 - `/dev/ttyUSB0`
 - `/dev/ttyACM0`
 - `/dev/ttyACM1`
+
+## Dependencies
+
+The Docker image includes:
+- **circup**: CircuitPython dependency management tool
+  - Automatically installed and available for circremote to use
+  - Cache is persisted via volume mount for faster installations
+  - Can be configured via circremote's `-u` option or config file
 
 ## Usage Examples
 
@@ -81,9 +91,12 @@ docker-compose -f docker/docker-compose.yml run circremote-run \
 docker-compose -f docker/docker-compose.yml run circremote-run \
   -c /dev/ttyUSB0 BME280
 
-# Use custom circup path
+# Use custom circup path (circup is installed in the container)
 docker-compose -f docker/docker-compose.yml run circremote-run \
   -u /usr/local/bin/circup /dev/ttyUSB0 BME280
+
+# Test circup installation
+docker run --rm circremote:latest circup --version
 ```
 
 ### WebSocket Connections

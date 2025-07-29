@@ -91,4 +91,8 @@ list-cmd:
 
 .PHONY: version
 version:
-	make exec CMD="--version" 
+	make exec CMD="--version"
+
+.PHONY: test-circup
+test-circup:
+	docker run --rm circremote:latest circup --version 

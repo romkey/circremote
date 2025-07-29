@@ -17,6 +17,7 @@ services:
       - ~/.circremote:/home/circremote/.circremote:ro
       - .:/workspace:rw
       - /dev/bus/usb:/dev/bus/usb:ro
+      - ~/.cache/circup:/home/circremote/.cache/circup:rw
     working_dir: /workspace
     stdin_open: true
     tty: true
@@ -41,6 +42,7 @@ services:
       - ~/.circremote:/home/circremote/.circremote:ro
       - .:/workspace:rw
       - /dev/bus/usb:/dev/bus/usb:ro
+      - ~/.cache/circup:/home/circremote/.cache/circup:rw
     working_dir: /workspace
     network_mode: host
     # This service is meant to be run with specific commands
