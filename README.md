@@ -50,6 +50,18 @@ cd circremote-python
 pip install -e .
 ```
 
+### Using Docker
+
+```bash
+# Build the Docker image
+docker build -f docker/Dockerfile -t circremote:latest .
+
+# Run circremote in a container
+docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 BME280
+
+# For more Docker options, see [docker/README.md](docker/README.md)
+```
+
 ## Usage
 
 ### Basic Usage
@@ -94,10 +106,10 @@ circremote -p mypassword 192.168.1.100 scan-i2c
 circremote -v -d -p mypassword 192.168.1.100:8080 BME680
 
 # Skip dependency installation
-circremote -C /dev/ttyUSB0 BME280
+circremote -c /dev/ttyUSB0 BME280
 
 # Specify custom circup path
-circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
+circremote -u /usr/local/bin/circup /dev/ttyUSB0 BME280
 ```
 
 ## Options
