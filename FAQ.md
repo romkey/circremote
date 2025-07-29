@@ -561,4 +561,289 @@ circremote --version
 # or
 circremote -V
 ```
-This will print the installed version of circremote and exit. 
+This will print the installed version of circremote and exit.
+
+## Docker Questions
+
+### How do I use circremote with Docker?
+
+circremote provides a Docker setup for containerized usage. The Docker image includes both circremote and circup for dependency management.
+
+**Quick Start:**
+```bash
+# Build the Docker image
+docker build -f docker/Dockerfile -t circremote:latest .
+
+# Run a command
+docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 BME280
+
+# Interactive shell
+docker-compose -f docker/docker-compose.yml run circremote
+```
+
+### What's included in the Docker image?
+
+The Docker image includes:
+- **circremote**: The main application
+- **circup**: CircuitPython dependency management tool
+- **Python 3.13.5**: Runtime environment
+- **Git and curl**: For dependency installation
+
+### How does device access work in Docker?
+
+The Docker setup provides access to serial devices through volume mounts:
+
+**Linux:**
+- `/dev/serial/by-id` → `/dev/serial/by-id` (read-only)
+- `/dev/bus/usb` → `/dev/bus/usb` (read-only)
+
+**macOS/Windows:**
+- Serial devices are typically accessed through `/dev/tty.usbserial-*` (macOS) or `COM*` (Windows)
+- You may need to adjust the device paths in your commands
+
+**Important:** The container runs with `network_mode: host` for WebSocket connections.
+
+### How do I handle the "Found orphan containers" warning?
+
+This warning appears when Docker Compose finds containers from previous runs that aren't defined in the current `docker-compose.yml` file.
+
+**Solutions:**
+
+1. **Clean up orphan containers:**
+   ```bash
+   # Remove orphan containers
+   docker-compose -f docker/docker-compose.yml down --remove-orphans
+   
+   # Or remove all stopped containers
+   docker container prune
+   ```
+
+2. **Use the `--remove-orphans` flag:**
+   ```bash
+   docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run /dev/ttyUSB0 BME280
+   ```
+
+3. **Add to your docker-compose command:**
+   ```bash
+   # Add this to your shell alias or script
+   alias circremote-docker='docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run'
+   ```
+
+**Why this happens:** When you modify the `docker-compose.yml` file (like removing device mappings), Docker Compose detects containers from the old configuration that are no longer defined.
+
+### How do I persist configuration and cache in Docker?
+
+The Docker setup mounts several directories for persistence:
+
+**Configuration:**
+```bash
+# Your local config is mounted read-only
+~/.circremote → /home/circremote/.circremote:ro
+```
+
+**Cache:**
+```bash
+# circup cache for faster installations
+~/.cache/circup → /home/circremote/.cache/circup:rw
+```
+
+**Workspace:**
+```bash
+# Current directory for commands and files
+. → /workspace:rw
+```
+
+### How do I map the CIRCUITPY drive for circup access?
+
+When using Docker, you need to mount the CIRCUITPY drive so that circup can install libraries directly to your CircuitPython device.
+
+**Linux:**
+```bash
+# Find your CIRCUITPY drive
+lsblk | grep CIRCUITPY
+# or
+ls -la /dev/serial/by-id/
+
+# Mount it in docker-compose.yml
+volumes:
+  - /media/$USER/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+  # or if using device path
+  - /dev/sdb1:/media/circremote/CIRCUITPY:rw
+```
+
+**macOS:**
+```bash
+# CIRCUITPY is typically mounted at /Volumes/CIRCUITPY
+# Add to docker-compose.yml
+volumes:
+  - /Volumes/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+```
+
+**Windows:**
+```bash
+# CIRCUITPY is typically mounted at a drive letter
+# Add to docker-compose.yml (adjust drive letter as needed)
+volumes:
+  - C:/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+```
+
+**Complete Example:**
+```yaml
+services:
+  circremote-run:
+    volumes:
+      - ~/.circremote:/home/circremote/.circremote:ro
+      - .:/workspace:rw
+      - /dev/bus/usb:/dev/bus/usb:ro
+      - /dev/serial/by-id:/dev/serial/by-id:ro
+      - ~/.cache/circup:/home/circremote/.cache/circup:rw
+      # Add CIRCUITPY drive mapping
+      - /media/$USER/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+```
+
+**Troubleshooting CIRCUITPY access:**
+
+1. **Check if CIRCUITPY is mounted:**
+   ```bash
+   # Linux
+   ls -la /media/$USER/CIRCUITPY/
+   
+   # macOS
+   ls -la /Volumes/CIRCUITPY/
+   
+   # Windows
+   dir C:\CIRCUITPY\
+   ```
+
+2. **Verify permissions:**
+   ```bash
+   # Make sure the drive is writable
+   touch /media/$USER/CIRCUITPY/test.txt
+   rm /media/$USER/CIRCUITPY/test.txt
+   ```
+
+3. **Test circup access:**
+   ```bash
+   # Run circup list to see installed libraries
+   docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
+     -u /usr/local/bin/circup /dev/ttyUSB0 --list
+   ```
+
+4. **Common issues:**
+   - **Drive not found**: Check the mount point path
+   - **Permission denied**: Ensure the drive is writable by your user
+   - **Read-only filesystem**: The device may be in bootloader mode or have a read-only filesystem
+
+### How do I use custom commands with Docker?
+
+**Method 1: Mount your commands directory**
+```bash
+# Add to docker-compose.yml volumes
+- ~/my_commands:/workspace/commands:ro
+
+# Then use your commands
+docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 my_sensor
+```
+
+**Method 2: Use search paths in config**
+```json
+{
+  "search_paths": ["/workspace/custom_commands"]
+}
+```
+
+### How do I troubleshoot Docker issues?
+
+**Common Problems:**
+
+1. **Permission denied on device:**
+   ```bash
+   # Add your user to the dialout group (Linux)
+   sudo usermod -a -G dialout $USER
+   
+   # Or run with privileged mode (not recommended for production)
+   docker run --privileged circremote:latest
+   ```
+
+2. **Device not found:**
+   ```bash
+   # Check available devices
+   ls -la /dev/serial/by-id/
+   
+   # Use the full device path
+   docker-compose -f docker/docker-compose.yml run circremote-run /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0JMQ1N-if00-port0 BME280
+   ```
+
+3. **circup not working:**
+   ```bash
+   # Test circup installation
+   docker run --rm circremote:latest circup --version
+   
+   # Check circup cache
+   ls -la ~/.cache/circup/
+   ```
+
+4. **Network connection issues:**
+   ```bash
+   # Ensure network_mode: host is set
+   # Check if device is accessible from host
+   ping 192.168.1.100
+   ```
+
+### How do I customize the Docker setup?
+
+**Modify docker-compose.yml:**
+```yaml
+services:
+  circremote:
+    environment:
+      - CIRCREMOTE_DEBUG=1
+    volumes:
+      # Add custom volume mounts
+      - ~/my_commands:/workspace/custom:ro
+```
+
+**Create a custom Dockerfile:**
+```dockerfile
+FROM circremote:latest
+# Add your customizations
+RUN pip install additional-package
+```
+
+### How do I clean up Docker resources?
+
+```bash
+# Remove circremote containers and images
+docker-compose -f docker/docker-compose.yml down --rmi all
+
+# Clean up all unused Docker resources
+docker system prune -a
+
+# Remove specific images
+docker rmi circremote:latest
+```
+
+### Can I use Docker with WebSocket connections?
+
+Yes! The Docker setup includes `network_mode: host` which allows WebSocket connections to work properly:
+
+```bash
+# Connect to device over WiFi
+docker-compose -f docker/docker-compose.yml run circremote-run 192.168.1.100 BME280
+
+# With password
+docker-compose -f docker/docker-compose.yml run circremote-run -p mypassword 192.168.1.100 BME280
+```
+
+### How do I run tests in Docker?
+
+```bash
+# Run unit tests
+docker run --rm circremote:latest python -m pytest tests/unit/
+
+# Run with verbose output
+docker run --rm circremote:latest python -m pytest tests/unit/ -v
+
+# Run specific test
+docker run --rm circremote:latest python -m pytest tests/unit/test_cli.py::TestCLI::test_parse_options
+``` 

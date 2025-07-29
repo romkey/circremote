@@ -18,6 +18,8 @@ help:
 	@echo "  exec         - Execute a specific circremote command"
 	@echo "  clean        - Remove circremote Docker images"
 	@echo "  test         - Test the Docker image"
+	@echo "  test-circup  - Test circup installation"
+	@echo "  test-circuitpy - Test CIRCUITPY drive access"
 	@echo "  push         - Push the image to registry (requires login)"
 	@echo "  multiarch    - Build multi-architecture image"
 
@@ -39,7 +41,7 @@ exec:
 		echo "Example: make exec CMD='/dev/ttyUSB0 BME280'"; \
 		exit 1; \
 	fi
-	docker-compose -f $(COMPOSE_FILE) run --rm circremote-run $(CMD)
+	docker-compose -f $(COMPOSE_FILE) run --remove-orphans --rm circremote-run $(CMD)
 
 # Test the Docker image
 .PHONY: test
@@ -95,4 +97,18 @@ version:
 
 .PHONY: test-circup
 test-circup:
-	docker run --rm circremote:latest circup --version 
+	docker run --rm circremote:latest circup --version
+
+.PHONY: test-circuitpy
+test-circuitpy:
+	@echo "Testing CIRCUITPY access..."
+	@if [ -d "/media/$$USER/CIRCUITPY" ]; then \
+		echo "Linux: CIRCUITPY found at /media/$$USER/CIRCUITPY"; \
+	elif [ -d "/Volumes/CIRCUITPY" ]; then \
+		echo "macOS: CIRCUITPY found at /Volumes/CIRCUITPY"; \
+	else \
+		echo "CIRCUITPY drive not found. Please check if your CircuitPython device is connected."; \
+		echo "Linux: /media/$$USER/CIRCUITPY"; \
+		echo "macOS: /Volumes/CIRCUITPY"; \
+		echo "Windows: C:/CIRCUITPY"; \
+	fi 

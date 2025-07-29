@@ -17,12 +17,14 @@ docker build -f docker/Dockerfile -t circremote:latest .
 # Start the interactive circremote container
 docker-compose -f docker/docker-compose.yml up circremote
 
-# Run a specific command
-docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 BME280
+# Run a specific command (recommended: use --remove-orphans to avoid warnings)
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run /dev/ttyUSB0 BME280
 
 # Run with custom config file
-docker-compose -f docker/docker-compose.yml run circremote-run -C /workspace/config.json /dev/ttyUSB0 BME280
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run -C /workspace/config.json /dev/ttyUSB0 BME280
 ```
+
+**Note:** The `--remove-orphans` flag prevents "Found orphan containers" warnings that occur when Docker Compose detects containers from previous configurations.
 
 ## Services
 
@@ -49,6 +51,19 @@ The Docker setup mounts several important directories:
 - `~/.cache/circup` → `/home/circremote/.cache/circup` (read-write)
   - circup cache for faster dependency installation
 
+**Optional: CIRCUITPY Drive Mapping**
+For circup to install libraries directly to your CircuitPython device, add the CIRCUITPY drive:
+
+```yaml
+volumes:
+  # Linux
+  - /media/$USER/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+  # macOS
+  - /Volumes/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+  # Windows
+  - C:/CIRCUITPY:/media/circremote/CIRCUITPY:rw
+```
+
 ## Device Access
 
 The container has access to common serial devices:
@@ -69,34 +84,45 @@ The Docker image includes:
 ### Basic Usage
 ```bash
 # Show help
-docker-compose -f docker/docker-compose.yml run circremote-run --help
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run --help
 
 # List available commands
-docker-compose -f docker/docker-compose.yml run circremote-run -l
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run -l
 
 # Run a sensor command
-docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 BME280
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run /dev/ttyUSB0 BME280
 
 # Run with verbose output
-docker-compose -f docker/docker-compose.yml run circremote-run -v /dev/ttyUSB0 BME280
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run -v /dev/ttyUSB0 BME280
 ```
 
 ### With Custom Configuration
 ```bash
 # Use a custom config file
-docker-compose -f docker/docker-compose.yml run circremote-run \
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
   -C /workspace/my_config.json /dev/ttyUSB0 BME280
 
 # Skip circup installation
-docker-compose -f docker/docker-compose.yml run circremote-run \
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
   -c /dev/ttyUSB0 BME280
 
 # Use custom circup path (circup is installed in the container)
-docker-compose -f docker/docker-compose.yml run circremote-run \
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
   -u /usr/local/bin/circup /dev/ttyUSB0 BME280
 
 # Test circup installation
 docker run --rm circremote:latest circup --version
+
+### With CIRCUITPY Drive Mapping
+```bash
+# First, add CIRCUITPY volume to docker-compose.yml
+# Then run with library installation
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
+  /dev/ttyUSB0 BME280
+
+# Check installed libraries on device
+docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
+  -u /usr/local/bin/circup /dev/ttyUSB0 --list
 ```
 
 ### WebSocket Connections
