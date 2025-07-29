@@ -733,6 +733,7 @@ services:
    - **Drive not found**: Check the mount point path
    - **Permission denied**: Ensure the drive is writable by your user
    - **Read-only filesystem**: The device may be in bootloader mode or have a read-only filesystem
+   - **circup permission errors**: If you get "Permission denied: '/home/circremote/.cache/circup/log'", rebuild the Docker image to ensure proper cache directory permissions
 
 ### How do I use custom commands with Docker?
 
@@ -774,16 +775,33 @@ docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 my_s
    docker-compose -f docker/docker-compose.yml run circremote-run /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0JMQ1N-if00-port0 BME280
    ```
 
-3. **circup not working:**
+3. **circup permission errors:**
    ```bash
-   # Test circup installation
+   # If you get: PermissionError: [Errno 13] Permission denied: '/home/circremote/.cache/circup/log'
+   
+   # Solution: Rebuild the Docker image (this creates the cache directory with proper permissions)
+   docker build -f docker/Dockerfile -t circremote:latest .
+   
+   # Test circup after rebuilding
    docker run --rm circremote:latest circup --version
    
-   # Check circup cache
-   ls -la ~/.cache/circup/
+   # Alternative: Check if the cache directory exists and has proper permissions
+   docker run --rm circremote:latest ls -la /home/circremote/.cache/circup/
    ```
 
-4. **Network connection issues:**
+4. **circup not found:**
+   ```bash
+   # Test circup installation (bypass entrypoint)
+   docker run --rm --entrypoint="" circremote:latest /usr/local/bin/circup --version
+   
+   # Check circup location
+   docker run --rm --entrypoint="" circremote:latest which circup
+   
+   # Test cache permissions
+   docker run --rm --entrypoint="" circremote:latest ls -la /home/circremote/.cache/circup/
+   ```
+
+5. **Network connection issues:**
    ```bash
    # Ensure network_mode: host is set
    # Check if device is accessible from host

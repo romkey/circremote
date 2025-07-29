@@ -76,6 +76,7 @@ The container has access to common serial devices:
 The Docker image includes:
 - **circup**: CircuitPython dependency management tool
   - Automatically installed and available for circremote to use
+  - Cache directory created with proper permissions for the circremote user
   - Cache is persisted via volume mount for faster installations
   - Can be configured via circremote's `-u` option or config file
 
@@ -123,6 +124,34 @@ docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run 
 # Check installed libraries on device
 docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
   -u /usr/local/bin/circup /dev/ttyUSB0 --list
+```
+
+## Troubleshooting
+
+### circup Permission Errors
+If you encounter `PermissionError: [Errno 13] Permission denied: '/home/circremote/.cache/circup/log'`:
+
+```bash
+# Rebuild the Docker image to ensure proper cache directory permissions
+docker build -f docker/Dockerfile -t circremote:latest .
+
+# Test circup after rebuilding
+docker run --rm circremote:latest circup --version
+```
+
+### circup Not Found
+If circremote can't find circup:
+
+```bash
+# Check circup installation (bypass entrypoint)
+docker run --rm --entrypoint="" circremote:latest /usr/local/bin/circup --version
+
+# Test cache permissions
+docker run --rm --entrypoint="" circremote:latest ls -la /home/circremote/.cache/circup/
+
+# Use make targets for testing
+make test-circup
+make test-cache-permissions
 ```
 
 ### WebSocket Connections

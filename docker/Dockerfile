@@ -31,6 +31,10 @@ RUN pip install -e .
 RUN useradd -m -s /bin/bash circremote && \
     chown -R circremote:circremote /app
 
+# Create circup cache directory with proper permissions
+RUN mkdir -p /home/circremote/.cache/circup && \
+    chown -R circremote:circremote /home/circremote/.cache
+
 # Switch to non-root user
 USER circremote
 

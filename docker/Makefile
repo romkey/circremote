@@ -20,6 +20,7 @@ help:
 	@echo "  test         - Test the Docker image"
 	@echo "  test-circup  - Test circup installation"
 	@echo "  test-circuitpy - Test CIRCUITPY drive access"
+	@echo "  test-cache-permissions - Test circup cache directory permissions"
 	@echo "  push         - Push the image to registry (requires login)"
 	@echo "  multiarch    - Build multi-architecture image"
 
@@ -97,7 +98,7 @@ version:
 
 .PHONY: test-circup
 test-circup:
-	docker run --rm circremote:latest circup --version
+	docker run --rm --entrypoint="" circremote:latest /usr/local/bin/circup --version
 
 .PHONY: test-circuitpy
 test-circuitpy:
@@ -111,4 +112,9 @@ test-circuitpy:
 		echo "Linux: /media/$$USER/CIRCUITPY"; \
 		echo "macOS: /Volumes/CIRCUITPY"; \
 		echo "Windows: C:/CIRCUITPY"; \
-	fi 
+	fi
+
+.PHONY: test-cache-permissions
+test-cache-permissions:
+	@echo "Testing circup cache permissions..."
+	docker run --rm --entrypoint="" circremote:latest ls -la /home/circremote/.cache/circup/ 
