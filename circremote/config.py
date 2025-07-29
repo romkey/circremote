@@ -224,4 +224,10 @@ class Config:
             return self.circup_path
         
         # Default to system PATH resolution
+        # In Docker containers, circup is installed at /usr/local/bin/circup
+        import os
+        if os.path.exists('/usr/local/bin/circup'):
+            return '/usr/local/bin/circup'
+        
+        # Fallback to PATH resolution
         return 'circup' 

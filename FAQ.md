@@ -799,6 +799,10 @@ docker-compose -f docker/docker-compose.yml run circremote-run /dev/ttyUSB0 my_s
    
    # Test cache permissions
    docker run --rm --entrypoint="" circremote:latest ls -la /home/circremote/.cache/circup/
+   
+   # If you get "circup not found or not executable at: circup"
+   # This is now fixed in the Docker image - circremote automatically detects
+   # that it's running in a container and uses /usr/local/bin/circup
    ```
 
 5. **Network connection issues:**

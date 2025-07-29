@@ -154,6 +154,8 @@ make test-circup
 make test-cache-permissions
 ```
 
+**Note:** The Docker image now automatically detects when it's running in a container and uses `/usr/local/bin/circup` instead of relying on PATH resolution. This fixes the "circup not found or not executable at: circup" error.
+
 ### WebSocket Connections
 ```bash
 # Connect to device over WiFi
