@@ -9,14 +9,11 @@ services:
       dockerfile: docker/Dockerfile
     container_name: circremote
     image: circremote:latest
-    devices:
-      - /dev/ttyUSB0:/dev/ttyUSB0
-      - /dev/ttyACM0:/dev/ttyACM0
-      - /dev/ttyACM1:/dev/ttyACM1
     volumes:
       - ~/.circremote:/home/circremote/.circremote:ro
       - .:/workspace:rw
       - /dev/bus/usb:/dev/bus/usb:ro
+      - /dev/serial/by-id:/dev/serial/by-id:ro
       - ~/.cache/circup:/home/circremote/.cache/circup:rw
     working_dir: /workspace
     stdin_open: true
@@ -34,14 +31,11 @@ services:
       dockerfile: docker/Dockerfile
     container_name: circremote-run
     image: circremote:latest
-    devices:
-      - /dev/ttyUSB0:/dev/ttyUSB0
-      - /dev/ttyACM0:/dev/ttyACM0
-      - /dev/ttyACM1:/dev/ttyACM1
     volumes:
       - ~/.circremote:/home/circremote/.circremote:ro
       - .:/workspace:rw
       - /dev/bus/usb:/dev/bus/usb:ro
+      - /dev/serial/by-id:/dev/serial/by-id:ro
       - ~/.cache/circup:/home/circremote/.cache/circup:rw
     working_dir: /workspace
     network_mode: host
