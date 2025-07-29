@@ -140,7 +140,7 @@ class TestConfig:
         # Prepare a config file with search paths
         config_data = {
             'search_paths': [
-                '/tmp/test_commands',
+                str(tmp_path / 'test_commands'),  # Use tmp_path for absolute path
                 '/nonexistent/path',
                 '~/custom_commands'
             ]
@@ -151,15 +151,15 @@ class TestConfig:
         config_path.write_text(json.dumps(config_data))
         
         # Create one of the search paths
-        test_commands_dir = tmp_path / 'tmp' / 'test_commands'
-        test_commands_dir.mkdir(parents=True)
+        test_commands_dir = tmp_path / 'test_commands'
+        test_commands_dir.mkdir()
         
         with patch('pathlib.Path.home', return_value=tmp_path):
             config = Config()
             # Should only include existing paths
             assert len(config.search_paths) == 1
             # The path should be resolved to the actual path
-            assert any('/tmp/test_commands' in path for path in config.search_paths)
+            assert any(str(test_commands_dir) in path for path in config.search_paths)
 
     def test_find_command_in_search_paths(self, tmp_path):
         config = Config()
