@@ -468,11 +468,11 @@ class CLI:
                           help='HTTP basic auth password for WebSocket connections')
         parser.add_argument('-d', '--double-exit', action='store_true',
                           help='Send additional Ctrl+D after Ctrl+B to exit raw REPL')
-        parser.add_argument('-C', '--skip-circup', action='store_true',
+        parser.add_argument('-c', '--skip-circup', action='store_true',
                           help='Skip circup dependency installation')
-        parser.add_argument('-c', '--circup', type=str,
+        parser.add_argument('-u', '--circup', type=str,
                           help='Path to circup executable')
-        parser.add_argument('-f', '--config', type=str,
+        parser.add_argument('-C', '--config', type=str,
                           help='Path to circremote.json config file')
         parser.add_argument('-y', '--yes', action='store_true',
                           help='Skip confirmation prompts (run untested commands without asking)')
@@ -516,8 +516,8 @@ class CLI:
         print("  -v, --verbose                    Enable verbose debug output")
         print("  -p, --password PASSWORD          HTTP basic auth password for WebSocket connections")
         print("  -d, --double-exit                Send additional Ctrl+D after Ctrl+B to exit raw REPL")
-        print("  -f, --config PATH                Path to circremote.json config file")
-        print("  -c, --circup PATH                Path to circup executable")
+        print("  -C, --config PATH                Path to circremote.json config file")
+        print("  -u, --circup PATH                Path to circup executable")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
         print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
         print("  -l, --list                       List all available commands from all sources")
@@ -534,11 +534,11 @@ class CLI:
         print("  circremote -p mypassword 192.168.1.100:8080 show-settings")
         print("  circremote -d /dev/ttyUSB0 system-info")
         print("  circremote -v -d -p mypassword 192.168.1.100 scan-i2c")
-        print("  circremote -f /path/to/custom.json /dev/ttyUSB0 BME280  # Use custom config")
+        print("  circremote -C /path/to/custom.json /dev/ttyUSB0 BME280  # Use custom config")
         print("  circremote /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2")
         print("  circremote sign-1 BME280 sda=board.IO1 scl=board.IO2  # With variables")
         print("  circremote /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")
-        print("  circremote -C /dev/ttyUSB0 BME280")
+        print("  circremote -c /dev/ttyUSB0 BME280")
         print("  circremote -y /dev/ttyUSB0 ADXL345                    # Skip confirmation for untested modules")
         print("  circremote -t 30 /dev/ttyUSB0 BME280                  # Wait 30 seconds for output")
         print("  circremote -t 0 /dev/ttyUSB0 BME280                   # Wait indefinitely for output")

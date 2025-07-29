@@ -76,14 +76,14 @@ circremote -v /dev/ttyUSB0 BME280
 
 ### How do I skip dependency installation?
 ```bash
-circremote -C /dev/ttyUSB0 BME280
+circremote -c /dev/ttyUSB0 BME280
 ```
 
 ### How do I specify a custom circup path?
 ```bash
 # Command line option
-circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
-circremote -c ~/venv/bin/circup /dev/ttyUSB0 BME280
+circremote -u /usr/local/bin/circup /dev/ttyUSB0 BME280
+circremote -u ~/venv/bin/circup /dev/ttyUSB0 BME280
 
 # Config file option
 ```
@@ -96,14 +96,14 @@ Add to your `~/.circremote/config.json`:
 ```
 
 **Precedence order:**
-1. Command line option (`-c PATH`) - highest priority
+1. Command line option (`-u PATH`) - highest priority
 2. Config file setting (`"circup": "PATH"`)
 
 ### How do I use a custom config file?
 ```bash
 # Use a different config file
-circremote -f /path/to/custom.json /dev/ttyUSB0 BME280
-circremote -f ~/projects/my_config.json 192.168.1.100 BME280
+circremote -C /path/to/custom.json /dev/ttyUSB0 BME280
+circremote -C ~/projects/my_config.json 192.168.1.100 BME280
 
 # Useful for:
 # - Testing different configurations

@@ -489,8 +489,8 @@ class TestCLI:
             assert config.search_paths == []
 
     def test_parse_options_with_circup_path(self, cli_instance):
-        """Test parsing -c option for circup path."""
-        args = ['-c', '/usr/local/bin/circup', '/dev/ttyUSB0', 'BME280']
+        """Test parsing -u option for circup path."""
+        args = ['-u', '/usr/local/bin/circup', '/dev/ttyUSB0', 'BME280']
         options, remaining = cli_instance.parse_options(args)
         
         assert options.circup == '/usr/local/bin/circup'
@@ -505,8 +505,8 @@ class TestCLI:
         assert remaining == ['/dev/ttyUSB0', 'BME280']
 
     def test_parse_options_with_circup_and_other_options(self, cli_instance):
-        """Test parsing -c option with other options."""
-        args = ['-v', '-c', '/usr/local/bin/circup', '-C', '/dev/ttyUSB0', 'BME280']
+        """Test parsing -u option with other options."""
+        args = ['-v', '-u', '/usr/local/bin/circup', '-c', '/dev/ttyUSB0', 'BME280']
         options, remaining = cli_instance.parse_options(args)
         
         assert options.verbose is True
@@ -713,8 +713,8 @@ class TestCLI:
             assert f"circremote version {VERSION}" in output
 
     def test_parse_options_with_config_file(self, cli_instance):
-        """Test the -f/--config option."""
-        options, remaining = cli_instance.parse_options(['-f', '/path/to/config.json'])
+        """Test the -C/--config option."""
+        options, remaining = cli_instance.parse_options(['-C', '/path/to/config.json'])
         assert options.config == '/path/to/config.json'
         assert remaining == []
 
@@ -727,9 +727,9 @@ class TestCLI:
     def test_parse_options_with_config_and_other_options(self, cli_instance):
         """Test config option with other options."""
         options, remaining = cli_instance.parse_options([
-            '-f', '/path/to/config.json',
+            '-C', '/path/to/config.json',
             '-v',
-            '-c', '/usr/local/bin/circup',
+            '-u', '/usr/local/bin/circup',
             '/dev/ttyUSB0', 'BME280'
         ])
         assert options.config == '/path/to/config.json'

@@ -106,9 +106,9 @@ circremote -c /usr/local/bin/circup /dev/ttyUSB0 BME280
 - `-p, --password PASSWORD`: HTTP basic auth password for WebSocket connections
 - `-d, --double-exit`: Send additional Ctrl+D after Ctrl+B to exit raw REPL
 - `-y, --yes`: Skip confirmation prompts (run untested commands without asking)
-- `-C, --skip-circup`: Skip circup dependency installation
-- `-c, --circup PATH`: Path to circup executable
-- `-f, --config PATH`: Path to circremote.json config file
+- `-c, --skip-circup`: Skip circup dependency installation
+- `-u, --circup PATH`: Path to circup executable
+- `-C, --config PATH`: Path to circremote.json config file
 - `-l, --list`: List all available commands from all sources
 - `-h, --help`: Show help message
 - `-h COMMAND`: Show help for a specific command
