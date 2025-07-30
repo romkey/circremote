@@ -1,8 +1,0 @@
-{
-  "description": "tar is a simple tar file creator that dumps the entire contents of the CircuitPython drive to the output as a tar format archive",
-  "warn_offline": false,
-  "warn_unavailable": false,
-  "variables": [
-  ],
-  "tested": false
-}
