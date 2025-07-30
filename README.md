@@ -38,8 +38,15 @@ From here, see how to install circremote and then please check out the [FAQ](FAQ
 
 ### From PyPI
 
+(Not yet listed on PyPl so try "From Github" instead)
+
 ```bash
 pip install circremote
+```
+
+### From Github
+```
+pip install git+https://github.com/romkey/circremote
 ```
 
 ### From Source
