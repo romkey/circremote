@@ -3,43 +3,31 @@
 # SPDX-License-Identifier: MIT
 
 services:
-  circremote:
+  circremote-base: &base
     build:
       context: ..
       dockerfile: docker/Dockerfile
     container_name: circremote
     image: circremote:latest
     volumes:
-      - ~/.circremote:/home/circremote/.circremote:ro
       - .:/workspace:rw
-      - /dev/bus/usb:/dev/bus/usb:ro
-      - /dev/serial/by-id:/dev/serial/by-id:ro
+      - ~/.circremote:/home/circremote/.circremote:ro
       - ~/.cache/circup:/home/circremote/.cache/circup:rw
+      - /dev/bus/usb:/dev/bus/usb:ro
     working_dir: /workspace
+    network_mode: host
+    restart: no
+
+  circremote-shell:
+    <<: *base
     stdin_open: true
     tty: true
-    environment:
-      - PYTHONUNBUFFERED=1
-    network_mode: host
-    restart: unless-stopped
-    command: ["--help"]
+    entrypoint: ["/bin/bash"]
 
-  # Alternative service for running specific circremote commands
-  circremote-run:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    container_name: circremote-run
-    image: circremote:latest
-    volumes:
-      - ~/.circremote:/home/circremote/.circremote:ro
-      - .:/workspace:rw
-      - /dev/bus/usb:/dev/bus/usb:ro
-      - /dev/serial/by-id:/dev/serial/by-id:ro
-      - ~/.cache/circup:/home/circremote/.cache/circup:rw
-    working_dir: /workspace
-    network_mode: host
-    # This service is meant to be run with specific commands
-    # Example: docker-compose run circremote-run /dev/ttyUSB0 BME280
-    profiles:
-      - run 
+  circremote:
+    <<: *base
+
+  circremote-serial:
+    <<: *base
+    devices:
+      - "${CIRCREMOTE_SERIAL}:${CIRCREMOTE_SERIAL}"

@@ -15,27 +15,29 @@ docker build -f docker/Dockerfile -t circremote:latest .
 
 ```bash
 # Start the interactive circremote container
-docker-compose -f docker/docker-compose.yml up circremote
+docker-compose -f docker/docker-compose.yml up circremote-shell
 
-# Run a specific command (recommended: use --remove-orphans to avoid warnings)
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run /dev/ttyUSB0 BME280
+# Run a specific command without serial
+docker-compose -f docker/docker-compose.yml run circremote 192.168.14.1:8080 -p PASSWORD  BME280
+
+# Run a specific command with serial
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote /dev/ttyUSB0 BME280
 
 # Run with custom config file
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run -C /workspace/config.json /dev/ttyUSB0 BME280
+docker-compose -f docker/docker-compose.yml run circremote-serial -C /workspace/config.json /dev/ttyUSB0 BME280
 ```
 
-**Note:** The `--remove-orphans` flag prevents "Found orphan containers" warnings that occur when Docker Compose detects containers from previous configurations.
+**Note:** Use the `--remove-orphans` flag prevents "Found orphan containers" warnings that occur when Docker Compose detects containers from previous configurations.
 
 ## Services
 
-### circremote (Interactive)
+### circremote-shell (Interactive)
 - Runs an interactive shell with circremote available
 - Mounts your local configuration and workspace
 - Good for development and testing
 
-### circremote-run (Command Runner)
+### circremote, circremote-serialn (Command Runners)
 - Designed for running specific circremote commands
-- Uses the `run` profile to avoid starting by default
 - Perfect for CI/CD or scripted usage
 
 ## Volume Mounts
@@ -66,10 +68,9 @@ volumes:
 
 ## Device Access
 
-The container has access to common serial devices:
-- `/dev/ttyUSB0`
-- `/dev/ttyACM0`
-- `/dev/ttyACM1`
+You must tell Docker what serial device you need - it will be mapped to the same name internally.
+
+The device name is specified in the environment variable `CIRCREMOTE_SERIAL`. You may specify it on the command line as a prefix to the `docker` command or put it in the `.env` file in the `docker` directory.
 
 ## Dependencies
 
@@ -85,31 +86,28 @@ The Docker image includes:
 ### Basic Usage
 ```bash
 # Show help
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run --help
+docker-compose -f docker/docker-compose.yml run  circremote --help
 
 # List available commands
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run -l
+docker-compose -f docker/docker-compose.yml run circremote -l
 
-# Run a sensor command
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run /dev/ttyUSB0 BME280
+# Run a sensor command over the network
+docker-compose -f docker/docker-compose.yml run circremote 192.168.1.100:8080 -p PASSWORD BME280
 
-# Run with verbose output
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run -v /dev/ttyUSB0 BME280
+# Run with verbose output using a serial port
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote-serial -v /dev/ttyUSB0 BME280
 ```
 
 ### With Custom Configuration
 ```bash
 # Use a custom config file
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
-  -C /workspace/my_config.json /dev/ttyUSB0 BME280
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote-serial -C /workspace/my_config.json /dev/ttyUSB0 BME280
 
 # Skip circup installation
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
-  -c /dev/ttyUSB0 BME280
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote-serial -c /dev/ttyUSB0 BME280
 
 # Use custom circup path (circup is installed in the container)
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
-  -u /usr/local/bin/circup /dev/ttyUSB0 BME280
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote-serial -u /usr/local/bin/circup /dev/ttyUSB0 BME280
 
 # Test circup installation
 docker run --rm circremote:latest circup --version
@@ -118,12 +116,10 @@ docker run --rm circremote:latest circup --version
 ```bash
 # First, add CIRCUITPY volume to docker-compose.yml
 # Then run with library installation
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
-  /dev/ttyUSB0 BME280
+docker-compose -f docker/docker-compose.yml run circremote /dev/ttyUSB0 BME280
 
 # Check installed libraries on device
-docker-compose -f docker/docker-compose.yml run --remove-orphans circremote-run \
-  -u /usr/local/bin/circup /dev/ttyUSB0 --list
+docker-compose -f docker/docker-compose.yml run circremote -u /usr/local/bin/circup /dev/ttyUSB0 --list
 ```
 
 ## Troubleshooting
@@ -159,23 +155,16 @@ make test-cache-permissions
 ### WebSocket Connections
 ```bash
 # Connect to device over WiFi
-docker-compose -f docker/docker-compose.yml run circremote-run \
-  192.168.1.100:8080 BME280
-
-# With password
-docker-compose -f docker/docker-compose.yml run circremote-run \
-  -p mypassword 192.168.1.100:8080 BME280
+docker-compose -f docker/docker-compose.yml run circremote 192.168.1.100:8080 -p PASSWORD BME280
 ```
 
 ### Local Commands
 ```bash
 # Run a local Python file
-docker-compose -f docker/docker-compose.yml run circremote-run \
-  /dev/ttyUSB0 /workspace/my_sensor.py
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote-serial /dev/ttyUSB0 /workspace/my_sensor.py
 
 # Run a local command directory
-docker-compose -f docker/docker-compose.yml run circremote-run \
-  /dev/ttyUSB0 /workspace/custom_sensors/BME280
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run circremote-serial /dev/ttyUSB0 /workspace/custom_sensors/BME280
 ```
 
 ## Development
@@ -183,7 +172,7 @@ docker-compose -f docker/docker-compose.yml run circremote-run \
 ### Interactive Development
 ```bash
 # Start interactive shell
-docker-compose -f docker/docker-compose.yml up circremote
+docker-compose -f docker/docker-compose.yml up circremote-shell
 
 # In another terminal, execute commands
 docker exec -it circremote circremote /dev/ttyUSB0 BME280
@@ -208,7 +197,7 @@ If you encounter permission issues with device access:
 sudo usermod -a -G dialout $USER
 
 # Or run with privileged mode (not recommended for production)
-docker-compose -f docker/docker-compose.yml run --privileged circremote-run /dev/ttyUSB0 BME280
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run --privileged circremote-serial/dev/ttyUSB0 BME280
 ```
 
 ### Device Not Found
@@ -229,9 +218,7 @@ If your config file isn't being read:
 ls -la ~/.circremote/
 
 # Mount the config file explicitly
-docker-compose -f docker/docker-compose.yml run \
-  -v $(pwd)/my_config.json:/home/circremote/.circremote/config.json:ro \
-  circremote-run /dev/ttyUSB0 BME280
+CIRCREMOTE_SERIAL=/dev/ttyUSB0 docker-compose -f docker/docker-compose.yml run -v $(pwd)/my_config.json:/home/circremote/.circremote/config.json:ro circremote-serial /dev/ttyUSB0 BME280
 ```
 
 ## Security Notes
