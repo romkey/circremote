@@ -11,6 +11,7 @@ import subprocess
 import signal
 import urllib.parse
 import requests
+import tempfile
 from pathlib import Path
 from argparse import ArgumentParser, Namespace
 from typing import Dict, Any, Optional
@@ -61,6 +62,10 @@ class CLI:
             print("  Example: circremote /dev/ttyUSB0 ./my_sensor.py")
             print("  Example: circremote /dev/ttyUSB0 /path/to/sensor/directory")
             print("  Example: circremote /dev/ttyUSB0 ../custom_sensors/BME280")
+            print("Remote commands:")
+            print("  Example: circremote /dev/ttyUSB0 https://github.com/user/repo/sensor/")
+            print("  Example: circremote /dev/ttyUSB0 https://example.com/sensor.py")
+            print("  Example: circremote /dev/ttyUSB0 https://raw.githubusercontent.com/user/repo/main/sensor.py")
             print("Use -h for more options")
             print("Use -h COMMAND for help on a specific command")
             sys.exit(1)
@@ -71,25 +76,29 @@ class CLI:
         # Check if command_name looks like a URL and fetch content if so
         file_content = None
         info_data = None
+        requirements_content = None
+        is_remote_directory = False
         
+        # Check if command_name looks like a URL and fetch content if so
         if self.looks_like_url(command_name):
             self.debug(f"Command '{command_name}' looks like a URL, fetching content", options)
             try:
-                file_content = self.fetch_url_content(command_name, options)
+                file_content, info_data, requirements_content, is_remote_directory = self.fetch_remote_command(command_name, options)
                 if file_content:
                     self.debug(f"Fetched {len(file_content.encode('utf-8'))} bytes from URL: {command_name}", options)
                     # For URL commands, we'll skip the local file processing
                     command_dir = None
                     code_file = None
+                    is_pathname = False  # URL commands are not pathnames
                 else:
                     print(f"Failed to fetch content from URL: {command_name}")
                     sys.exit(1)
             except Exception as e:
                 print(f"Error fetching URL content: {e}")
                 sys.exit(1)
-        
-        # Resolve command path and get file_content, command_dir, code_file, info_data
-        file_content, command_dir, code_file, info_data, is_pathname = self.resolve_command_path(command_name, options)
+        else:
+            # Only resolve command path if it's not a URL
+            file_content, command_dir, code_file, info_data, is_pathname = self.resolve_command_path(command_name, options)
         
         # If it's not a pathname, check for command aliases and built-in commands
         if not is_pathname:
@@ -102,7 +111,7 @@ class CLI:
                 if self.looks_like_url(command_name):
                     self.debug(f"Aliased command '{command_name}' looks like a URL, fetching content", options)
                     try:
-                        file_content = self.fetch_url_content(command_name, options)
+                        file_content, info_data, requirements_content, is_remote_directory = self.fetch_remote_command(command_name, options)
                         if file_content:
                             self.debug(f"Fetched {len(file_content.encode('utf-8'))} bytes from aliased URL: {command_name}", options)
                             # For URL commands, we'll skip the local file processing
@@ -191,7 +200,7 @@ class CLI:
         # Store remaining arguments for later parsing after we have info.json
         remaining_args = remaining[2:]
 
-        # Check for requirements.txt and install dependencies with circup (only for local commands)
+        # Check for requirements.txt and install dependencies with circup (for local commands)
         if not file_content and command_dir:  # Only for local commands
             requirements_file = command_dir / 'requirements.txt'
             self.debug("Checking for requirements.txt in command directory", options)
@@ -216,6 +225,26 @@ class CLI:
                     self.handle_circup_installation(requirements_file, serial_port, password, options)
                 else:
                     self.debug("requirements.txt has no actual content (only comments/blanks), skipping circup", options)
+
+        # Check for remote requirements.txt and install dependencies with circup (for remote commands)
+        if requirements_content and not options.skip_circup:
+            self.debug("Remote requirements.txt found, checking content", options)
+            
+            # Filter out comments and blank lines to check for actual requirements
+            actual_requirements = [
+                line.strip() for line in requirements_content.split('\n')
+                if line.strip() and not line.strip().startswith('#')
+            ]
+            
+            self.debug(f"Remote requirements content: {repr(requirements_content)}", options)
+            self.debug(f"Actual requirements after filtering: {actual_requirements}", options)
+            self.debug(f"Number of actual requirements: {len(actual_requirements)}", options)
+            
+            if actual_requirements:
+                self.debug("Remote requirements.txt has actual content, checking for circup", options)
+                self.handle_remote_circup_installation(requirements_content, serial_port, password, options)
+            else:
+                self.debug("Remote requirements.txt has no actual content, skipping circup", options)
 
         # Read and parse info.json file (only for local commands)
         if not file_content and command_dir:  # Only for local commands
@@ -1206,6 +1235,93 @@ class CLI:
             print("Continuing anyway...")
         print()
 
+    def handle_remote_circup_installation(self, requirements_content, serial_port, password, options):
+        """Handle circup dependency installation for remote commands."""
+        # Get circup path from config with precedence handling
+        circup_path = self.config.get_circup_path()
+        
+        # Check if the specified circup path exists and is executable
+        if not os.path.exists(circup_path) or not os.access(circup_path, os.X_OK):
+            print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
+            print("   Please install circup to automatically install dependencies:")
+            print("   pip install circup")
+            print("   Or specify the correct path with -c PATH or in config file")
+            print("   Continuing without installing dependencies...")
+            print()
+            return
+        
+        self.debug(f"Found circup at: {circup_path}", options)
+        
+        # Create a temporary requirements file
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as temp_file:
+            temp_file.write(requirements_content)
+            temp_requirements_path = temp_file.name
+        
+        try:
+            # Build circup command
+            circup_args = []
+            # Add WebSocket-specific arguments if using WebSocket
+            if re.match(r'^(\d{1,3}\.){3}\d{1,3}(:\d+)?$', serial_port):
+                self.debug("Detected WebSocket connection, adding host/port/password args", options)
+                if ':' in serial_port:
+                    host, port = serial_port.split(':', 1)
+                else:
+                    host = serial_port
+                    port = "80"  # Default port if not specified
+                
+                circup_args += ["--host", host, "--port", port]
+                if password:
+                    circup_args += ["--password", password]
+            
+            circup_args += ["install", "-r", temp_requirements_path]
+            full_command = [circup_path] + circup_args
+            command_string = " ".join(full_command)
+            
+            print("\n" + "="*60)
+            print("📦 REMOTE DEPENDENCIES FOUND")
+            print("="*60)
+            print()
+            print("This remote module requires CircuitPython libraries to be installed.")
+            print("Requirements content:")
+            print("-" * 40)
+            print(requirements_content.strip())
+            print("-" * 40)
+            print()
+            print("The following command will be executed:")
+            print(f"  {command_string}")
+            print()
+            print("Options:")
+            print("  r - run (install dependencies and continue)")
+            print("  s - skip (continue without installing dependencies)")
+            print("  x - exit (cancel operation)")
+            print()
+            
+            if options.yes:
+                print("Installing dependencies automatically due to -y flag...")
+                self.run_circup_command(full_command, options)
+            else:
+                response = input("What would you like to do? (r/s/x): ").strip().lower()
+                
+                if response in ['r', 'run']:
+                    print("Installing dependencies...")
+                    self.run_circup_command(full_command, options)
+                elif response in ['s', 'skip']:
+                    print("Skipping dependency installation...")
+                    print()
+                elif response in ['x', 'exit']:
+                    print("Operation cancelled by user.")
+                    sys.exit(0)
+                else:
+                    print("Invalid option. Cancelling operation.")
+                    sys.exit(0)
+        finally:
+            # Clean up temporary file
+            try:
+                os.unlink(temp_requirements_path)
+            except Exception as e:
+                self.debug(f"Warning: Could not delete temporary requirements file: {e}", options)
+
     def monitor_output(self, connection, options):
         """Monitor output from the connection with configurable timeout."""
         import signal
@@ -1388,6 +1504,113 @@ class CLI:
         
         # If we can't parse it, return the original URL
         return url
+
+    def fetch_remote_command(self, url, options):
+        """
+        Fetch a remote command directory or file with associated metadata.
+        
+        Returns:
+            tuple: (file_content, info_data, requirements_content, is_directory)
+        """
+        self.debug(f"Fetching remote command from URL: {url}", options)
+        
+        # Check if URL ends with .py (file) or treat as directory
+        is_python_file = url.endswith('.py')
+        
+        if is_python_file:
+            # Fetch the Python file and try to get associated metadata
+            self.debug("Detected Python file URL, fetching file and metadata", options)
+            return self._fetch_remote_python_file(url, options)
+        else:
+            # Treat as a directory URL (fetch code.py, info.json, requirements.txt)
+            self.debug("Detected directory URL, fetching command files", options)
+            return self._fetch_remote_directory(url, options)
+
+    def _fetch_remote_directory(self, url, options):
+        """Fetch code.py, info.json, and requirements.txt from a remote directory."""
+        base_url = url.rstrip('/')
+        
+        # Try to fetch code.py
+        code_url = f"{base_url}/code.py"
+        # Convert individual file URLs for GitHub
+        if 'github.com' in code_url:
+            code_url = self.convert_github_url_to_raw(code_url)
+        
+        file_content = None
+        try:
+            file_content = self.fetch_url_content(code_url, options)
+            self.debug(f"Successfully fetched code.py from {code_url}", options)
+        except Exception as e:
+            print(f"Error: Could not fetch code.py from {code_url}: {e}")
+            sys.exit(1)
+        
+        # Try to fetch info.json
+        info_data = None
+        info_url = f"{base_url}/info.json"
+        # Convert individual file URLs for GitHub
+        if 'github.com' in info_url:
+            info_url = self.convert_github_url_to_raw(info_url)
+        
+        try:
+            info_content = self.fetch_url_content(info_url, options)
+            info_data = json.loads(info_content)
+            self.debug(f"Successfully fetched and parsed info.json from {info_url}", options)
+        except Exception as e:
+            self.debug(f"Could not fetch info.json from {info_url}: {e}", options)
+            # info.json is optional, continue without it
+        
+        # Try to fetch requirements.txt
+        requirements_content = None
+        requirements_url = f"{base_url}/requirements.txt"
+        # Convert individual file URLs for GitHub
+        if 'github.com' in requirements_url:
+            requirements_url = self.convert_github_url_to_raw(requirements_url)
+        
+        try:
+            requirements_content = self.fetch_url_content(requirements_url, options)
+            self.debug(f"Successfully fetched requirements.txt from {requirements_url}", options)
+        except Exception as e:
+            self.debug(f"Could not fetch requirements.txt from {requirements_url}: {e}", options)
+            # requirements.txt is optional, continue without it
+        
+        return file_content, info_data, requirements_content, True
+
+    def _fetch_remote_python_file(self, url, options):
+        """Fetch a Python file and try to get associated metadata files."""
+        # Fetch the main Python file
+        try:
+            file_content = self.fetch_url_content(url, options)
+            self.debug(f"Successfully fetched Python file from {url}", options)
+        except Exception as e:
+            print(f"Error fetching Python file from {url}: {e}")
+            sys.exit(1)
+        
+        # Try to fetch associated info.json and requirements.txt
+        # Use standard filenames in the same directory
+        base_url = url.rsplit('/', 1)[0] + '/'
+        
+        # Try to fetch info.json
+        info_data = None
+        info_url = f"{base_url}info.json"
+        try:
+            info_content = self.fetch_url_content(info_url, options)
+            info_data = json.loads(info_content)
+            self.debug(f"Successfully fetched and parsed info.json from {info_url}", options)
+        except Exception as e:
+            self.debug(f"Could not fetch info.json from {info_url}: {e}", options)
+            # info.json is optional, continue without it
+        
+        # Try to fetch requirements.txt
+        requirements_content = None
+        requirements_url = f"{base_url}requirements.txt"
+        try:
+            requirements_content = self.fetch_url_content(requirements_url, options)
+            self.debug(f"Successfully fetched requirements.txt from {requirements_url}", options)
+        except Exception as e:
+            self.debug(f"Could not fetch requirements.txt from {requirements_url}: {e}", options)
+            # requirements.txt is optional, continue without it
+        
+        return file_content, info_data, requirements_content, False
 
     def monitor_websocket_output(self, connection, options):
         """Monitor output from WebSocket connection."""

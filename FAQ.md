@@ -69,6 +69,46 @@ circremote 192.168.1.100:8080 BME280
 circremote -p mypassword 192.168.1.100 BME280
 ```
 
+### How do I use remote commands from URLs?
+
+circremote supports running commands directly from URLs, including GitHub repositories and other web servers.
+
+**Remote Command Directory (any URL not ending in .py):**
+```bash
+# Fetch code.py, info.json, and requirements.txt from a directory
+circremote /dev/ttyUSB0 https://github.com/user/repo/sensor/
+circremote /dev/ttyUSB0 https://example.com/sensors/temperature/
+circremote /dev/ttyUSB0 https://github.com/user/repo/tree/main/commands/sensor
+circremote /dev/ttyUSB0 https://github.com/romkey/circremote/tree/main/circremote/commands/BME680
+```
+
+**Remote Python File (ends with .py):**
+```bash
+# Fetch a Python file and associated metadata
+circremote /dev/ttyUSB0 https://example.com/sensor.py
+circremote /dev/ttyUSB0 https://raw.githubusercontent.com/user/repo/main/sensor.py
+```
+
+**Single File (any other URL):**
+```bash
+# Fetch a single file (existing behavior)
+circremote /dev/ttyUSB0 https://example.com/script.py
+```
+
+**Features:**
+- **Automatic metadata**: For directory URLs (any URL not ending in .py), circremote fetches `code.py`, `info.json`, and `requirements.txt`
+- **Associated files**: For Python files, circremote tries to fetch `info.json` and `requirements.txt` in the same directory
+- **Dependency installation**: Remote `requirements.txt` files trigger automatic circup installation
+- **GitHub support**: GitHub URLs are automatically converted to raw content URLs
+- **Variable support**: Remote commands support the same variable interpolation as local commands
+
+**Example with dependencies:**
+```bash
+# This will fetch the command and install any required libraries
+circremote /dev/ttyUSB0 https://github.com/user/repo/sensor/
+# If requirements.txt exists, circup will be run automatically
+```
+
 ### How do I enable verbose output?
 ```bash
 circremote -v /dev/ttyUSB0 BME280
