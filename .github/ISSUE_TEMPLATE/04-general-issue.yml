@@ -15,8 +15,8 @@ body:
     id: os
     attributes:
       label: Operating System
-      description: What operating system are you using?
-      placeholder: "e.g., macOS 14.0, Ubuntu 22.04, Windows 11"
+      description: What operating system are you using? Windows is not currently supported, do not file issues on it.
+      placeholder: "e.g., macOS 14.0, Ubuntu 22.04"
     validations:
       required: true
   

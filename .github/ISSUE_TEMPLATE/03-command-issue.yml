@@ -36,9 +36,7 @@ body:
       description: How are you connecting to the CircuitPython device?
       options:
         - USB Serial
-        - WebSocket
-        - WiFi
-        - other
+        - WiFi/WebSocket
     validations:
       required: true
   
@@ -75,7 +73,7 @@ body:
     id: full-command-line
     attributes:
       label: Full Command Line
-      description: What was the complete command line you used?
+      description: What was the complete command line you used? Redact any passwords; private IP addresses are safe to include.
       placeholder: "e.g., circremote /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2"
     validations:
       required: true
