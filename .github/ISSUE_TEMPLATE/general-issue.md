@@ -1,7 +1,6 @@
 ---
 name: General Issue
 about: Report other problems or issues with circremote
-title: "[GENERAL] "
 labels: ["general", "bug"]
 assignees: ["romkey"]
 ---

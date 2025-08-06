@@ -1,7 +1,6 @@
 ---
 name: Runtime Issue
 about: Report problems running circremote commands
-title: "[RUNTIME] "
 labels: ["runtime", "bug"]
 assignees: ["romkey"]
 ---

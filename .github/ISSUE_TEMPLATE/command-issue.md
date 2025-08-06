@@ -1,7 +1,6 @@
 ---
 name: Command Issue
 about: Report problems with specific circremote commands or sensors
-title: "[COMMAND] "
 labels: ["command", "bug"]
 assignees: ["romkey"]
 ---

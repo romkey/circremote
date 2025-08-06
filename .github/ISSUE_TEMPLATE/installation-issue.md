@@ -1,7 +1,6 @@
 ---
 name: Installation Issue
 about: Report problems installing circremote
-title: "[INSTALLATION] "
 labels: ["installation", "bug"]
 assignees: ["romkey"]
 ---

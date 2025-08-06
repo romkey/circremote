@@ -1,7 +1,6 @@
 ---
 name: Feature Request
 about: Suggest a new feature or enhancement for circremote
-title: "[FEATURE] "
 labels: ["enhancement", "feature-request"]
 assignees: ["romkey"]
 ---
