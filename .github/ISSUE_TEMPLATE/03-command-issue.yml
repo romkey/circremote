@@ -2,7 +2,7 @@ name: Command Issue
 description: Report problems with specific circremote commands or sensors
 title: "[COMMAND] "
 labels: ["command", "bug"]
-assignees: ["romkey"]
+assignees: ["$repo-owner"]
 body:
   - type: markdown
     attributes:

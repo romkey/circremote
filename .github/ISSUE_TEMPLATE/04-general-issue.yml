@@ -2,7 +2,7 @@ name: General Issue
 description: Report other problems or issues with circremote
 title: "[GENERAL] "
 labels: ["general", "bug"]
-assignees: ["romkey"]
+assignees: ["$repo-owner"]
 body:
   - type: markdown
     attributes:

@@ -2,7 +2,7 @@ name: Installation Issue
 description: Report problems installing circremote
 title: "[INSTALLATION] "
 labels: ["installation", "bug"]
-assignees: ["romkey"]
+assignees: ["$repo-owner"]
 body:
   - type: markdown
     attributes:

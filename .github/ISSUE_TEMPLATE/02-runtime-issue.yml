@@ -2,7 +2,7 @@ name: Runtime Issue
 description: Report problems running circremote commands
 title: "[RUNTIME] "
 labels: ["runtime", "bug"]
-assignees: ["romkey"]
+assignees: ["$repo-owner"]
 body:
   - type: markdown
     attributes:
