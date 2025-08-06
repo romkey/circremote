@@ -1,0 +1,253 @@
+name: General Issue
+description: Report other problems or issues with circremote
+title: "[GENERAL] "
+labels: ["general", "bug"]
+assignees: ["romkey"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## General Issue Report
+        
+        Please provide the following information to help us diagnose your problem.
+  
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      placeholder: "e.g., macOS 14.0, Ubuntu 22.04, Windows 11"
+    validations:
+      required: true
+  
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: What version of Python are you using?
+      placeholder: "e.g., Python 3.11.5"
+    validations:
+      required: true
+  
+  - type: input
+    id: circremote-version
+    attributes:
+      label: circremote Version
+      description: What version of circremote are you using?
+      placeholder: "e.g., 1.0.0, git commit hash if from source"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation Method
+      description: How did you install circremote?
+      options:
+        - pip install
+        - pipx install
+        - git clone
+        - Docker
+        - other
+    validations:
+      required: true
+  
+  - type: checkboxes
+    id: issue-category
+    attributes:
+      label: Issue Category
+      description: What type of issue is this?
+      options:
+        - label: Documentation issue
+        - label: Configuration problem
+        - label: Performance issue
+        - label: Security concern
+        - label: Usability problem
+        - label: Compatibility issue
+        - label: Other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: brief-description
+    attributes:
+      label: Brief Description
+      description: Provide a clear and concise description of the issue
+      placeholder: "[Provide a clear and concise description of the issue]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Error Message or Unexpected Behavior
+      description: Please paste any error messages, unexpected output, or problematic behavior
+      placeholder: |
+        [Paste any error messages, unexpected output, or problematic behavior]
+  
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide step-by-step instructions to reproduce the issue
+      placeholder: |
+        1. [Step 1]
+        2. [Step 2]
+        3. [Step 3]
+        4. [See issue]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "[Describe what you expected to happen]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "[Describe what actually happened]"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: when-started
+    attributes:
+      label: When did this start happening?
+      description: When did this issue begin?
+      options:
+        - After updating circremote
+        - After system update
+        - Always been this way
+        - Recently
+        - unknown
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: Frequency
+      description: How often does this issue occur?
+      options:
+        - Always
+        - Sometimes
+        - Rarely
+        - Only under specific conditions
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      description: How does this issue affect you?
+      options:
+        - Blocks all usage
+        - Minor inconvenience
+        - Cosmetic issue
+        - Performance impact
+        - other
+    validations:
+      required: true
+  
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      description: What hardware are you using?
+      placeholder: "e.g., MacBook Pro M2, Raspberry Pi 4, Windows PC"
+  
+  - type: dropdown
+    id: network-environment
+    attributes:
+      label: Network Environment
+      description: What type of network are you using?
+      options:
+        - Home network
+        - Corporate network
+        - VPN
+        - No network
+        - other
+  
+  - type: textarea
+    id: other-software
+    attributes:
+      label: Other Software
+      description: Any related tools, conflicting software, etc.
+      placeholder: "[e.g., Related tools, conflicting software, etc.]"
+  
+  - type: textarea
+    id: command-output
+    attributes:
+      label: Relevant Command Output
+      description: Please paste any relevant command output, logs, or error messages
+      placeholder: |
+        [Paste any relevant command output, logs, or error messages]
+  
+  - type: textarea
+    id: configuration-files
+    attributes:
+      label: Configuration Files (if relevant)
+      description: Please paste relevant configuration file contents
+      placeholder: |
+        [Paste relevant configuration file contents]
+  
+  - type: textarea
+    id: system-information
+    attributes:
+      label: System Information
+      description: Please paste relevant system information
+      placeholder: |
+        [Paste relevant system information like `uname -a`, `python --version`, etc.]
+  
+  - type: checkboxes
+    id: troubleshooting-attempted
+    attributes:
+      label: Troubleshooting Attempted
+      description: What troubleshooting steps have you already tried?
+      options:
+        - label: Checked documentation
+        - label: Searched existing issues
+        - label: Tried different approaches
+        - label: Restarted system/application
+        - label: Checked for updates
+        - label: Verified configuration
+  
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: If you found a workaround, describe it here
+      placeholder: "[If you found a workaround, describe it here]"
+  
+  - type: textarea
+    id: related-issues
+    attributes:
+      label: Related Issues
+      description: Link to any related GitHub issues or discussions
+      placeholder: "[Link to any related GitHub issues or discussions]"
+  
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this issue to you?
+      options:
+        - Critical - Blocks my workflow
+        - High - Significant impact
+        - Medium - Moderate impact
+        - Low - Minor impact
+  
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any other information that might be helpful
+      placeholder: "[Any other information that might be helpful]" 

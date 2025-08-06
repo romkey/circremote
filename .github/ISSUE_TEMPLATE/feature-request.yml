@@ -1,0 +1,140 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for circremote
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+assignees: ["romkey"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request
+        
+        Please provide the following information to help us understand your feature request.
+  
+  - type: textarea
+    id: feature-summary
+    attributes:
+      label: Feature Summary
+      description: Provide a clear and concise description of the feature you'd like to see
+      placeholder: "[Provide a clear and concise description of the feature]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: "[Describe the current limitation or pain point that this feature would address]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: "[Describe your vision for how this feature should function]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe a specific scenario where this feature would be useful
+      placeholder: "[Provide a concrete example of how you would use this feature]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: alternative-solutions
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative approaches?
+      placeholder: "[Describe any other ways you've thought about solving this problem]"
+  
+  - type: checkboxes
+    id: feature-category
+    attributes:
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - label: New command/sensor support
+        - label: CLI enhancement
+        - label: Configuration improvement
+        - label: Connection method enhancement
+        - label: Documentation improvement
+        - label: Performance optimization
+        - label: Security enhancement
+        - label: Usability improvement
+        - label: Other
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Critical - Blocks my workflow
+        - High - Would significantly improve my experience
+        - Medium - Nice to have
+        - Low - Minor improvement
+    validations:
+      required: true
+  
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: Implementation Ideas
+      description: Do you have any thoughts on how this could be implemented?
+      placeholder: "[Optional: Share any technical ideas or implementation approaches]"
+  
+  - type: textarea
+    id: mockups-examples
+    attributes:
+      label: Mockups or Examples
+      description: If applicable, provide mockups, diagrams, or examples
+      placeholder: "[Include any visual aids, code examples, or similar features from other tools]"
+  
+  - type: textarea
+    id: related-features
+    attributes:
+      label: Related Features
+      description: Are there any existing features this would enhance or replace?
+      placeholder: "[Link to any related existing functionality]"
+  
+  - type: textarea
+    id: your-use-case
+    attributes:
+      label: Your Use Case
+      description: How do you currently use circremote?
+      placeholder: "[How do you currently use circremote?]"
+  
+  - type: textarea
+    id: similar-tools
+    attributes:
+      label: Similar Tools
+      description: Are there other tools that have this feature?
+      placeholder: "[Are there other tools that have this feature?]"
+  
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      description: How many users would benefit from this feature?
+      options:
+        - Just me
+        - A few users
+        - Many users
+        - All users
+        - unknown
+  
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any other information that might be helpful for implementing this feature
+      placeholder: "[Any other information that might be helpful for implementing this feature]" 

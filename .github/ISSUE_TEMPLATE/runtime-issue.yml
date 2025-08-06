@@ -1,0 +1,280 @@
+name: Runtime Issue
+description: Report problems running circremote commands
+title: "[RUNTIME] "
+labels: ["runtime", "bug"]
+assignees: ["romkey"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Runtime Issue Report
+        
+        Please provide the following information to help us diagnose your runtime problem.
+  
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      placeholder: "e.g., macOS 14.0, Ubuntu 22.04, Windows 11"
+    validations:
+      required: true
+  
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: What version of Python are you using?
+      placeholder: "e.g., Python 3.11.5"
+    validations:
+      required: true
+  
+  - type: input
+    id: circremote-version
+    attributes:
+      label: circremote Version
+      description: What version of circremote are you using?
+      placeholder: "e.g., 1.0.0, git commit hash if from source"
+    validations:
+      required: true
+  
+  - type: input
+    id: board-model
+    attributes:
+      label: CircuitPython Board Model
+      description: What CircuitPython board are you using?
+      placeholder: "e.g., Adafruit MatrixPortal S3, Raspberry Pi Pico, ESP32-S3-DevKitC-1"
+    validations:
+      required: true
+  
+  - type: input
+    id: circuitpython-version
+    attributes:
+      label: CircuitPython Version
+      description: What version of CircuitPython is on your board?
+      placeholder: "e.g., 9.2.8, 8.2.10"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: connection-method
+    attributes:
+      label: Connection Method
+      description: How are you connecting to the CircuitPython device?
+      options:
+        - USB Serial
+        - WebSocket
+        - WiFi
+        - other
+    validations:
+      required: true
+  
+  - type: input
+    id: device-address
+    attributes:
+      label: Device Address/Port
+      description: What is the device address or port?
+      placeholder: "e.g., /dev/ttyUSB0, 10.0.1.23:8080, COM3"
+    validations:
+      required: true
+  
+  - type: input
+    id: command-being-run
+    attributes:
+      label: Command Being Run
+      description: What command were you trying to run?
+      placeholder: "e.g., circremote /dev/ttyUSB0 BME280"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: full-command-line
+    attributes:
+      label: Full Command Line
+      description: What was the complete command line you used?
+      placeholder: "e.g., circremote -v /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: error-occurrence
+    attributes:
+      label: Error Occurrence
+      description: When did the error occur?
+      options:
+        - During connection
+        - During code upload
+        - During execution
+        - During output monitoring
+        - other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Full Error Message
+      description: Please paste the complete error message or traceback
+      placeholder: |
+        [Paste the complete error message here]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide step-by-step instructions to reproduce the issue
+      placeholder: |
+        1. [Step 1]
+        2. [Step 2]
+        3. [Step 3]
+        4. [See error]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen when running the command?
+      placeholder: "[Describe what you expected to happen when running the command]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "[Describe what actually happened]"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: device-boot-status
+    attributes:
+      label: Device Boot Status
+      description: What is the current boot status of your device?
+      options:
+        - Normal boot
+        - Safe mode
+        - Recovery mode
+        - unknown
+  
+  - type: input
+    id: storage-space
+    attributes:
+      label: Storage Space
+      description: How much storage space is available on the device?
+      placeholder: "e.g., 1.2MB free of 2MB total"
+  
+  - type: textarea
+    id: connected-sensors
+    attributes:
+      label: Connected Sensors/Modules
+      description: What sensors or modules are connected to your device?
+      placeholder: "[List any connected hardware]"
+  
+  - type: dropdown
+    id: connection-type
+    attributes:
+      label: Connection Type
+      description: What type of connection are you using?
+      options:
+        - Serial/USB
+        - WebSocket/WiFi
+        - other
+  
+  - type: input
+    id: connection-speed
+    attributes:
+      label: Connection Speed (if serial)
+      description: What is the serial connection speed?
+      placeholder: "e.g., 115200 baud"
+  
+  - type: dropdown
+    id: connection-stability
+    attributes:
+      label: Connection Stability
+      description: How stable is your connection?
+      options:
+        - Stable
+        - Intermittent
+        - Unstable
+  
+  - type: textarea
+    id: circremote-verbose-output
+    attributes:
+      label: circremote Verbose Output
+      description: Please paste the complete circremote -v output
+      placeholder: |
+        [Paste the complete circremote -v output here]
+  
+  - type: textarea
+    id: device-serial-output
+    attributes:
+      label: Device Serial Output (if available)
+      description: Please paste any output from the device itself
+      placeholder: |
+        [Paste any output from the device itself]
+  
+  - type: textarea
+    id: system-logs
+    attributes:
+      label: System Logs (if relevant)
+      description: Please paste relevant system logs
+      placeholder: |
+        [Paste relevant system logs like dmesg, lsusb, etc.]
+  
+  - type: checkboxes
+    id: troubleshooting-attempted
+    attributes:
+      label: Troubleshooting Attempted
+      description: What troubleshooting steps have you already tried?
+      options:
+        - label: Verified device is connected and visible
+        - label: Checked CircuitPython version compatibility
+        - label: Tried different connection methods
+        - label: Restarted the device
+        - label: Checked for conflicting processes
+        - label: Verified network connectivity (if using WebSocket)
+        - label: Checked USB cable/connection (if using USB)
+  
+  - type: textarea
+    id: hardware-setup
+    attributes:
+      label: Hardware Setup
+      description: Description of connected sensors, wiring, etc.
+      placeholder: "[Description of connected sensors, wiring, etc.]"
+  
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: What environment are you using this in?
+      options:
+        - Development
+        - Production
+        - Testing
+  
+  - type: textarea
+    id: previous-working-state
+    attributes:
+      label: Previous Working State
+      description: When did this last work?
+      placeholder: "[When did this last work?]"
+  
+  - type: textarea
+    id: recent-changes
+    attributes:
+      label: Recent Changes
+      description: Any recent changes to system, hardware, or software
+      placeholder: "[Any recent changes to system, hardware, or software]"
+  
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any other information that might be helpful
+      placeholder: "[Any other information that might be helpful]" 

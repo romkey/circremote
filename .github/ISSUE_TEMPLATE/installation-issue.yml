@@ -1,0 +1,175 @@
+name: Installation Issue
+description: Report problems installing circremote
+title: "[INSTALLATION] "
+labels: ["installation", "bug"]
+assignees: ["romkey"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Installation Issue Report
+        
+        Please provide the following information to help us diagnose your installation problem.
+  
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      placeholder: "e.g., macOS 14.0, Ubuntu 22.04, Windows 11"
+    validations:
+      required: true
+  
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: What version of Python are you using?
+      placeholder: "e.g., Python 3.11.5"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: package-manager
+    attributes:
+      label: Package Manager
+      description: What package manager are you using?
+      options:
+        - pip
+        - pipx
+        - conda
+        - system package manager
+        - other
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation Method
+      description: How did you try to install circremote?
+      options:
+        - pip install
+        - pipx install
+        - git clone
+        - Docker
+        - other
+    validations:
+      required: true
+  
+  - type: input
+    id: circremote-version
+    attributes:
+      label: circremote Version
+      description: What version of circremote are you trying to install?
+      placeholder: "e.g., 1.0.0, git commit hash if from source"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Full Error Message
+      description: Please paste the complete error message or traceback
+      placeholder: |
+        [Paste the complete error message here]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide step-by-step instructions to reproduce the issue
+      placeholder: |
+        1. [Step 1]
+        2. [Step 2]
+        3. [Step 3]
+        4. [See error]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen during installation?
+      placeholder: "[Describe what you expected to happen during installation]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "[Describe what actually happened]"
+    validations:
+      required: true
+  
+  - type: input
+    id: docker-version
+    attributes:
+      label: Docker Version (if using Docker)
+      description: What version of Docker are you using?
+      placeholder: "e.g., Docker 24.0.5"
+  
+  - type: dropdown
+    id: virtual-environment
+    attributes:
+      label: Virtual Environment
+      description: Are you using a virtual environment?
+      options:
+        - No
+        - Yes - venv
+        - Yes - virtualenv
+        - Yes - conda
+        - Yes - other
+  
+  - type: input
+    id: system-architecture
+    attributes:
+      label: System Architecture
+      description: What is your system architecture?
+      placeholder: "e.g., x86_64, ARM64, etc."
+  
+  - type: textarea
+    id: troubleshooting-attempted
+    attributes:
+      label: Troubleshooting Attempted
+      description: What troubleshooting steps have you already tried?
+      placeholder: |
+        - [ ] Checked Python version compatibility
+        - [ ] Verified pip is up to date
+        - [ ] Tried installation in virtual environment
+        - [ ] Checked system permissions
+        - [ ] Verified network connectivity
+        - [ ] Checked for conflicting packages
+  
+  - type: textarea
+    id: logs-output
+    attributes:
+      label: Logs and Output
+      description: Please paste relevant command output, logs, and system information
+      placeholder: |
+        **pip install output:**
+        ```
+        [Paste pip install output here]
+        ```
+        
+        **Python version check:**
+        ```
+        [Paste `python --version` and `pip --version` output]
+        ```
+        
+        **System information:**
+        ```
+        [Paste relevant system information like `uname -a`, `lsb_release -a`, etc.]
+        ```
+  
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any other information that might be helpful
+      placeholder: "[Any other information that might be helpful]" 

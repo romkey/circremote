@@ -1,0 +1,356 @@
+name: Command Issue
+description: Report problems with specific circremote commands or sensors
+title: "[COMMAND] "
+labels: ["command", "bug"]
+assignees: ["romkey"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Command Issue Report
+        
+        Please provide the following information to help us diagnose your command problem.
+  
+  - type: input
+    id: board-model
+    attributes:
+      label: CircuitPython Board Model
+      description: What CircuitPython board are you using?
+      placeholder: "e.g., Adafruit MatrixPortal S3, Raspberry Pi Pico, ESP32-S3-DevKitC-1"
+    validations:
+      required: true
+  
+  - type: input
+    id: circuitpython-version
+    attributes:
+      label: CircuitPython Version
+      description: What version of CircuitPython is on your board?
+      placeholder: "e.g., 9.2.8, 8.2.10"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: connection-method
+    attributes:
+      label: Connection Method
+      description: How are you connecting to the CircuitPython device?
+      options:
+        - USB Serial
+        - WebSocket
+        - WiFi
+        - other
+    validations:
+      required: true
+  
+  - type: input
+    id: command-name
+    attributes:
+      label: Command Name
+      description: What command are you having trouble with?
+      placeholder: "e.g., BME280, ADXL345, custom-sensor"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: command-type
+    attributes:
+      label: Command Type
+      description: What type of command is this?
+      options:
+        - Built-in
+        - Custom
+        - Remote URL
+        - Pathname
+    validations:
+      required: true
+  
+  - type: input
+    id: command-location
+    attributes:
+      label: Command Location
+      description: Where is the command located?
+      placeholder: "e.g., Built-in, ~/.circremote/commands/, https://github.com/user/repo/"
+  
+  - type: textarea
+    id: full-command-line
+    attributes:
+      label: Full Command Line
+      description: What was the complete command line you used?
+      placeholder: "e.g., circremote /dev/ttyUSB0 BME280 sda=board.IO1 scl=board.IO2"
+    validations:
+      required: true
+  
+  - type: input
+    id: sensor-module
+    attributes:
+      label: Sensor/Module
+      description: What sensor or module are you using?
+      placeholder: "e.g., BME280 Temperature Sensor, ADXL345 Accelerometer"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: connection-type
+    attributes:
+      label: Connection Type
+      description: How is the sensor connected?
+      options:
+        - I2C
+        - SPI
+        - UART
+        - GPIO
+        - other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: wiring-details
+    attributes:
+      label: Wiring Details
+      description: How is the sensor wired to your board?
+      placeholder: "e.g., SDA=GPIO1, SCL=GPIO2, VCC=3.3V, GND=GND"
+    validations:
+      required: true
+  
+  - type: input
+    id: power-supply
+    attributes:
+      label: Power Supply
+      description: How is the sensor powered?
+      placeholder: "e.g., 3.3V from board, External 5V, etc."
+  
+  - type: textarea
+    id: additional-hardware
+    attributes:
+      label: Additional Hardware
+      description: Any additional hardware like level shifters, pull-up resistors, etc.
+      placeholder: "e.g., Level shifters, Pull-up resistors, etc."
+  
+  - type: dropdown
+    id: error-occurrence
+    attributes:
+      label: Error Occurrence
+      description: When did the error occur?
+      options:
+        - During initialization
+        - During reading
+        - During execution
+        - other
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: error-type
+    attributes:
+      label: Error Type
+      description: What type of error are you seeing?
+      options:
+        - Import error
+        - I2C error
+        - Sensor not found
+        - Runtime error
+        - other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Full Error Message
+      description: Please paste the complete error message or traceback
+      placeholder: |
+        [Paste the complete error message here]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide step-by-step instructions to reproduce the issue
+      placeholder: |
+        1. [Step 1]
+        2. [Step 2]
+        3. [Step 3]
+        4. [See error]
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect the command to do?
+      placeholder: "[Describe what you expected the command to do]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "[Describe what actually happened]"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: circremote-verbose-output
+    attributes:
+      label: circremote Verbose Output
+      description: Please paste the complete circremote -v output
+      placeholder: |
+        [Paste the complete circremote -v output here]
+  
+  - type: textarea
+    id: device-output
+    attributes:
+      label: Device Output
+      description: Please paste the output from the device when running the command
+      placeholder: |
+        [Paste the output from the device when running the command]
+  
+  - type: textarea
+    id: command-file-content
+    attributes:
+      label: Command File Content (if custom command)
+      description: Please paste the code.py content if it's a custom command
+      placeholder: |
+        [Paste the code.py content if it's a custom command]
+  
+  - type: textarea
+    id: info-json-content
+    attributes:
+      label: Info.json Content (if available)
+      description: Please paste the info.json content if available
+      placeholder: |
+        [Paste the info.json content if available]
+  
+  - type: dropdown
+    id: hardware-tested
+    attributes:
+      label: Hardware Tested
+      description: Have you tested this sensor with other code?
+      options:
+        - Yes
+        - No
+  
+  - type: dropdown
+    id: alternative-code
+    attributes:
+      label: Alternative Code
+      description: Does the sensor work with other CircuitPython examples?
+      options:
+        - Yes
+        - No
+  
+  - type: textarea
+    id: multimeter-readings
+    attributes:
+      label: Multimeter Readings (if applicable)
+      description: Voltage readings at sensor pins
+      placeholder: "[If applicable, voltage readings at sensor pins]"
+  
+  - type: textarea
+    id: oscilloscope
+    attributes:
+      label: Oscilloscope (if applicable)
+      description: Signal quality measurements
+      placeholder: "[If applicable, signal quality measurements]"
+  
+  - type: textarea
+    id: required-libraries
+    attributes:
+      label: Required Libraries
+      description: What libraries are required for this command?
+      placeholder: "e.g., adafruit_bme680, adafruit_bus_device"
+  
+  - type: textarea
+    id: library-versions
+    attributes:
+      label: Library Versions
+      description: What versions of the libraries are installed?
+      placeholder: "e.g., adafruit_bme680==1.1.8"
+  
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation Method
+      description: How were the libraries installed?
+      options:
+        - circup
+        - manual copy
+        - bundle
+        - other
+  
+  - type: dropdown
+    id: installation-status
+    attributes:
+      label: Installation Status
+      description: What is the status of library installation?
+      options:
+        - Successfully installed
+        - Failed to install
+        - Not attempted
+  
+  - type: checkboxes
+    id: troubleshooting-attempted
+    attributes:
+      label: Troubleshooting Attempted
+      description: What troubleshooting steps have you already tried?
+      options:
+        - label: Verified sensor wiring
+        - label: Checked power supply voltage
+        - label: Tested with known working code
+        - label: Verified I2C/SPI address
+        - label: Checked for conflicting devices
+        - label: Verified library installation
+        - label: Tested with different pins
+        - label: Checked for loose connections
+  
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: What environment are you using this in?
+      options:
+        - Indoor
+        - Outdoor
+        - High temperature
+        - High humidity
+        - other
+  
+  - type: textarea
+    id: previous-working-state
+    attributes:
+      label: Previous Working State
+      description: When did this last work?
+      placeholder: "[When did this last work?]"
+  
+  - type: textarea
+    id: recent-changes
+    attributes:
+      label: Recent Changes
+      description: Any recent changes to hardware, wiring, or software
+      placeholder: "[Any recent changes to hardware, wiring, or software]"
+  
+  - type: textarea
+    id: similar-commands
+    attributes:
+      label: Similar Commands
+      description: Do other similar commands work?
+      placeholder: "[Do other similar commands work?]"
+  
+  - type: textarea
+    id: hardware-photos
+    attributes:
+      label: Hardware Photos
+      description: If possible, include photos of the wiring setup and connections
+      placeholder: "[If possible, include photos of the wiring setup and connections]"
+  
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any other information that might be helpful
+      placeholder: "[Any other information that might be helpful]" 
