@@ -9,7 +9,6 @@ circremote [options] <serial_port or ip:port> <command_name> [command line optio
 ### Show Version
 ```bash
 circremote --version
-# or
 circremote -V
 ```
 
@@ -55,10 +54,11 @@ circremote -u /usr/local/bin/circup /dev/ttyUSB0 BME280
 - `-y, --yes`: Skip confirmation prompts (run untested commands without asking)
 - `-c, --skip-circup`: Skip circup dependency installation
 - `-u, --circup PATH`: Path to circup executable
-- `-C, --config PATH`: Path to circremote.json config file
+- `-C, --config PATH`: Path to circremote JSON config file (`~/.circremote/config.json` by default)
 - `-l, --list`: List all available commands from all sources
-- `-h, --help`: Show help message
+- `-h, --help`: Show help message 
 - `-h COMMAND`: Show help for a specific command
+- `-t TIMEOUT: exit TIMEOUT seconds after sending the command - 0 to not exit`
 - `-V, --version`: Show version and exit
 
 ## Features

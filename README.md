@@ -19,8 +19,6 @@ It can also pull code from a web server, so you can run Adafruit example code di
 
 It does not currently support Microsoft Windows. I do not have a Windows machine and have no way to test it with Windows. I understand that a lot of people use Windows and that the lack of support means that a lot of people who might benefit from circremote won't be able to use it. While I'm happy to spend some time and resources on continuing to develop circremote and support users, I don't have the time, energy or desire to bring up a new platform and get it working on it. If a motivated co-maintainer comes along who'd like to get circremote working properly with Windows and then support it, I'd be happy to bring someone like that onto the project.
 
-From here, see how to install circremote and then please check out the [FAQ](doc/FAQ.md) to see how to use it.
-
 - [About circremote](doc/about.md)
 - [Install](doc/install.md)
 - [Usage](doc/usage.md)
@@ -28,6 +26,7 @@ From here, see how to install circremote and then please check out the [FAQ](doc
 - [Configuration](doc/configuration.md)
 - [Contributing](doc/contributing.md)
 - [Development](doc/development.md)
+- [Testing](doc/testing.md)
 - [FAQ](doc/faq.md)
 
 
@@ -39,4 +38,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - CircuitPython community for the excellent ecosystem
 - Adafruit for the sensor libraries
-- Python community for the package infrastructure 
+- Python community for, well... Python
