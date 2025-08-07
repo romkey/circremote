@@ -1,6 +1,6 @@
 # Available Commands
 
-The tool comes with a collection of pre-built sensor and utility commands:
+`circremote` comes with a collection of pre-built sensor and utility commands:
 
 ### Temperature & Humidity Sensors
 - `ADT7410` - High-accuracy digital temperature sensor with ±0.5°C accuracy
@@ -97,7 +97,7 @@ The tool comes with a collection of pre-built sensor and utility commands:
 - `neopixel-rainbow` - Cycles through rainbow colors on a NeoPixel LED
 - `ntp` - Get the time from an NTP server 
 - `ping` - Ping (ICMP Echo Request) another device
-- `relay-serial` - Control a relay via serial communication
+- `relay-serial` - Display received serial data
 - `reset` - Restart the device (`microcontroller.reset()`)
 - `run` - Reads a file on the device and executes it
 - `scan-i2c` - Scan for I2C devices 

@@ -87,7 +87,7 @@ Commands can be marked as untested:
 
 ### Connection Types
 
-circremote needs a way to communicate with the CircuitPython device that's going to run the code.
+`circremote` needs a way to communicate with the CircuitPython device that's going to run the code.
 
 #### Serial Connection
 - Supports standard serial ports (USB, UART)
@@ -136,6 +136,10 @@ circremote /dev/ttyUSB0 https://github.com/user/repo/blob/main/sensor.py
 # Direct URLs
 circremote /dev/ttyUSB0 https://example.com/sensor.py
 ```
+
+If you use ` https://example.com/sensor.py`, `circremote` will attempt to load `https://example.com/requirements.txt` and `https://example.com/info.json` - if they're present, it will process them as normal. If they're not, it will still attempt to run `sensor.py` on the device but will be unable to use `circup` to install any necessary libraries.
+
+If you use `https://example.com/sensor` or `https://example.com/sensor/`, `circremote` will attempt to load `https://example.com/sensor/code.py`. If that succeeds, it will also attempt to load `https://example.com/sensor/requirements.txt` and `https://example.com/sensor/info.json` and will continue processing as described above.
 
 ### Error Handling
 - Comprehensive error reporting

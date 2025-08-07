@@ -1,11 +1,11 @@
-# circremote FAQ
+# `circremote` FAQ
 
 ## General Questions
 
-### What is circremote?
-circremote is a command-line tool for uploading and running Python code on CircuitPython devices. It supports both local serial connections and networked WebSocket connections (via CircuitPython Web Workflow), making it easy to remotely control and run programs on CircuitPython boards.
+### What is `circremote`?
+`circremote` is a command-line tool for uploading and running Python code on CircuitPython devices. It supports both local serial connections and networked WebSocket connections (via CircuitPython Web Workflow), making it easy to remotely control and run programs on CircuitPython boards.
 
-### How do I install circremote?
+### How do I install `circremote`?
 
 ```bash
 pip install git+https://github.com/romkey/circremote
@@ -23,12 +23,12 @@ cd circremote-python
 pip install -e .
 ```
 
-### How do I use circremote under Windows?
+### How do I use `circremote` under Windows?
 
-I do not have access to a Windows machine and have not tried to use circremote on one. I cannot make any promises or offer any support for Windows users, sorry.
+I do not have access to a Windows machine and have not tried to use `circremote` on one. I cannot make any promises or offer any support for Windows users, sorry.
 
-### What devices does circremote support?
-circremote works with any CircuitPython-compatible board, including:
+### What devices does `circremote` support?
+`circremote` works with any CircuitPython-compatible board, including:
 - Raspberry Pi Pico
 - Adafruit Feather boards
 - ESP32/ESP8266 boards
@@ -71,7 +71,7 @@ circremote -p mypassword 192.168.1.100 BME280
 
 ### How do I use remote commands from URLs?
 
-circremote supports running commands directly from URLs, including GitHub repositories and other web servers.
+`circremote` supports running commands directly from URLs, including GitHub repositories and other web servers.
 
 **Remote Command Directory (any URL not ending in .py):**
 ```bash
@@ -96,8 +96,8 @@ circremote /dev/ttyUSB0 https://example.com/script.py
 ```
 
 **Features:**
-- **Automatic metadata**: For directory URLs (any URL not ending in .py), circremote fetches `code.py`, `info.json`, and `requirements.txt`
-- **Associated files**: For Python files, circremote tries to fetch `info.json` and `requirements.txt` in the same directory
+- **Automatic metadata**: For directory URLs (any URL not ending in .py), `circremote` fetches `code.py`, `info.json`, and `requirements.txt`
+- **Associated files**: For Python files, `circremote` tries to fetch `info.json` and `requirements.txt` in the same directory
 - **Dependency installation**: Remote `requirements.txt` files trigger automatic circup installation
 - **GitHub support**: GitHub URLs are automatically converted to raw content URLs
 - **Variable support**: Remote commands support the same variable interpolation as local commands
@@ -160,6 +160,10 @@ circremote -t 30 /dev/ttyUSB0 BME280
 # Wait indefinitely
 circremote -t 0 /dev/ttyUSB0 BME280
 ```
+
+### Why Can't I Access My Raspberry Pi Pico W over the network?
+
+Wifi-enabled Raspberry Pi Pico W boards do not support the Web Workflow. Only ESP32 CPUs support it.
 
 ## Device Configuration
 
@@ -292,12 +296,12 @@ print(f"Temperature: {bme280.temperature}°C")
 ```
 
 ## Loading Commands from the Web
-circremote is able to download code from a web server and send it to a CircuitPython device. It currently only downloads the code; it cannot handle library dependencies or get information about the code from an `info.json` file.
+`circremote` is able to download code from a web server and send it to a CircuitPython device. It currently only downloads the code; it cannot handle library dependencies or get information about the code from an `info.json` file.
 
 Please be careful downloading random code from a web site. Even on a CircuitPython device it could contain malicious code which could share your WiFi credentials or other information stored on the device with bad actors.
 
 ### How do I run a command from GitHub?
-circremote automatically rewrites Github URLs to properly access the file managed at that URL. These two examples are identical:
+`circremote` automatically rewrites Github URLs to properly access the file managed at that URL. These two examples are identical:
 
 ```bash
 # Direct GitHub URL
@@ -307,7 +311,7 @@ circremote /dev/ttyUSB0 https://github.com/adafruit/Adafruit_CircuitPython_BME68
 circremote /dev/ttyUSB0 https://raw.githubusercontent.com/adafruit/Adafruit_CircuitPython_BME680/main/examples/bme680_simpletest.py
 ```
 
-Be aware that circremote will not automatically install the BME680 library if you run this code this way. It will if you run the local `BME680` command.
+Be aware that `circremote` will not automatically install the BME680 library if you run this code this way. It will if you run the local `BME680` command.
 
 ### How do I run a command from other websites?
 ```bash
@@ -315,8 +319,8 @@ Be aware that circremote will not automatically install the BME680 library if yo
 circremote /dev/ttyUSB0 https://romkey.com/circup/hello.py
 ```
 
-### Can I use GitHub URLs with directories?
-No, circremote does not currently support remote directories or remote `info.json` or `requirements.txt` files.
+### Can I use URLs with directories?
+Yes, `circremote` will automatically try to load `code.py`, `info.json` and `requirements.txt` files from URLs that aren't Python files.
 
 ## Troubleshooting
 
@@ -516,7 +520,7 @@ circremote -l
 ```
 
 This shows:
-- **Built-in commands:** Commands that come with circremote
+- **Built-in commands:** Commands that come with `circremote`
 - **Search path commands:** Commands from your configured search paths
 - **Command aliases:** Short names you've configured for commands
 - **Total count:** Number of commands available
@@ -592,22 +596,22 @@ Examples:
 
 ### How do I report bugs or request features?
 - Open an issue on the GitHub repository
-- Include the circremote version, your operating system, and steps to reproduce
+- Include the `circremote` version, your operating system, and steps to reproduce
 - Use the `-v` flag and include the debug output 
 
-### How do I check the circremote version?
+### How do I check the `circremote` version?
 ```bash
 circremote --version
 # or
 circremote -V
 ```
-This will print the installed version of circremote and exit.
+This will print the installed version of `circremote` and exit.
 
 ## Docker Questions
 
-### How do I use circremote with Docker?
+### How do I use `circremote` with Docker?
 
-circremote provides a Docker setup for containerized usage. The Docker image includes both circremote and circup for dependency management.
+`circremote` provides a Docker setup for containerized usage. The Docker image includes both `circremote` and circup for dependency management.
 
 **Quick Start:**
 ```bash
@@ -695,7 +699,7 @@ The Docker setup mounts several directories for persistence:
 
 ### How do I map the CIRCUITPY drive for circup access?
 
-When using Docker, you need to mount the CIRCUITPY drive so that circup can install libraries directly to your CircuitPython device.
+When using Docker, you need to mount the CIRCUITPY drive so that `circup` can install libraries directly to your CircuitPython device.
 
 **Linux:**
 ```bash
@@ -717,14 +721,6 @@ volumes:
 # Add to docker-compose.yml
 volumes:
   - /Volumes/CIRCUITPY:/media/circremote/CIRCUITPY:rw
-```
-
-**Windows:**
-```bash
-# CIRCUITPY is typically mounted at a drive letter
-# Add to docker-compose.yml (adjust drive letter as needed)
-volumes:
-  - C:/CIRCUITPY:/media/circremote/CIRCUITPY:rw
 ```
 
 **Complete Example:**

@@ -1,4 +1,4 @@
-# circremote
+# `circremote`
 
 A command-line tool for uploading and running Python code on CircuitPython devices via serial or Web Workflow websocket connections, with support for dependency management and sensor libraries.
 
@@ -19,7 +19,7 @@ circremote -h
 
 ## Overview
 
-circremote is a utility program that allows you to easily upload and run code on a CircuitPython device without disturbing code.py.
+`circremote` is a utility program that allows you to easily upload and run code on a CircuitPython device without disturbing code.py.
 
 It works with devices connected over USB and over a network connection to devices that support and are configured for the Web Workflow.
 
@@ -32,9 +32,9 @@ Commands can include a `requirements.txt` file and `circup` will automatically b
 For your convenience you can also configure aliases for devices and commands.
 It can also pull code from a web server, so you can run Adafruit example code directly from Github if you want.
 
-It does not currently support Microsoft Windows. I do not have a Windows machine and have no way to test it with Windows. I understand that a lot of people use Windows and that the lack of support means that a lot of people who might benefit from circremote won't be able to use it. While I'm happy to spend some time and resources on continuing to develop circremote and support users, I don't have the time, energy or desire to bring up a new platform and get it working on it. If a motivated co-maintainer comes along who'd like to get circremote working properly with Windows and then support it, I'd be happy to bring someone like that onto the project.
+It does not currently support Microsoft Windows. I do not have a Windows machine and have no way to test it with Windows. I understand that a lot of people use Windows and that the lack of support means that a lot of people who might benefit from `circremote` won't be able to use it. While I'm happy to spend some time and resources on continuing to develop `circremote` and support users, I don't have the time, energy or desire to bring up a new platform and get it working on it. If a motivated co-maintainer comes along who'd like to get `circremote` working properly with Windows and then support it, I'd be happy to bring someone like that onto the project.
 
-- [About circremote](doc/about.md)
+- [About `circremote`](doc/about.md)
 - [Install](doc/install.md)
 - [Usage](doc/usage.md)
 - [Commands](doc/commands.md)
@@ -43,6 +43,16 @@ It does not currently support Microsoft Windows. I do not have a Windows machine
 - [Development](doc/development.md)
 - [Testing](doc/testing.md)
 - [FAQ](doc/faq.md)
+
+## Getting Help
+
+If you run into problems, first - if you're using Microsoft Windows, this is currently unsupported and we cannot help you.
+
+Please review the [FAQ](doc/faq.md).
+
+If you're unable to resolve the problem with `circremote` file an issue here on Github.
+
+General CircuitPython help is available at [#help-with-circuitpython on Adafruit's Discord server[(https://discord.com/channels/327254708534116352/537365702651150357) and at [r/circuitpython](https://www.reddit.com/r/circuitpython/) on Reddit.
 
 
 ## License

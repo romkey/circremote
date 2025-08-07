@@ -1,4 +1,4 @@
-# Install circremote
+# Install `circremote`
 
 ### ~~From PyPI~~
 
@@ -22,8 +22,6 @@ pip install -e .
 ```
 
 ### Using Docker
-
-**Note: running circup is not currently working correctly in the Docker image**
 
 ```bash
 # Build the Docker image (includes circup for dependency management)
