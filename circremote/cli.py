@@ -545,6 +545,7 @@ class CLI:
         print("  -v, --verbose                    Enable verbose debug output")
         print("  -p, --password PASSWORD          HTTP basic auth password for WebSocket connections")
         print("  -d, --double-exit                Send additional Ctrl+D after Ctrl+B to exit raw REPL")
+        print("  -c, --skip-circup                Skip circup dependency installation")
         print("  -C, --config PATH                Path to circremote.json config file")
         print("  -u, --circup PATH                Path to circup executable")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
@@ -1141,7 +1142,7 @@ class CLI:
             print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
             print("   Please install circup to automatically install dependencies:")
             print("   pip install circup")
-            print("   Or specify the correct path with -c PATH or in config file")
+            print("   Or specify the correct path with -u PATH or in config file")
             print("   Continuing without installing dependencies...")
             print()
             return
@@ -1245,7 +1246,7 @@ class CLI:
             print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
             print("   Please install circup to automatically install dependencies:")
             print("   pip install circup")
-            print("   Or specify the correct path with -c PATH or in config file")
+            print("   Or specify the correct path with -u PATH or in config file")
             print("   Continuing without installing dependencies...")
             print()
             return

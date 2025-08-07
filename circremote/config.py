@@ -208,7 +208,7 @@ class Config:
     def get_circup_path(self):
         """
         Get the circup executable path with precedence:
-        1. Command line option (-c)
+        1. Command line option (-u)
         2. Config file setting
         3. System PATH resolution (default)
         
@@ -223,11 +223,18 @@ class Config:
         if self.circup_path:
             return self.circup_path
         
-        # Default to system PATH resolution
-        # In Docker containers, circup is installed at /usr/local/bin/circup
+        # Try to find circup in system PATH
+        import shutil
         import os
+        
+        # In Docker containers, circup is installed at /usr/local/bin/circup
         if os.path.exists('/usr/local/bin/circup'):
             return '/usr/local/bin/circup'
         
-        # Fallback to PATH resolution
+        # Try to find circup in PATH
+        circup_path = shutil.which('circup')
+        if circup_path:
+            return circup_path
+        
+        # Fallback to just 'circup' (will be resolved by subprocess)
         return 'circup' 
