@@ -35,6 +35,10 @@ I do not have access to a Windows machine and have not tried to use `circremote`
 - SAMD21/SAMD51 boards
 - And many others
 
+### How do I save a program using `circremote`?
+
+You don't. `circremote` is intended to upload and run a program on a device without disturbing the software that's already stored on it. It does not currently support saving files to the device.
+
 ## Command Usage
 
 ### How do I run a basic command?
