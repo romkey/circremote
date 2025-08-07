@@ -44,6 +44,10 @@ It does not currently support Microsoft Windows. I do not have a Windows machine
 - [Testing](doc/testing.md)
 - [FAQ](doc/faq.md)
 
+## Rough Edges
+
+There are still some rough edges in dealing with program termination and resuming `code.py` (the "double exit" mode). Programs can continue running indefinitely, which may or may not be desired. Many commands are untested because I either don't have the hardware or haven't had the time to get to them.
+
 ## Getting Help
 
 If you run into problems, first - if you're using Microsoft Windows, this is currently unsupported and we cannot help you.
@@ -53,7 +57,6 @@ Please review the [FAQ](doc/faq.md).
 If you're unable to resolve the problem with `circremote` file an issue here on Github.
 
 General CircuitPython help is available at [#help-with-circuitpython on Adafruit's Discord server[(https://discord.com/channels/327254708534116352/537365702651150357) and at [r/circuitpython](https://www.reddit.com/r/circuitpython/) on Reddit.
-
 
 ## License
 
