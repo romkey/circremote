@@ -1,7 +1,5 @@
 {
   "description": "VL53L1X is an advanced time-of-flight distance sensor that measures distance using infrared laser technology. It features high accuracy (\u00b13mm) and can detect objects from 40mm to 4 meters. The sensor uses I2C communication and includes features like configurable distance modes, timing budgets, and advanced ambient light rejection for reliable distance measurement in various lighting conditions.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x29"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

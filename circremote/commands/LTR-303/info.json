@@ -1,7 +1,5 @@
 {
   "description": "LTR-303 is a digital ambient light sensor that provides high accuracy light measurements with a wide dynamic range. It features low power consumption, automatic gain control, and includes interrupt capabilities for light level monitoring applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x29"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

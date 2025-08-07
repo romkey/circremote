@@ -1,7 +1,5 @@
 {
   "description": "HDC3022 is a high-accuracy digital temperature and humidity sensor with excellent long-term stability. It features 16-bit resolution and includes configurable measurement repeatability and heater control. The sensor uses I2C communication and includes features like periodic measurement modes and automatic self-calibration for reliable readings.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x44"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

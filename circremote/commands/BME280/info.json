@@ -1,7 +1,5 @@
 {
   "description": "BME280 is a digital sensor that measures temperature, humidity, and barometric pressure. It provides high accuracy readings and can calculate altitude based on pressure changes. The sensor uses I2C communication and includes advanced features like configurable oversampling and filtering.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x76"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

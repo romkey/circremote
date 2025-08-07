@@ -1,7 +1,5 @@
 {
   "description": "VL53L4CX is an advanced time-of-flight distance sensor that measures distance using infrared laser technology with enhanced performance. It features high accuracy and can detect objects from 10mm to 2 meters. The sensor uses I2C communication and includes features like configurable timing budgets, ambient light rejection, and advanced ranging modes for reliable distance measurement in various conditions.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x29"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

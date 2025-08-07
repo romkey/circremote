@@ -1,7 +1,5 @@
 {
   "description": "SHT31D is a high-precision digital temperature and humidity sensor with excellent long-term stability. It features 16-bit resolution and includes configurable measurement repeatability and heater control for sensor diagnostics. The sensor uses I2C communication and includes features like periodic measurement modes and automatic self-calibration.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x44"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

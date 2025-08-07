@@ -1,6 +1,5 @@
 {
   "description": "Blink an LED",
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "led_pin",
@@ -9,5 +8,6 @@
       "default": "board.LED"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

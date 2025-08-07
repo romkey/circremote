@@ -1,7 +1,5 @@
 {
   "description": "MLX90640 is a thermal camera sensor that provides a 24x32 pixel array of temperature readings. It features infrared thermopile technology and can detect temperatures from -40\u00b0C to 300\u00b0C with \u00b11.5\u00b0C accuracy. The sensor uses I2C communication and includes configurable refresh rates for thermal imaging and temperature monitoring applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x33"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

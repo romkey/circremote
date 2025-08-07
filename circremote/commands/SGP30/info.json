@@ -1,7 +1,5 @@
 {
   "description": "SGP30 is a digital gas sensor that measures eCO2 (equivalent CO2) and TVOC (Total Volatile Organic Compounds) for air quality monitoring. It features metal oxide gas sensing technology and includes automatic baseline calibration. The sensor uses I2C communication and provides air quality indices for indoor environmental monitoring applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -16,5 +14,6 @@
       "default": "board.SCL"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

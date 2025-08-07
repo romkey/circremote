@@ -1,7 +1,5 @@
 {
   "description": "BH1750 is a digital ambient light sensor that measures light intensity with high resolution. It features 16-bit resolution and can detect light levels from 1 to 65535 lux. The sensor uses I2C communication and includes configurable measurement modes, resolution settings, and power management for various lighting applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x23"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

@@ -1,7 +1,5 @@
 {
   "description": "LPS22 is a digital barometric pressure sensor with high accuracy and ultra-low power consumption. It features a wide pressure range, temperature compensation, and includes advanced features like FIFO buffer and interrupt capabilities for pressure monitoring applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x5C"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

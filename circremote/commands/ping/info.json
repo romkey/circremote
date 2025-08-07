@@ -1,6 +1,5 @@
 {
   "description": "Ping a host",
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "target",
@@ -10,5 +9,6 @@
     }
   ],
   "tested": true,
-  "default_commandline": "target"
+  "default_commandline": "target",
+  "warn_offline": false
 }

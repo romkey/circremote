@@ -1,7 +1,5 @@
 {
   "description": "SHT41 is a high-precision digital temperature and humidity sensor with excellent long-term stability. It features 16-bit resolution and includes configurable measurement modes with different precision levels and heater options. The sensor uses I2C communication and includes features like automatic self-calibration and low-power operation for reliable environmental monitoring.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x44"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

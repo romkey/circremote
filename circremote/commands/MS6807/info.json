@@ -1,7 +1,5 @@
 {
   "description": "MS6807 is a digital barometric pressure sensor that provides high accuracy pressure measurements with temperature compensation. It features low power consumption, fast response time, and is suitable for altitude measurement, weather monitoring, and pressure sensing applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x76"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

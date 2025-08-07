@@ -1,6 +1,5 @@
 {
   "description": "Get time via NTP",
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "server",
@@ -9,5 +8,6 @@
       "default": "pool.ntp.org"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

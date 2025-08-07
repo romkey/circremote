@@ -1,7 +1,5 @@
 {
   "description": "MPL3115A2 is a digital barometric pressure sensor that provides high accuracy pressure and altitude measurements. It features low power consumption, fast response time, and includes temperature compensation for accurate altitude calculation.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x60"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

@@ -1,7 +1,5 @@
 {
   "description": "APDS9960 is a digital proximity, ambient light, RGB color, and gesture sensor. It features an integrated IR LED and photodiodes for proximity detection and gesture recognition. The sensor uses I2C communication and includes configurable gain, integration time, and interrupt functionality for various sensing applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x39"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

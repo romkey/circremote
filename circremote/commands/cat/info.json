@@ -1,6 +1,5 @@
 {
   "description": "Output a file",
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "filename",
@@ -10,5 +9,6 @@
     }
   ],
   "tested": true,
-  "default_commandline": "filename"
+  "default_commandline": "filename",
+  "warn_offline": false
 }

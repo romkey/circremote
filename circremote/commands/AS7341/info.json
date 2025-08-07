@@ -1,7 +1,5 @@
 {
   "description": "AS7341 is a multi-spectral color sensor that measures light across 11 different spectral channels. It can detect colors from near-UV to near-IR wavelengths and includes flicker detection capabilities. The sensor uses I2C communication and features configurable integration time, gain, and LED control for various lighting applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x39"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

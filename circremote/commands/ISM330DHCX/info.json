@@ -1,7 +1,5 @@
 {
   "description": "ISM330DHCX is a 6-axis inertial measurement unit (IMU) that combines a 3-axis accelerometer and 3-axis gyroscope. It features high performance motion sensing with configurable ranges, low power consumption, and includes advanced features like machine learning core and finite state machine.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x6A"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

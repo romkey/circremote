@@ -1,7 +1,5 @@
 {
   "description": "DPS310 is a high-precision barometric pressure sensor that measures atmospheric pressure and temperature with excellent accuracy. It features configurable oversampling and data rates for optimal performance. The sensor uses I2C communication and includes features like temperature compensation and altitude calculation for precise pressure and altitude measurement applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x77"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

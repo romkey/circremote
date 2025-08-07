@@ -1,7 +1,5 @@
 {
   "description": "LIS2MDL is a 3-axis magnetometer that provides high accuracy magnetic field measurements. It features low power consumption, high resolution, and includes temperature compensation. The sensor is ideal for compass applications and magnetic field detection.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x1E"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

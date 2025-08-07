@@ -1,7 +1,5 @@
 {
   "description": "SHT20 is a digital temperature and humidity sensor with high accuracy and low power consumption. It features 14-bit resolution for temperature and 12-bit for humidity measurements. The sensor uses I2C communication and includes configurable measurement resolution and heater control for sensor diagnostics.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x40"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

@@ -1,7 +1,5 @@
 {
   "description": "AMG8833 is a 8x8 thermal camera sensor that provides infrared temperature measurements. It features 64 individual temperature sensors arranged in a grid, low power consumption, and includes interrupt capabilities for temperature monitoring applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x68"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

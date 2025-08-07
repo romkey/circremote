@@ -1,7 +1,5 @@
 {
   "description": "SHT30 is a high-precision digital temperature and humidity sensor with excellent long-term stability. It features a 16-bit resolution and includes configurable measurement repeatability and clock stretching. The sensor uses I2C communication and includes features like heater control for sensor diagnostics and periodic measurement modes.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x44"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

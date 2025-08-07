@@ -1,7 +1,5 @@
 {
   "description": "MSA311 is a 3-axis accelerometer that provides high accuracy acceleration measurements with low power consumption. It features digital output, configurable measurement ranges, and includes embedded features like motion detection and free-fall detection.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x62"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

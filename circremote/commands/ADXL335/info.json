@@ -1,7 +1,5 @@
 {
   "description": "ADXL335 is a 3-axis analog accelerometer that measures acceleration in X, Y, and Z directions. It features a \u00b13g measurement range and provides analog voltage outputs proportional to acceleration. The sensor includes configurable sensitivity and bandwidth settings for motion detection and orientation sensing applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x53"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

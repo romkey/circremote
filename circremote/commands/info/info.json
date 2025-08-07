@@ -1,7 +1,6 @@
 {
   "description": "Report info about CircuitPython, flash and memory usage, board and Wifi",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

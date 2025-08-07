@@ -1,7 +1,5 @@
 {
   "description": "MLX90393 is a 3-axis magnetometer that provides high-accuracy magnetic field measurements. It features 16-bit resolution, configurable gain settings, and temperature compensation. The sensor is ideal for compass applications, position sensing, and magnetic field detection.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x0C"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

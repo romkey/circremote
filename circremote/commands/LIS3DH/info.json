@@ -1,7 +1,5 @@
 {
   "description": "LIS3DH is a 3-axis accelerometer that measures acceleration in X, Y, and Z directions. It features configurable full-scale range (\u00b12g to \u00b116g) and data rates up to 5.3kHz. The sensor uses I2C communication and includes features like interrupt generation, click detection, and low-power modes for motion detection and orientation sensing applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x18"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

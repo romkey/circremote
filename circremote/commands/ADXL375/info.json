@@ -1,7 +1,5 @@
 {
-  "description": "ADXL375 is a high-g accelerometer that can measure accelerations up to ±200g. It's designed for impact detection, drop detection, and high-shock applications. The sensor features digital output, configurable measurement ranges, and includes activity/inactivity detection.",
-  "warn_offline": false,
-  "warn_unavailable": false,
+  "description": "ADXL375 is a high-g accelerometer that can measure accelerations up to \u00b1200g. It's designed for impact detection, drop detection, and high-shock applications. The sensor features digital output, configurable measurement ranges, and includes activity/inactivity detection.",
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x53"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

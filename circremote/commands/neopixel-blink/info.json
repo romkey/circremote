@@ -1,6 +1,5 @@
 {
   "description": "Blink a Neopixel",
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "neopixel_pin",
@@ -21,5 +20,6 @@
       "default": 0.3
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

@@ -1,7 +1,5 @@
 {
   "description": "MPU6050 is a 6-axis motion sensor that combines a 3-axis accelerometer and 3-axis gyroscope. It measures acceleration and angular velocity with configurable full-scale ranges and data rates. The sensor uses I2C communication and includes features like digital motion processing, interrupt generation, and low-power modes for motion tracking applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x68"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

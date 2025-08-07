@@ -1,7 +1,5 @@
 {
   "description": "SCD40 is a high-precision CO2 sensor that measures carbon dioxide concentration in the air. It also provides temperature and humidity readings. The sensor uses photoacoustic spectroscopy technology and includes automatic self-calibration. It communicates via I2C and features low power consumption with periodic measurement modes.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": true,
   "variables": [
     {
@@ -16,5 +14,6 @@
       "description": "I2C SCL pin",
       "default": "board.SCL"
     }
-  ]
+  ],
+  "warn_offline": false
 }

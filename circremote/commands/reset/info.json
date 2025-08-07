@@ -1,7 +1,6 @@
 {
   "description": "Reset microcontroller",
-  "warn_offline": false,
-  "warn_unavailable": true,
   "variables": [],
-  "tested": true
+  "tested": true,
+  "warn_offline": true
 }

@@ -1,7 +1,5 @@
 {
-  "description": "Si7021 is a digital temperature and humidity sensor that provides high accuracy measurements with ±0.4°C temperature accuracy and ±3% humidity accuracy. It features low power consumption, fast response time, and includes a built-in heater for sensor diagnostics.",
-  "warn_offline": false,
-  "warn_unavailable": false,
+  "description": "Si7021 is a digital temperature and humidity sensor that provides high accuracy measurements with \u00b10.4\u00b0C temperature accuracy and \u00b13% humidity accuracy. It features low power consumption, fast response time, and includes a built-in heater for sensor diagnostics.",
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x40"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

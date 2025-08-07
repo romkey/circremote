@@ -1,7 +1,5 @@
 {
   "description": "SEN54 is a multi-gas environmental sensor that measures temperature, humidity, VOC (Volatile Organic Compounds) index, and NOx (Nitrogen Oxides) index. It provides comprehensive air quality monitoring with configurable measurement modes and includes features for environmental sensing applications. The sensor uses I2C communication and includes unique product identification.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -16,5 +14,6 @@
       "default": "board.SCL"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

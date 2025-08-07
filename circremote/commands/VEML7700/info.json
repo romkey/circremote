@@ -1,7 +1,5 @@
 {
   "description": "VEML7700 is a high-accuracy ambient light sensor that measures visible light intensity. It features a 16-bit resolution and wide dynamic range from 0.0036 to 120k lux. The sensor uses I2C communication and includes configurable gain and integration time settings. It's designed for applications requiring precise light measurement like automatic brightness control.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -22,5 +20,6 @@
       "default": "0x10"
     }
   ],
-  "tested": false
+  "tested": false,
+  "warn_offline": false
 }

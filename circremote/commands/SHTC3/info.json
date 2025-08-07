@@ -1,7 +1,5 @@
 {
   "description": "SHTC3 is a digital temperature and humidity sensor with high accuracy and low power consumption. It features 16-bit resolution and includes unique serial number identification. The sensor uses I2C communication and includes features like configurable measurement modes and low-power operation for battery-powered environmental monitoring applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -16,5 +14,6 @@
       "default": "board.SCL"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }

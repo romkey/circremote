@@ -1,7 +1,5 @@
 {
   "description": "ENS160 is a digital gas sensor that measures air quality by detecting various volatile organic compounds (VOCs), carbon dioxide equivalent (eCO2), and total volatile organic compounds (TVOC). It provides real-time air quality data and includes temperature and humidity compensation.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x53"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

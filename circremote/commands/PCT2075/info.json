@@ -1,7 +1,5 @@
 {
   "description": "PCT2075 is a digital temperature sensor that provides high accuracy temperature measurements with low power consumption. It features configurable resolution, alert functionality, and includes a built-in temperature-to-digital converter.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": true,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x48"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

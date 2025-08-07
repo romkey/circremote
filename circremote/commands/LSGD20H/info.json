@@ -1,7 +1,5 @@
 {
   "description": "LSGD20H is a 3-axis gyroscope that provides high accuracy angular velocity measurements. It features low power consumption, high resolution, and includes configurable measurement ranges for motion sensing applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "tested": false,
   "variables": [
     {
@@ -22,5 +20,6 @@
       "description": "I2C address",
       "default": "0x6A"
     }
-  ]
-} 
+  ],
+  "warn_offline": false
+}

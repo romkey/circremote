@@ -1,7 +1,5 @@
 {
   "description": "SGP40 is a digital gas sensor that measures VOC (Volatile Organic Compounds) index for air quality monitoring. It features metal oxide gas sensing technology and includes automatic baseline calibration. The sensor uses I2C communication and provides VOC index values for indoor environmental monitoring and air quality assessment applications.",
-  "warn_offline": false,
-  "warn_unavailable": false,
   "variables": [
     {
       "name": "sda",
@@ -16,5 +14,6 @@
       "default": "board.SCL"
     }
   ],
-  "tested": true
+  "tested": true,
+  "warn_offline": false
 }
