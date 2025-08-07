@@ -46,7 +46,7 @@ It does not currently support Microsoft Windows. I do not have a Windows machine
 
 ## Rough Edges
 
-There are still some rough edges in dealing with program termination and resuming `code.py` (the "double exit" mode). Programs can continue running indefinitely, which may or may not be desired. Many commands are untested because I either don't have the hardware or haven't had the time to get to them.
+There are still some rough edges in dealing with program termination and resuming `code.py` (the "double exit" mode). Programs can continue running indefinitely, which may or may not be desired. Many commands are untested because I either don't have the hardware or haven't had the time to get to them. `circremote` is not yet available on PyPI; it needs more testing before going to a "general" release.
 
 ## Getting Help
 

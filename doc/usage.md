@@ -23,7 +23,7 @@ circremote /dev/ttyUSB0 BME280
 circremote -v /dev/ttyACM0 VL53L1X
 
 # Run with double exit (additional Ctrl+D)
-circremote -d /dev/ttyUSB0 system-info
+circremote -d /dev/ttyUSB0 info
 ```
 
 #### WebSocket Connection (CircuitPython Web Workflow)
@@ -32,7 +32,7 @@ circremote -d /dev/ttyUSB0 system-info
 circremote 192.168.1.100 SHT30
 
 # Connect with custom port
-circremote 192.168.1.100:8080 show-settings
+circremote 192.168.1.100:8080 settings
 
 # Connect with HTTP basic auth password
 circremote -p mypassword 192.168.1.100 scan-i2c

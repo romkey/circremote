@@ -93,6 +93,7 @@
 - `cat` - Display contents of a file
 - `clean` - Clean unwanted files like ._file_, file~ and others from the device
 - `hello` - Hello world
+- `info` - Display information about the board - CircuitPython version, pin definitions, free memory and flash, wifi info
 - `neopixel-blink` - Blinks a NeoPixel LED
 - `neopixel-rainbow` - Cycles through rainbow colors on a NeoPixel LED
 - `ntp` - Get the time from an NTP server 
@@ -103,7 +104,6 @@
 - `scan-i2c` - Scan for I2C devices 
 - `scan-wifi` - Scan for WiFi networks 
 - `settings` - Display contents of `settings.toml` (same as `cat settings.toml`) 
-- `system-info` - Display system information
 - `uf2` - Restart compatible devices in UF2 bootloader mode (this will take the device offline if it's on wifi)
 
 ### OneWire Interface
