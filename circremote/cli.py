@@ -208,23 +208,23 @@ class CLI:
             if requirements_file.exists() and not options.skip_circup:
                 self.debug("requirements.txt found, checking content", options)
                 with open(requirements_file, 'r') as f:
-                    requirements_content = f.read()
+                    local_requirements_content = f.read()
                 
                 # Filter out comments and blank lines to check for actual requirements
                 actual_requirements = [
-                    line.strip() for line in requirements_content.split('\n')
+                    line.strip() for line in local_requirements_content.split('\n')
                     if line.strip() and not line.strip().startswith('#')
                 ]
                 
-                self.debug(f"Requirements content: {repr(requirements_content)}", options)
+                self.debug(f"Local requirements content: {repr(local_requirements_content)}", options)
                 self.debug(f"Actual requirements after filtering: {actual_requirements}", options)
                 self.debug(f"Number of actual requirements: {len(actual_requirements)}", options)
                 
                 if actual_requirements:
-                    self.debug("requirements.txt has actual content (after filtering comments/blanks), checking for circup", options)
+                    self.debug("Local requirements.txt has actual content (after filtering comments/blanks), checking for circup", options)
                     self.handle_circup_installation(requirements_file, serial_port, password, options)
                 else:
-                    self.debug("requirements.txt has no actual content (only comments/blanks), skipping circup", options)
+                    self.debug("Local requirements.txt has no actual content (only comments/blanks), skipping circup", options)
 
         # Check for remote requirements.txt and install dependencies with circup (for remote commands)
         if requirements_content and not options.skip_circup:
