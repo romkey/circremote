@@ -2,6 +2,21 @@
 
 A command-line tool for uploading and running Python code on CircuitPython devices via serial or Web Workflow websocket connections, with support for dependency management and sensor libraries.
 
+A few examples:
+```
+# simple I2C scanner on locally connected device
+circremote /dev/ttyUSB0 scan-i2c
+
+# show the contents of settings.toml on a Web Workflow device
+circremote 192.168.1.23:8080 -p PASSWORD cat settings.toml
+
+# run Adafruit's I2C scanner on a device with the nickname feather-s3
+circremote feather-s3 https://github.com/adafruit/Adafruit_Learning_System_Guides/blob/main/I2C_Scanners/circuitpython/code.py
+
+# help
+circremote -h
+```
+
 ## Overview
 
 circremote is a utility program that allows you to easily upload and run code on a CircuitPython device without disturbing code.py.
