@@ -7,13 +7,14 @@
 
 ### How do I install `circremote`?
 
-```bash
-pip install git+https://github.com/romkey/circremote
-```
+The preferred and easiest way is to use PyPI:
 
-*Note this does not yet work as we're not yet listed in PyPI, for now please use the development install)*
 ```bash
 pip install circremote
+```
+
+```bash
+pip install git+https://github.com/romkey/circremote
 ```
 
 For development, you can install in editable mode:

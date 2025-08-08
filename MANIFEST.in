@@ -1,0 +1,40 @@
+include README.md
+include LICENSE
+include requirements.txt
+include pytest.ini
+include tox.ini
+include conftest.py
+include run_tests.py
+include bump_version.py
+include CODE_OF_CONDUCT.md
+
+recursive-include circremote/commands *.py
+recursive-include circremote/commands *.json
+recursive-include circremote/commands *.txt
+
+recursive-include doc *.md
+recursive-include tests *.py
+
+# Include Docker files for reference
+recursive-include docker *.dockerfile
+recursive-include docker *.yml
+recursive-include docker *.md
+recursive-include docker *.sh
+recursive-include docker Makefile
+
+# Include GitHub templates and workflows
+recursive-include .github *.yml
+recursive-include .github *.md
+
+# Exclude development and build artifacts
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude *.egg-info
+global-exclude build
+global-exclude dist
+global-exclude .pytest_cache
+global-exclude .tox
+global-exclude venv
+global-exclude .git

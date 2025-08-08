@@ -1,8 +1,6 @@
 # Install `circremote`
 
-### ~~From PyPI~~
-
-(Not yet listed on PyPl so try "From Github" instead)
+### From PyPI
 
 ```bash
 pip install circremote

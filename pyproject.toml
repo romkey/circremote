@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "circremote"
+dynamic = ["version"]
+description = "A command-line tool for uploading and running code on CircuitPython devices"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    {name = "John Romkey", email = "58883+romkey@users.noreply.github.com"}
+]
+maintainers = [
+    {name = "John Romkey", email = "58883+romkey@users.noreply.github.com"}
+]
+keywords = ["circuitpython", "microcontroller", "serial", "websocket", "webworkflow", "esp32", "sensors"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Hardware",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "pyserial>=3.5",
+    "websocket-client>=1.0.0",
+    "requests>=2.25.0",
+    "circup>=2.2.2"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.10",
+    "pytest-mock>=3.0",
+    "tox>=3.0",
+    "flake8>=3.8",
+    "black>=21.0",
+    "isort>=5.0",
+    "sphinx>=3.0",
+    "sphinx-rtd-theme>=0.5",
+]
+
+[project.scripts]
+circremote = "circremote.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/romkey/circremote"
+Documentation = "https://github.com/romkey/circremote#readme"
+Repository = "https://github.com/romkey/circremote"
+"Bug Tracker" = "https://github.com/romkey/circremote/issues"
+"Changelog" = "https://github.com/romkey/circremote/blob/main/CHANGELOG.md"
+
+[tool.setuptools.package-data]
+circremote = [
+    "commands/*/code.py",
+    "commands/*/info.json", 
+    "commands/*/requirements.txt"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "circremote.version.VERSION"}

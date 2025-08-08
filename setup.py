@@ -25,25 +25,39 @@ setup(
     description="A command-line tool for uploading and running code on CircuitPython devices",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(),
+    url="https://github.com/romkey/circremote",
+    project_urls={
+        "Bug Tracker": "https://github.com/romkey/circremote/issues",
+        "Documentation": "https://github.com/romkey/circremote#readme",
+        "Source Code": "https://github.com/romkey/circremote",
+    },
+    packages=["circremote"],
     include_package_data=True,
     package_data={
         "circremote": ["commands/*/*", "commands/*/code.py", "commands/*/info.json", "commands/*/requirements.txt"],
     },
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Framework :: Pytest",
-        "Intended Audience :: Other Audience",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Topic :: Utilties"
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: System :: Hardware",
+        "Topic :: Utilities",
     ],
     python_requires=">=3.7",
     install_requires=[
         "pyserial>=3.5",
         "websocket-client>=1.0.0",
         "requests>=2.25.0",
+        "circup>=2.2.2"
     ],
     extras_require={
         "dev": [
@@ -63,4 +77,5 @@ setup(
             "circremote=circremote.cli:main",
         ],
     },
+    keywords="circuitpython microcontroller serial websocket sensors",
 ) 
