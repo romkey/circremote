@@ -5,31 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.2] - 2025-08-07
 
-### Added
-- Support for remote command execution from GitHub and other web servers
-- Docker containerization with circup integration
-- I2C display commands (OLED, LCD, LED Matrix, TFT)
-- GitHub issue templates and PR management workflows
-- `--version` CLI option
-- `-c` option to skip circup dependency installation
-- `-C` option to specify config file path
-- `-u` option to specify circup executable path
+Fixed package building to properly omit files and use pypackage.toml
+and MANFEST.in and not setuptools.py
 
-### Changed
-- Renamed CLI options: `-C` (skip-circup) → `-c`, `-f` (config) → `-C`, `-c` (circup) → `-u`
-- Updated info.json files: removed `warn_offline`, renamed `warn_unavailable` to `warn_offline`
-- Improved error handling and graceful exits
-- Enhanced Docker support with proper circup integration
+No functional changes, only packaging.
 
-### Fixed
-- Pytest spewing garbage on Ctrl+C interruption
-- Double circup execution for remote commands
-- Docker container permission issues
-- GitHub URL conversion for remote command fetching
-
-## [0.10.0] - 2025-01-XX
+## [0.10.0] - 2025-08-07 
 
 ### Added
 - Initial release with core functionality
@@ -45,3 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File system operations (clean, cat, etc.)
 - Network utilities (ping, WiFi scanning)
 - Hardware abstraction for various sensors and displays
+
+## [0.10.1] - 2025-08-08
+
+- PyPI support

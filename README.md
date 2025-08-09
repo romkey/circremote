@@ -42,6 +42,7 @@ It does not currently support Microsoft Windows. I do not have a Windows machine
 - [Contributing](doc/contributing.md)
 - [Development](doc/development.md)
 - [Testing](doc/testing.md)
+- [Release](doc/release.md)
 - [FAQ](doc/faq.md)
 
 ## Rough Edges

@@ -21,6 +21,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -64,6 +65,10 @@ circremote = [
     "commands/*/info.json", 
     "commands/*/requirements.txt"
 ]
+
+[tool.setuptools.packages.find]
+where = ["."] 
+exclude = ["doc/*", "docker/*", "tests/*", "doc*", "docker*", "tests*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "circremote.version.VERSION"}
