@@ -267,11 +267,11 @@ class CLI:
                             self.show_tested_warning(options)
                         
                         # Display module description if available
-                        if info_data.get('description'):
+                        if info_data.get('description') and not options.quiet:
                             print(f"Module: {command_name}")
                             print(f"Description: {info_data['description']}")
                             print()
-                            
+                        
                 except json.JSONDecodeError as e:
                     print(f"Warning: Could not parse info.json: {e}")
                     print("Proceeding without module information...")
@@ -505,6 +505,8 @@ class CLI:
                           help='Path to circremote.json config file')
         parser.add_argument('-y', '--yes', action='store_true',
                           help='Skip confirmation prompts (run untested commands without asking)')
+        parser.add_argument('-q', '--quiet', action='store_true',
+                          help='Quiet mode: suppress output except device output, exit on confirmations')
         parser.add_argument('-t', '--timeout', type=float, default=10.0,
                           help='Timeout in seconds for receiving data (0 = wait indefinitely)')
         parser.add_argument('-l', '--list', action='store_true',
@@ -518,6 +520,12 @@ class CLI:
             options, remaining = parser.parse_known_args(args)
         except Exception as e:
             print(f"❌ Error parsing options: {e}")
+            sys.exit(1)
+        
+        # Validate mutually exclusive options
+        if options.verbose and options.quiet:
+            print("❌ Error: Cannot use both -v (verbose) and -q (quiet) options together")
+            print("   Use -v for verbose debug output or -q for quiet mode, but not both")
             sys.exit(1)
         
         # Handle help manually - but only if no command is specified
@@ -549,6 +557,7 @@ class CLI:
         print("  -C, --config PATH                Path to circremote.json config file")
         print("  -u, --circup PATH                Path to circup executable")
         print("  -y, --yes                        Skip confirmation prompts (run untested commands without asking)")
+        print("  -q, --quiet                      Quiet mode: suppress output except device output, exit on confirmations")
         print("  -t, --timeout SECONDS            Timeout in seconds for receiving data (0 = wait indefinitely)")
         print("  -l, --list                       List all available commands from all sources")
         print("  -V, --version                    Show version and exit")
@@ -570,6 +579,8 @@ class CLI:
         print("  circremote /dev/ttyUSB0 PMS5003 rx=board.TX tx=board.RX")
         print("  circremote -c /dev/ttyUSB0 BME280")
         print("  circremote -y /dev/ttyUSB0 ADXL345                    # Skip confirmation for untested modules")
+        print("  circremote -q /dev/ttyUSB0 BME280                     # Quiet mode (exit on confirmations)")
+        print("  circremote -q -y /dev/ttyUSB0 BME280                  # Quiet mode with auto-confirm")
         print("  circremote -t 30 /dev/ttyUSB0 BME280                  # Wait 30 seconds for output")
         print("  circremote -t 0 /dev/ttyUSB0 BME280                   # Wait indefinitely for output")
         print("  circremote /dev/ttyUSB0 mycommand filename.txt         # Positional arguments (if default_commandline defined)")
@@ -584,9 +595,6 @@ class CLI:
         print("Command help:")
         print("  circremote -h BME280                                    # Show help for BME280 command")
         print("  circremote -h clean                                     # Show help for clean command")
-        print()
-        print("List commands:")
-        print("  circremote -l                                           # List all available commands")
 
     def show_command_help(self, command_name, options):
         """Show help for a specific command."""
@@ -894,8 +902,8 @@ class CLI:
 
     def debug(self, message, options):
         """Print debug message if verbose mode is enabled."""
-        if options and options.verbose:
-            print(message)
+        if options and options.verbose and not options.quiet:
+            print(f"DEBUG: {message}")
 
     def validate_variables(self, variables, info_data, command_name):
         """Validate variables against info.json."""
@@ -1086,6 +1094,10 @@ class CLI:
 
     def show_offline_warning(self, options):
         """Show warning for modules that may make device unreachable."""
+        if options.quiet:
+            print("ERROR: Command may make device unreachable. Use -y to confirm or run without -q", file=sys.stderr)
+            sys.exit(1)
+            
         print("\n" + "="*60)
         print("⚠️  WARNING: This module may make the CircuitPython device")
         print("   unreachable without physical access to it.")
@@ -1109,6 +1121,10 @@ class CLI:
 
     def show_tested_warning(self, options):
         """Show warning for untested modules."""
+        if options.quiet and not options.yes:
+            print("ERROR: Command is untested. Use -y to confirm or run without -q", file=sys.stderr)
+            sys.exit(1)
+            
         print("\n" + "="*60)
         print("⚠️  WARNING: This module has not been tested")
         print("="*60)
@@ -1139,12 +1155,13 @@ class CLI:
         
         # Check if the specified circup path exists and is executable
         if not os.path.exists(circup_path) or not os.access(circup_path, os.X_OK):
-            print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
-            print("   Please install circup to automatically install dependencies:")
-            print("   pip install circup")
-            print("   Or specify the correct path with -u PATH or in config file")
-            print("   Continuing without installing dependencies...")
-            print()
+            if not options.quiet:
+                print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
+                print("   Please install circup to automatically install dependencies:")
+                print("   pip install circup")
+                print("   Or specify the correct path with -u PATH or in config file")
+                print("   Continuing without installing dependencies...")
+                print()
             return
         
         self.debug(f"Found circup at: {circup_path}", options)
@@ -1168,39 +1185,49 @@ class CLI:
         full_command = [circup_path] + circup_args
         command_string = " ".join(full_command)
         
-        print("\n" + "="*60)
-        print("📦 DEPENDENCIES FOUND")
-        print("="*60)
-        print()
-        print("This module requires CircuitPython libraries to be installed.")
-        print(f"Requirements file: {requirements_file}")
-        print()
-        print("The following command will be executed:")
-        print(f"  {command_string}")
-        print()
-        print("Options:")
-        print("  r - run (install dependencies and continue)")
-        print("  s - skip (continue without installing dependencies)")
-        print("  x - exit (cancel operation)")
-        print()
+        if options.quiet and not options.yes:
+            print("ERROR: Dependencies need to be installed. Use -y to confirm or run without -q", file=sys.stderr)
+            sys.exit(1)
+            
+        if not options.quiet:
+            print("\n" + "="*60)
+            print("📦 DEPENDENCIES FOUND")
+            print("="*60)
+            print()
+            print("This module requires CircuitPython libraries to be installed.")
+            print(f"Requirements file: {requirements_file}")
+            print()
+            print("The following command will be executed:")
+            print(f"  {command_string}")
+            print()
+            print("Options:")
+            print("  r - run (install dependencies and continue)")
+            print("  s - skip (continue without installing dependencies)")
+            print("  x - exit (cancel operation)")
+            print()
         
         if options.yes:
-            print("Installing dependencies automatically due to -y flag...")
+            if not options.quiet:
+                print("Installing dependencies automatically due to -y flag...")
             self.run_circup_command(full_command, options)
         else:
             response = input("What would you like to do? (r/s/x): ").strip().lower()
             
             if response in ['r', 'run']:
-                print("Installing dependencies...")
+                if not options.quiet:
+                    print("Installing dependencies...")
                 self.run_circup_command(full_command, options)
             elif response in ['s', 'skip']:
-                print("Skipping dependency installation...")
-                print()
+                if not options.quiet:
+                    print("Skipping dependency installation...")
+                    print()
             elif response in ['x', 'exit']:
-                print("Operation cancelled by user.")
+                if not options.quiet:
+                    print("Operation cancelled by user.")
                 sys.exit(0)
             else:
-                print("Invalid option. Cancelling operation.")
+                if not options.quiet:
+                    print("Invalid option. Cancelling operation.")
                 sys.exit(0)
 
     def run_circup_command(self, full_command, options):
@@ -1210,31 +1237,38 @@ class CLI:
         try:
             result = subprocess.run(full_command, capture_output=True, text=True)
             
-            # Display circup output
-            if result.stdout:
-                print("Circup output:")
-                print("-" * 40)
-                print(result.stdout)
-                print("-" * 40)
-            
-            if result.stderr:
-                print("Circup error output:")
-                print("-" * 40)
-                print(result.stderr)
-                print("-" * 40)
+            # Display circup output only if not in quiet mode
+            if not options.quiet:
+                if result.stdout:
+                    print("Circup output:")
+                    print("-" * 40)
+                    print(result.stdout)
+                    print("-" * 40)
+                
+                if result.stderr:
+                    print("Circup error output:")
+                    print("-" * 40)
+                    print(result.stderr)
+                    print("-" * 40)
             
             if result.returncode == 0:
-                print("✅ Dependencies installed successfully")
+                if not options.quiet:
+                    print("✅ Dependencies installed successfully")
                 self.debug("Circup command completed successfully", options)
             else:
-                print(f"❌ Failed to install dependencies (exit code: {result.returncode})")
+                if not options.quiet:
+                    print(f"❌ Failed to install dependencies (exit code: {result.returncode})")
                 self.debug(f"Circup command failed with exit code: {result.returncode}", options)
-                print("Continuing anyway...")
+                if not options.quiet:
+                    print("Continuing anyway...")
         except Exception as e:
-            print(f"❌ Error running circup: {e}")
+            if not options.quiet:
+                print(f"❌ Error running circup: {e}")
             self.debug(f"Circup execution error: {type(e).__name__}: {e}", options)
-            print("Continuing anyway...")
-        print()
+            if not options.quiet:
+                print("Continuing anyway...")
+        if not options.quiet:
+            print()
 
     def handle_remote_circup_installation(self, requirements_content, serial_port, password, options):
         """Handle circup dependency installation for remote commands."""
@@ -1243,12 +1277,13 @@ class CLI:
         
         # Check if the specified circup path exists and is executable
         if not os.path.exists(circup_path) or not os.access(circup_path, os.X_OK):
-            print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
-            print("   Please install circup to automatically install dependencies:")
-            print("   pip install circup")
-            print("   Or specify the correct path with -u PATH or in config file")
-            print("   Continuing without installing dependencies...")
-            print()
+            if not options.quiet:
+                print(f"⚠️  Warning: requirements.txt found but circup not found or not executable at: {circup_path}")
+                print("   Please install circup to automatically install dependencies:")
+                print("   pip install circup")
+                print("   Or specify the correct path with -u PATH or in config file")
+                print("   Continuing without installing dependencies...")
+                print()
             return
         
         self.debug(f"Found circup at: {circup_path}", options)
@@ -1279,42 +1314,52 @@ class CLI:
             full_command = [circup_path] + circup_args
             command_string = " ".join(full_command)
             
-            print("\n" + "="*60)
-            print("📦 REMOTE DEPENDENCIES FOUND")
-            print("="*60)
-            print()
-            print("This remote module requires CircuitPython libraries to be installed.")
-            print("Requirements content:")
-            print("-" * 40)
-            print(requirements_content.strip())
-            print("-" * 40)
-            print()
-            print("The following command will be executed:")
-            print(f"  {command_string}")
-            print()
-            print("Options:")
-            print("  r - run (install dependencies and continue)")
-            print("  s - skip (continue without installing dependencies)")
-            print("  x - exit (cancel operation)")
-            print()
+            if options.quiet and not options.yes:
+                print("ERROR: Remote dependencies need to be installed. Use -y to confirm or run without -q", file=sys.stderr)
+                sys.exit(1)
+                
+            if not options.quiet:
+                print("\n" + "="*60)
+                print("📦 REMOTE DEPENDENCIES FOUND")
+                print("="*60)
+                print()
+                print("This remote module requires CircuitPython libraries to be installed.")
+                print("Requirements content:")
+                print("-" * 40)
+                print(requirements_content.strip())
+                print("-" * 40)
+                print()
+                print("The following command will be executed:")
+                print(f"  {command_string}")
+                print()
+                print("Options:")
+                print("  r - run (install dependencies and continue)")
+                print("  s - skip (continue without installing dependencies)")
+                print("  x - exit (cancel operation)")
+                print()
             
             if options.yes:
-                print("Installing dependencies automatically due to -y flag...")
+                if not options.quiet:
+                    print("Installing dependencies automatically due to -y flag...")
                 self.run_circup_command(full_command, options)
             else:
                 response = input("What would you like to do? (r/s/x): ").strip().lower()
                 
                 if response in ['r', 'run']:
-                    print("Installing dependencies...")
+                    if not options.quiet:
+                        print("Installing dependencies...")
                     self.run_circup_command(full_command, options)
                 elif response in ['s', 'skip']:
-                    print("Skipping dependency installation...")
-                    print()
+                    if not options.quiet:
+                        print("Skipping dependency installation...")
+                        print()
                 elif response in ['x', 'exit']:
-                    print("Operation cancelled by user.")
+                    if not options.quiet:
+                        print("Operation cancelled by user.")
                     sys.exit(0)
                 else:
-                    print("Invalid option. Cancelling operation.")
+                    if not options.quiet:
+                        print("Invalid option. Cancelling operation.")
                     sys.exit(0)
         finally:
             # Clean up temporary file
