@@ -1,0 +1,14 @@
+{
+    "description": "List files and directories recursively",
+    "warn_offline": false,
+    "default_commandline": "filename",
+    "variables": [
+        {
+            "name": "filename",
+            "description": "Optional filename or directory path to list (defaults to root /)",
+	    "default": "/",
+	    "required": false
+        }
+    ],
+    "tested": true
+}

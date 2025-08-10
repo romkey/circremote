@@ -17,7 +17,7 @@ maintainers = [
 ]
 keywords = ["circuitpython", "microcontroller", "serial", "websocket", "webworkflow", "esp32", "sensors"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
@@ -68,7 +68,8 @@ circremote = [
 
 [tool.setuptools.packages.find]
 where = ["."] 
-exclude = ["doc/*", "docker/*", "tests/*", "doc*", "docker*", "tests*"]
+include = [ "circremote" ]
 
 [tool.setuptools.dynamic]
 version = {attr = "circremote.version.VERSION"}
+dependencies = {file = ["requirements.txt"]}

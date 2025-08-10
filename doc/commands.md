@@ -94,10 +94,12 @@
 - `clean` - Clean unwanted files like ._file_, file~ and others from the device
 - `hello` - Hello world
 - `info` - Display information about the board - CircuitPython version, pin definitions, free memory and flash, wifi info
+- `ls` - List files and directories recursively
 - `neopixel-blink` - Blinks a NeoPixel LED
 - `neopixel-rainbow` - Cycles through rainbow colors on a NeoPixel LED
 - `ntp` - Get the time from an NTP server 
 - `ping` - Ping (ICMP Echo Request) another device
+- `rm` - Remove files and directories recursively
 - `relay-serial` - Display received serial data
 - `reset` - Restart the device (`microcontroller.reset()`)
 - `run` - Reads a file on the device and executes it

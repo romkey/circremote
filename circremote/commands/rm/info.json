@@ -1,0 +1,13 @@
+{
+    "description": "Remove files and directories recursively",
+    "warn_offline": true,
+    "default_commandline": "filename",
+    "variables": [
+        {
+            "name": "filename",
+            "description": "File or directory path to remove",
+            "required": true
+        }
+    ],
+    "tested": true
+}
