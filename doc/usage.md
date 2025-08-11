@@ -40,6 +40,15 @@ circremote -p mypassword 192.168.1.100 scan-i2c
 # Combine options
 circremote -v -d -p mypassword 192.168.1.100:8080 BME680
 
+# Quiet mode - suppresses all circremote output
+circremote -q 192.168.1.100 BME280
+
+# Quiet mode with auto-confirm
+circremote -q -y 192.168.1.100 BME280
+
+# Quiet mode with skip-circup (if dependencies need to be installed)
+circremote -q -c 192.168.1.100 BME280
+
 # Skip dependency installation
 circremote -c /dev/ttyUSB0 BME280
 
@@ -52,6 +61,7 @@ circremote -u /usr/local/bin/circup /dev/ttyUSB0 BME280
 - `-p, --password PASSWORD`: HTTP basic auth password for WebSocket connections
 - `-d, --double-exit`: Send additional Ctrl+D after Ctrl+B to exit raw REPL
 - `-y, --yes`: Skip confirmation prompts (run untested commands without asking)
+- `-q, --quiet`: Quiet mode: suppress output except device output, exit on confirmations
 - `-c, --skip-circup`: Skip circup dependency installation
 - `-u, --circup PATH`: Path to circup executable
 - `-C, --config PATH`: Path to circremote JSON config file (`~/.circremote/config.json` by default)
@@ -84,6 +94,18 @@ Commands can be marked as untested:
 - Warns about modules that haven't been tested
 - Explains potential issues (wrong pins, addresses, etc.)
 - Requires user confirmation unless `-y` flag is used
+
+### Quiet Mode
+Use the `-q` flag to suppress all circremote output except device output:
+
+- **Suppresses**: All circremote messages, warnings, progress info, module descriptions
+- **Shows**: Only output from the CircuitPython device
+- **Exits with error**: If any confirmation is needed (untested commands, offline warnings, dependencies)
+- **Use with `-y`**: Combine with `-y` to auto-confirm all prompts in quiet mode
+- **Use with `-c`**: Combine with `-c` to skip dependency installation in quiet mode
+- **Mutually exclusive**: Cannot be used with `-v` (verbose) option
+
+Perfect for scripting and automation where you only want the device output.
 
 ### Connection Types
 

@@ -92,6 +92,7 @@
 - `blink` - Blinks a simple LED
 - `cat` - Display contents of a file
 - `clean` - Clean unwanted files like ._file_, file~ and others from the device
+- `erase_fs` - erase the filesystem - cannot be undone. Requires the word `yes` as an argument.
 - `hello` - Hello world
 - `info` - Display information about the board - CircuitPython version, pin definitions, free memory and flash, wifi info
 - `ls` - List files and directories recursively

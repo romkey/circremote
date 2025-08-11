@@ -1,0 +1,14 @@
+{
+  "description": "Erase filesystem\nusage: circup DEVICE erase_fs yes # yes -> perform the erase, anything else -> do not erase",
+  "variables": [
+    {
+      "name": "erase",
+      "required": false,
+      "description": "yes to erase, anything else to not",
+      "default": "no"
+    }
+  ],
+  "tested": true,
+  "warn_offline": true,
+    "default_commandline": "erase"
+}

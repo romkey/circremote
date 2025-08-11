@@ -5,7 +5,7 @@
       "name": "filename",
       "required": true,
       "description": "File to cat",
-      "default": null
+      "default": "foo"
     }
   ],
   "tested": true,
