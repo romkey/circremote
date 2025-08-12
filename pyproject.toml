@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -68,7 +68,7 @@ circremote = [
 
 [tool.setuptools.packages.find]
 where = ["."] 
-include = [ "circremote" ]
+exclude = ["doc/*", "docker/*", "tests/*", "doc*", "docker*", "tests*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "circremote.version.VERSION"}
