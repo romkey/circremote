@@ -3,33 +3,32 @@ include LICENSE
 include requirements.txt
 include CODE_OF_CONDUCT.md
 
-prune pytest.ini
-prune tox.ini
-prune conftest.py
-prune run_tests.py
-prune bump_version.py
+exclude pytest.ini
+exclude tox.ini
+exclude conftest.py
+exclude run_tests.py
+exclude bump_version.py
+
+exclude .gitignore
+exclude *.pyc
+exclude *.pyo
+exclude __pycache__
+exclude .DS_Store
+exclude *.egg-info
+exclude build
+exclude dist
+exclude .pytest_cache
+exclude .tox
+exclude pytest.ini
+exclude setup.cfg
+exclude conftest.py
+exclude run_tests.py
+exclude tox.ini
+exclude bump_version.py
 
 prune .git
-prune .gitignore
+prune venv
 prune .github
 prune doc
 prune docker
 prune tests
-prune pytest.ini
-prune setup.cfg
-prune conftest.py
-prune run_tests.py
-prune tox.ini
-prune bump_version.py
-
-prune *.pyc
-prune *.pyo
-prune __pycache__
-prune .DS_Store
-prune *.egg-info
-prune build
-prune dist
-prune .pytest_cache
-prune .tox
-prune venv
-
