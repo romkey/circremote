@@ -18,16 +18,8 @@ except:
 
 # Initialize MMC5603 sensor
 try:
-    mmc5603 = adafruit_mmc56x3.MMC5603(i2c, address={{ address }})
+    mmc5603 = adafruit_mmc56x3.MMC5603(i2c)
     print("✓ MMC5603 sensor initialized successfully")
-    
-    # Configure sensor settings
-    mmc5603.magnetic_field_range = adafruit_mmc56x3.MagneticFieldRange.RANGE_30_GAUSS
-    mmc5603.data_rate = adafruit_mmc56x3.DataRate.RATE_100_HZ
-    
-    print(f"Magnetic Field Range: {mmc5603.magnetic_field_range}")
-    print(f"Data Rate: {mmc5603.data_rate}")
-    
 except Exception as e:
     print(f"✗ Error initializing MMC5603: {e}")
     import sys
@@ -51,7 +43,7 @@ try:
         print(f"Magnitude: {magnitude:.3f} Gauss")
         print("-" * 30)
         
-        time.sleep(30)  # Wait 30 seconds between readings
+        time.sleep(10)
         
 except KeyboardInterrupt:
     print("\nMeasurement stopped by user")

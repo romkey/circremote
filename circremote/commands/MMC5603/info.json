@@ -14,6 +14,6 @@
       "default": "board.SCL"
     }
   ],
-  "tested": false,
+  "tested": true,
   "warn_offline": false
 }
