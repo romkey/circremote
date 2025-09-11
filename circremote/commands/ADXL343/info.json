@@ -1,6 +1,6 @@
 {
   "description": "ADXL343 is a 3-axis accelerometer that provides high-resolution measurements with low power consumption. It features digital output, configurable measurement ranges, and includes embedded features like activity/inactivity detection, single/double tap detection, and free-fall detection.",
-  "tested": false,
+  "tested": true,
   "variables": [
     {
       "name": "sda",
