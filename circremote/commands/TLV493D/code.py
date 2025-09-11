@@ -18,13 +18,8 @@ except:
 
 # Initialize TLV493D sensor
 try:
-    tlv493d = adafruit_tlv493d.TLV493D(i2c, address={{ address }})
+    tlv493d = adafruit_tlv493d.TLV493D(i2c)
     print("✓ TLV493D sensor initialized successfully")
-    
-    # Print sensor information
-    print(f"Temperature: {tlv493d.temperature:.2f} °C")
-    print(f"Mode: {tlv493d.mode}")
-    print(f"Power Mode: {tlv493d.power_mode}")
     
 except Exception as e:
     print(f"✗ Error initializing TLV493D: {e}")
@@ -49,7 +44,7 @@ try:
         print(f"Magnitude: {magnitude:.2f} μT")
         print("-" * 30)
         
-        time.sleep(30)  # Wait 30 seconds between readings
+        time.sleep(10)
         
 except KeyboardInterrupt:
     print("\nMeasurement stopped by user")
