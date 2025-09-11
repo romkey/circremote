@@ -1,1 +1,1 @@
-adafruit-circuitpython-ds2484 
+adafruit-circuitpython-ds248x

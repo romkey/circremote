@@ -1,6 +1,6 @@
 {
   "description": "DS2484 is a 1-Wire master controller that provides I2C to 1-Wire bridge functionality. It enables communication with 1-Wire devices like temperature sensors, EEPROMs, and other 1-Wire peripherals through an I2C interface. The device includes automatic reset and presence detection.",
-  "tested": false,
+  "tested": true,
   "variables": [
     {
       "name": "sda",

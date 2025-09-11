@@ -5,7 +5,7 @@
 import time
 import board
 import busio
-import adafruit_ds2484
+from adafruit_ds248x import Adafruit_DS248x
 
 # Initialize I2C with fallback
 try:
@@ -15,7 +15,7 @@ except:
 
 # Initialize DS2484
 try:
-    ds2484 = adafruit_ds2484.DS2484(i2c, address={{ address }})
+    ds248x = Adafruit_DS248x(i2c, address={{ address }})
 except Exception as e:
     print(f"Error initializing DS2484: {e}")
     import sys
@@ -24,14 +24,15 @@ except Exception as e:
 print("DS2484 1-Wire Master Controller")
 print("=" * 30)
 
-# Main reading loop
 while True:
-        # Scan for 1-Wire devices
-        devices = ds2484.scan()
+    rom = bytearray(8)
+    if not ds248x.onewire_search(rom):
+        print("no devices found")
+    else:
+        print(f"device found {rom.hex()}")
+
+        temperature = ds248x.ds18b20_temperature(rom)
+        print(f"Temperature: {temperature:.2f} °C")
         
-        print(f"Found {len(devices)} 1-Wire device(s):")
-        for i, device in enumerate(devices):
-            print(f"  Device {i+1}: {device}")
-        
-        print("-" * 30)
-        time.sleep(10) 
+    print("-" * 30)
+    time.sleep(10) 
