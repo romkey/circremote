@@ -24,19 +24,12 @@ except Exception as e:
 print("LTR-329 Ambient Light Sensor")
 print("=" * 30)
 
-# Main reading loop
 while True:
-        # Read sensor values
         visible = ltr.visible_plus_ir_light
         ir = ltr.ir_light
         
-        # Calculate visible light (subtract IR)
-        visible_light = visible - ir
-        
-        # Display readings
-        print(f"Visible Light: {visible_light:.1f} lux")
         print(f"IR Light: {ir:.1f} lux")
         print(f"Total Light: {visible:.1f} lux")
         print("-" * 30)
         
-        time.sleep(30) 
+        time.sleep(10)
