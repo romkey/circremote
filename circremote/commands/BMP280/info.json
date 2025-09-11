@@ -1,6 +1,6 @@
 {
   "description": "BMP280 is a digital barometric pressure sensor that provides high accuracy pressure and temperature measurements. It features low power consumption, fast response time, and is suitable for altitude measurement, weather monitoring, and pressure sensing applications.",
-  "tested": false,
+  "tested": true,
   "variables": [
     {
       "name": "sda",
@@ -18,7 +18,7 @@
       "name": "address",
       "required": false,
       "description": "I2C address",
-      "default": "0x76"
+      "default": "0x77"
     }
   ],
   "warn_offline": false
