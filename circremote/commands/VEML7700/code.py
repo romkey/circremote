@@ -24,21 +24,15 @@ except Exception as e:
 print("VEML7700 Ambient Light Sensor")
 print("=" * 35)
 
-# Display sensor information
-print(f"Integration Time: {veml7700.integration_time}")
-print(f"Gain: {veml7700.gain}")
-print(f"Power Save Mode: {veml7700.power_save}")
-print()
-
 # Main reading loop
 while True:
     lux = veml7700.lux
+    autolux = veml7700.autolux
     white = veml7700.white
-    als = veml7700.als
     
     print(f"Lux: {lux:.2f} lux")
+    print(f"Auto Lux: {autolux:.2f} lux")
     print(f"White: {white}")
-    print(f"ALS: {als}")
     
     # Determine light level
     if lux < 0.1:
@@ -57,4 +51,4 @@ while True:
     print(f"Light Level: {light_level}")
     print("-" * 30)
     
-    time.sleep(30)
+    time.sleep(10)

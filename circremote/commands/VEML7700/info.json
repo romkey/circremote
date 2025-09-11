@@ -20,6 +20,6 @@
       "default": "0x10"
     }
   ],
-  "tested": false,
+  "tested": true,
   "warn_offline": false
 }
