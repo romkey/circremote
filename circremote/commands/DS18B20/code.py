@@ -9,14 +9,10 @@ from adafruit_onewire.bus import OneWireBus
 from adafruit_ds18x20 import DS18X20
 from digitalio import DigitalInOut, Direction, Pull
 
-# Initialize OneWire bus
-try:
-    onewire = OneWireBus({{ pin }})
-except Exception as e:
-    print(f"Error initializing OneWireBus: {e}")
-    import sys
-    sys.exit(1)
 
+onewire = OneWireBus({{ onewire_pin }})
+
+print("Scanning onewire bus")
 devices = onewire.scan()
 if len(devices) == 0:
     print("No OneWire devices found")
@@ -25,6 +21,8 @@ if len(devices) == 0:
 if len(devices) > 1:
     print(f"Too many OneWire devices found: {len(devices)}")
     exit
+
+print(f"OneWire device found {devices[0].rom.hex}")
 
 try:
     ds18b20 = DS18X20(onewire, devices[0])
@@ -36,21 +34,7 @@ except Exception as e:
 print("DS18B20 Temperature Sensor")
 print("=" * 35)
 
-# Scan for devices
-roms = ds18b20.scan()
-print(f"Found {len(roms)} DS18B20 device(s)")
-
-# Display sensor information
-for i, rom in enumerate(roms):
-    print(f"Device {i+1}: {[hex(x) for x in rom]}")
-    print(f"Temperature Resolution: {ds18b20.resolution} bits")
-print()
-
 # Main reading loop
 while True:
-    # Read temperature from all devices
-    for i, rom in enumerate(roms):
-        temp = ds18b20.read_temperature(rom)
-        print(f"Device {i+1} Temperature: {temp:.2f}°C")
-                
-    time.sleep(30) 
+    print(f"Temperature: {ds18b20.temperature:.2f}°C")
+    time.sleep(10)
