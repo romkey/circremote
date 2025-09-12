@@ -22,7 +22,7 @@ if len(devices) > 1:
     print(f"Too many OneWire devices found: {len(devices)}")
     exit
 
-print(f"OneWire device found {devices[0].rom.hex}")
+print(f"OneWire device found {devices[0].rom.hex()}")
 
 try:
     ds18b20 = DS18X20(onewire, devices[0])
