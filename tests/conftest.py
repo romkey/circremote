@@ -74,12 +74,36 @@ while True:
 '''
 
 
+def make_options(**overrides):
+    """Build a full options Namespace matching parse_options() defaults."""
+    defaults = dict(
+        verbose=False,
+        password=None,
+        double_exit=False,
+        skip_circup=False,
+        circup=None,
+        config=None,
+        yes=False,
+        quiet=False,
+        timeout=10.0,
+        list=False,
+        version=False,
+        help=False,
+    )
+    defaults.update(overrides)
+    return Namespace(**defaults)
+
+
+@pytest.fixture
+def default_options():
+    """Return a fully-populated options Namespace."""
+    return make_options()
+
+
 @pytest.fixture
 def cli_instance():
     """Return a CLI instance for testing."""
-    options = Namespace(verbose=False, password=None, double_exit=False, 
-                       skip_circup=False, yes=False)
-    return CLI(options)
+    return CLI(make_options())
 
 
 @pytest.fixture
@@ -89,6 +113,7 @@ def mock_serial_connection():
     mock_conn.connection_type = 'serial'
     mock_conn.write = Mock()
     mock_conn.read_nonblock = Mock(return_value="***START***\nTest output\n***END***\n")
+    mock_conn.read_available = Mock(return_value="***START***\nTest output\n***END***\n")
     mock_conn.flush = Mock()
     mock_conn.close = Mock()
     return mock_conn
@@ -101,6 +126,7 @@ def mock_websocket_connection():
     mock_conn.connection_type = 'websocket'
     mock_conn.write = Mock()
     mock_conn.on_message = Mock()
+    mock_conn.read_available = Mock(return_value="***START***\nTest output\n***END***\n")
     mock_conn.flush = Mock()
     mock_conn.close = Mock()
     return mock_conn

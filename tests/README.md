@@ -16,15 +16,14 @@ tests/
 ├── integration/                # Integration tests
 │   ├── __init__.py
 │   └── test_command_execution.py  # End-to-end command execution tests
-├── functional/                 # Functional tests
-│   ├── __init__.py
-│   ├── test_smoke.py          # Smoke tests for all command files
-│   └── test_error_handling.py # Error handling scenarios
-└── fixtures/                   # Test data and fixtures
-    ├── sample_commands/        # Sample command files for testing
-    ├── mock_devices/           # Mock device configurations
-    └── test_configs/           # Test configuration files
+└── functional/                 # Functional tests
+    ├── __init__.py
+    ├── test_smoke.py          # Smoke tests for all command files
+    └── test_error_handling.py # Error handling scenarios
 ```
+
+Test data is created on the fly with pytest's `tmp_path` fixture rather than
+stored as static files.
 
 ## Test Categories
 
@@ -116,7 +115,7 @@ pytest -m functional
 
 The project uses GitHub Actions for automated testing:
 
-- **Python Versions**: 3.7, 3.8, 3.9, 3.10, 3.11
+- **Python Versions**: 3.10, 3.11, 3.12, 3.13
 - **Linting**: flake8, black, isort
 - **Coverage**: Codecov integration
 - **Triggers**: Push to main/develop, pull requests
@@ -129,12 +128,16 @@ Common test fixtures are defined in `conftest.py`:
 - `sample_command_dir` - Sample command directory (BME280)
 - `sample_info_json` - Sample info.json data
 - `sample_code_py` - Sample code.py content
+- `default_options` - Fully-populated options Namespace
 - `cli_instance` - CLI instance for testing
 - `mock_serial_connection` - Mock serial connection
 - `mock_websocket_connection` - Mock WebSocket connection
 - `temp_command_dir` - Temporary command directory
 - `sample_command_files` - Complete sample command files
 - `mock_config` - Mock config for testing
+
+`tests/conftest.py` also provides the `make_options(**overrides)` helper for
+building an options Namespace with specific flags set.
 
 ## Writing Tests
 

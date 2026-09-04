@@ -9,6 +9,8 @@ from unittest.mock import patch, mock_open
 
 from circremote.config import Config
 
+pytestmark = pytest.mark.unit
+
 class TestConfig:
     def test_init_sets_attributes(self):
         config = Config()
@@ -32,6 +34,15 @@ class TestConfig:
         assert config.find_command_alias('foo') == 'BME280'
         assert config.find_command_alias('bar') == 'SHT30'
         assert config.find_command_alias('nope') is None
+
+    def test_find_device_by_path(self):
+        config = Config()
+        config.devices = {
+            'dev1': {'name': 'dev1', 'device': '/dev/ttyUSB0'},
+            'dev2': {'name': 'dev2', 'device': '/dev/ttyUSB1'}
+        }
+        assert config.find_device_by_path('/dev/ttyUSB1') == {'name': 'dev2', 'device': '/dev/ttyUSB1'}
+        assert config.find_device_by_path('/dev/ttyUSB9') is None
 
     def test_list_devices_and_aliases(self):
         config = Config()
@@ -315,7 +326,20 @@ class TestConfig:
         config = Config()
         config.circup_path = None
         
-        assert config.get_circup_path() == 'circup'
+        # Simulate a system where circup is not installed anywhere, so the
+        # test doesn't depend on the machine it runs on
+        with patch('os.path.exists', return_value=False), \
+             patch('shutil.which', return_value=None):
+            assert config.get_circup_path() == 'circup'
+
+    def test_get_circup_path_from_system_path(self):
+        """Test that circup found on the system PATH is used."""
+        config = Config()
+        config.circup_path = None
+        
+        with patch('os.path.exists', return_value=False), \
+             patch('shutil.which', return_value='/usr/bin/circup'):
+            assert config.get_circup_path() == '/usr/bin/circup'
 
     def test_get_circup_path_no_options(self):
         """Test get_circup_path when options is None."""

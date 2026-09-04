@@ -23,6 +23,10 @@ class CircuitPythonConnection:
         self.ws_message_handlers = []
         self.ws_error_handlers = []
         self.ws_close_handlers = []
+        # Incoming WebSocket data is buffered here (by the receive thread)
+        # so it can be consumed synchronously via read_available().
+        self._recv_buffer = ""
+        self._recv_lock = threading.Lock()
         
         self.establish_connection()
 
@@ -55,6 +59,30 @@ class CircuitPythonConnection:
             return self.connection.read(max_bytes).decode('utf-8', errors='ignore')
         else:
             raise RuntimeError("read_nonblock not supported for WebSocket connections")
+
+    def read_available(self, max_bytes=1024):
+        """Return whatever output the device has sent (may be empty).
+
+        For serial connections this blocks up to the port timeout waiting
+        for the first byte, then drains anything else already buffered.
+        For WebSocket connections it drains the data accumulated by the
+        receive thread without blocking.
+        """
+        if self.connection_type == 'serial':
+            waiting = self.connection.in_waiting
+            if waiting:
+                data = self.connection.read(min(waiting, max_bytes))
+            else:
+                data = self.connection.read(1)
+                waiting = self.connection.in_waiting
+                if data and waiting:
+                    data += self.connection.read(min(waiting, max_bytes - 1))
+            return data.decode('utf-8', errors='ignore')
+        else:
+            with self._recv_lock:
+                data = self._recv_buffer
+                self._recv_buffer = ""
+            return data
 
     def on_message(self, handler):
         """Register a message handler for WebSocket connections."""
@@ -116,16 +144,15 @@ class CircuitPythonConnection:
             # Check for 401 unauthorized error
             if hasattr(error, 'status_code') and error.status_code == 401:
                 connection_error = "Bad password - authentication failed"
-            elif hasattr(error, 'args') and len(error.args) > 0:
-                error_str = str(error.args[0])
-                if '401' in error_str or 'unauthorized' in error_str.lower():
-                    connection_error = "Bad password - authentication failed"
-            # Check for connection refused error
+            # Check for connection refused error before inspecting args, so a
+            # ConnectionRefusedError with a message still gets classified
             elif isinstance(error, ConnectionRefusedError):
                 connection_error = "Connection refused"
             elif hasattr(error, 'args') and len(error.args) > 0:
                 error_str = str(error.args[0])
-                if 'connection refused' in error_str.lower() or 'refused' in error_str.lower():
+                if '401' in error_str or 'unauthorized' in error_str.lower():
+                    connection_error = "Bad password - authentication failed"
+                elif 'refused' in error_str.lower():
                     connection_error = "Connection refused"
         
         def on_open(ws):
@@ -315,6 +342,10 @@ class CircuitPythonConnection:
     def _on_ws_message(self, ws, message):
         """Handle WebSocket message events."""
         self.debug(f"WebSocket message received: {message}")
+        if isinstance(message, bytes):
+            message = message.decode('utf-8', errors='ignore')
+        with self._recv_lock:
+            self._recv_buffer += message
         for handler in self.ws_message_handlers:
             try:
                 handler(message)

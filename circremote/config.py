@@ -42,6 +42,13 @@ class Config:
         """Find a device by name in the configuration."""
         return self.devices.get(name)
 
+    def find_device_by_path(self, device_path):
+        """Find a device by its device path/address in the configuration."""
+        for device in self.devices.values():
+            if device.get('device') == device_path:
+                return device
+        return None
+
     def list_devices(self):
         """List all configured device names."""
         return list(self.devices.keys())

@@ -287,15 +287,20 @@ class CLI:
         # Parse variables from command line arguments
         variables = {}
         
+        # Separate positional arguments from explicit var=value assignments so
+        # assignments are never counted (or consumed) as positional values.
+        positional_args = [arg for arg in remaining_args if '=' not in arg]
+        assignment_args = [arg for arg in remaining_args if '=' in arg]
+        
         # First, try to parse as default commandline variables (positional arguments)
-        if info_data and remaining_args:
-            default_vars = self.parse_default_commandline_variables(remaining_args, info_data, command_name)
+        if info_data and positional_args:
+            default_vars = self.parse_default_commandline_variables(positional_args, info_data, command_name)
             if default_vars:
                 variables.update(default_vars)
                 self.debug(f"Parsed {len(default_vars)} variables from default commandline", options)
         
         # Then, parse any explicit variable assignments (var=value format)
-        explicit_vars = self.parse_command_line_variables(remaining_args)
+        explicit_vars = self.parse_command_line_variables(assignment_args)
         if explicit_vars:
             variables.update(explicit_vars)
             self.debug(f"Parsed {len(explicit_vars)} explicit variable assignments", options)
@@ -394,17 +399,11 @@ class CLI:
         try:
             self.debug("Starting CircuitPython REPL protocol", options)
             
-            self.debug("Interrupting CircuitPython (Ctrl+C x3)...", options)
-            self.debug("Sending 3 Ctrl+C characters (\\x03)", options)
-            connection.write("\x03\x03\x03")  # Send Ctrl+C three times
-            self.debug("Waiting 0.5 seconds after Ctrl+C", options)
-            time.sleep(0.5)
-            
-            self.debug("Entering raw REPL mode (Ctrl+A)...", options)
-            self.debug("Sending Ctrl+A character (\\x01)", options)
-            connection.write("\x01")  # Send Ctrl+A
-            self.debug("Waiting 0.5 seconds after Ctrl+A", options)
-            time.sleep(0.5)
+            # Drive the device into raw REPL mode, verifying each step by
+            # reading the device's responses. Any output received past the
+            # raw REPL prompt is carried forward so the monitors don't miss
+            # the start of the program's output.
+            pending_output = self.enter_raw_repl(connection, options)
             
             self.debug("Sending start marker...", options)
             self.debug("Sending: print('***START***')", options)
@@ -434,11 +433,19 @@ class CLI:
             connection.flush()
             self.debug("End marker sent and flushed", options)
             
-            self.debug("Exiting raw REPL mode (Ctrl+D, Ctrl+B)...", options)
-            self.debug("Sending Ctrl+D character (\\x04)", options)
+            self.debug("Executing code (Ctrl+D) and waiting for raw REPL acknowledgment...", options)
             connection.write("\x04")  # Send Ctrl+D
-            self.debug("Waiting 0.1 seconds after Ctrl+D", options)
-            time.sleep(0.1)
+            connection.flush()
+            found, pending_output = self.read_until(
+                connection, "OK", 5.0, options, initial=pending_output
+            )
+            if found:
+                self.debug("Raw REPL acknowledged execution with 'OK'", options)
+            else:
+                self.debug("Raw REPL did not acknowledge execution with 'OK'; continuing anyway", options)
+            
+            # Queue the raw REPL exit; the device processes it once the
+            # program finishes.
             self.debug("Sending Ctrl+B character (\\x02)", options)
             connection.write("\x02")  # Send Ctrl+B
             
@@ -460,7 +467,7 @@ class CLI:
 
         try:
             self.debug("Starting output monitoring with 10-second timeout", options)
-            self.monitor_output(connection, options)
+            self.monitor_output(connection, options, pending_output)
         except KeyboardInterrupt:
             print("\nInterrupted by user")
         except Exception as e:
@@ -887,28 +894,17 @@ class CLI:
                 print("Please update the module's info.json file to include these variables.")
                 sys.exit(1)
         
-        # Parse positional arguments as variables
-        for i, arg in enumerate(args):
-            if i < len(expected_vars):
-                var_name = expected_vars[i]
-                variables[var_name] = arg
-            else:
-                # Extra arguments beyond what's expected
-                print(f"❌ Error: Too many positional arguments for '{command_name}'")
-                print(f"Expected {len(expected_vars)} arguments: {default_commandline}")
-                print(f"Got {len(args)} arguments")
-                sys.exit(1)
-        
-        # Check if we have enough arguments
-        if len(args) < len(expected_vars):
-            print(f"❌ Error: Not enough positional arguments for '{command_name}'")
-            print(f"Expected {len(expected_vars)} arguments: {default_commandline}")
+        # Parse positional arguments as variables. Fewer arguments than
+        # expected is fine: remaining variables can be supplied by explicit
+        # var=value assignments or filled in from defaults later.
+        if len(args) > len(expected_vars):
+            print(f"❌ Error: Too many positional arguments for '{command_name}'")
+            print(f"Expected at most {len(expected_vars)} arguments: {default_commandline}")
             print(f"Got {len(args)} arguments")
-            print()
-            print("You can also use explicit variable assignments:")
-            for var in expected_vars:
-                print(f"   {var}=value")
             sys.exit(1)
+        
+        for var_name, arg in zip(expected_vars, args):
+            variables[var_name] = arg
         
         return variables
 
@@ -943,7 +939,7 @@ class CLI:
             print("Please check the module's info.json file for the correct variable names.")
             sys.exit(1)
 
-    def add_defaults_from_info(self, variables, info_data, command_name, device_info):
+    def add_defaults_from_info(self, variables, info_data, command_name, device_info=None):
         """
         Add default values for missing variables with precedence:
         1. Command line variables (already in variables dict)
@@ -1030,21 +1026,31 @@ class CLI:
             print("Please provide values for all template variables on the command line.")
             sys.exit(1)
         
-        # Perform the interpolation
+        # Perform the interpolation. Use a callable replacement so values are
+        # inserted literally (backslashes and \g<...> in a value would
+        # otherwise be interpreted as regex replacement escapes).
         result = content
         for var_name, value in variables.items():
             pattern = r'\{\{\s*' + re.escape(var_name) + r'\s*\}\}'
-            result = re.sub(pattern, value, result)
+            result = re.sub(pattern, lambda match, v=value: v, result)
         
         return result
 
     def resolve_device(self, device_spec, options):
         """Resolve device specification to device info."""
-        # First, try to find the device in the config
+        # First, try to find the device in the config by name
         device_config = self.config.find_device(device_spec)
         
         if device_config:
             self.debug(f"Found device '{device_spec}' in config: {device_config['device']}", options)
+            return device_config
+        
+        # Next, try to match a config device by its device path/address, so
+        # defaults and passwords apply even when the raw path is used
+        device_config = self.config.find_device_by_path(device_spec)
+        
+        if device_config:
+            self.debug(f"Found device '{device_spec}' in config by path (name: '{device_config['name']}')", options)
             return device_config
         
         # If not found in config, treat as direct device specification
@@ -1411,7 +1417,80 @@ class CLI:
             except Exception as e:
                 self.debug(f"Warning: Could not delete temporary requirements file: {e}", options)
 
-    def monitor_output(self, connection, options):
+    def read_until(self, connection, pattern, timeout, options, initial=""):
+        """Accumulate device output until `pattern` appears or `timeout` expires.
+
+        Returns (found, remainder): remainder is any data received after the
+        pattern (or the entire unmatched buffer on timeout), so callers can
+        chain reads without losing data.
+        """
+        buffer = initial
+        deadline = time.time() + timeout
+        while pattern not in buffer:
+            if time.time() >= deadline:
+                self.debug(f"Timed out waiting for {pattern!r}; buffer: {buffer!r}", options)
+                return False, buffer
+            data = connection.read_available()
+            if data:
+                buffer += data
+            else:
+                time.sleep(0.05)
+        self.debug(f"Found expected {pattern!r} in device output", options)
+        index = buffer.index(pattern) + len(pattern)
+        return True, buffer[index:]
+
+    def enter_raw_repl(self, connection, options):
+        """Drive the device into raw REPL mode, verifying each step.
+
+        Returns any device output received after the raw REPL prompt so it
+        can be carried over into output monitoring.
+        """
+        pending = ""
+        
+        # Step 1: get to the normal '>>>' prompt. Ctrl+C interrupts any
+        # running program; Ctrl+B backs out of a stale raw REPL session (at
+        # the normal REPL it just reprints the banner); the CR/LF doubles as
+        # the keypress CircuitPython wants when it is sitting at "Press any
+        # key to enter the REPL."
+        self.debug("Interrupting device and waiting for '>>>' prompt...", options)
+        for attempt in range(1, 6):
+            connection.write("\x03")  # Send Ctrl+C
+            connection.flush()
+            time.sleep(0.1)
+            connection.write("\x02\r\n")  # Send Ctrl+B and a newline
+            connection.flush()
+            found, pending = self.read_until(connection, ">>>", 2.0, options, initial=pending)
+            if found:
+                self.debug(f"Got '>>>' prompt (attempt {attempt})", options)
+                break
+        else:
+            raise RuntimeError("could not reach the CircuitPython REPL prompt ('>>>' never seen)")
+        
+        # Step 2: enter raw REPL and wait for its confirmation banner.
+        self.debug("Entering raw REPL mode (Ctrl+A)...", options)
+        for attempt in range(1, 6):
+            connection.write("\x01")  # Send Ctrl+A
+            connection.flush()
+            found, pending = self.read_until(
+                connection, "raw REPL; CTRL-B to exit", 2.0, options, initial=pending
+            )
+            if found:
+                self.debug(f"Raw REPL banner seen (attempt {attempt})", options)
+                break
+            # Back out of any partial state and try again
+            connection.write("\x02\x03")
+            connection.flush()
+        else:
+            raise RuntimeError("could not enter raw REPL mode (banner never seen)")
+        
+        # The banner is followed by the raw REPL '>' prompt.
+        found, pending = self.read_until(connection, ">", 1.0, options, initial=pending)
+        if not found:
+            self.debug("Raw REPL '>' prompt not seen; continuing anyway", options)
+        
+        return pending
+
+    def monitor_output(self, connection, options, initial_buffer=""):
         """Monitor output from the connection with configurable timeout."""
         import signal
         import platform
@@ -1444,9 +1523,9 @@ class CLI:
         
         try:
             if connection.connection_type == 'serial':
-                self.monitor_serial_output(connection, options, timeout_flag)
+                self.monitor_serial_output(connection, options, timeout_flag, initial_buffer)
             else:
-                self.monitor_websocket_output(connection, options)
+                self.monitor_websocket_output(connection, options, initial_buffer)
         finally:
             # Cancel the timeout if it was set
             if connection.connection_type == 'serial' and timeout > 0:
@@ -1458,24 +1537,89 @@ class CLI:
                     except (AttributeError, OSError):
                         pass
 
-    def monitor_serial_output(self, connection, options, timeout_flag=None):
+    def _scan_output_buffer(self, state, options):
+        """Scan buffered device output for the START/END markers, printing
+        content between them. Mutates `state` (a dict with 'buffer',
+        'found_start', and 'found_end' keys); returns True once the end
+        marker has been seen.
+        """
+        buffer = state['buffer']
+        if not buffer:
+            return state['found_end']
+        
+        # Look for ***START*** marker
+        if not state['found_start'] and "***START***" in buffer:
+            start_index = buffer.index("***START***")
+            self.debug(f"Found ***START*** marker at index {start_index}", options)
+            state['found_start'] = True
+            after_start = buffer[start_index + len("***START***"):]
+            
+            # Check if ***END*** is also in this buffer
+            if "***END***" in after_start:
+                end_index = after_start.index("***END***")
+                self.debug(f"Found ***END*** marker at index {end_index} in same buffer", options)
+                
+                # Only display content between ***START*** and ***END***
+                display_content = after_start[:end_index]
+                self.debug(f"Content between markers: {repr(display_content)}", options)
+                if display_content.strip():
+                    self.debug("Displaying content between markers", options)
+                    print(display_content, end='', flush=True)
+                
+                state['found_end'] = True
+                self.debug("Set found_start=true, found_end=true", options)
+            else:
+                # Only ***START*** found, display content after it
+                self.debug(f"Content after ***START***: {repr(after_start)}", options)
+                if after_start.strip():
+                    self.debug("Displaying content after ***START***", options)
+                    print(after_start, end='', flush=True)
+                self.debug("Set found_start=true, cleared buffer", options)
+            state['buffer'] = ""
+        elif state['found_start'] and not state['found_end']:
+            # Look for ***END*** marker
+            if "***END***" in buffer:
+                end_index = buffer.index("***END***")
+                self.debug(f"Found ***END*** marker at index {end_index}", options)
+                # Display content up to ***END***
+                display_content = buffer[:end_index]
+                self.debug(f"Content before ***END***: {repr(display_content)}", options)
+                if display_content.strip():
+                    self.debug("Displaying content before ***END***", options)
+                    print(display_content, end='', flush=True)
+                state['found_end'] = True
+                self.debug("Set found_end=true", options)
+            else:
+                # Display all content since we're between markers
+                self.debug(f"Displaying buffer content (between markers): {repr(buffer)}", options)
+                print(buffer, end='', flush=True)
+                self.debug("Cleared buffer after display", options)
+            state['buffer'] = ""
+        else:
+            self.debug(f"Skipping data (found_start={state['found_start']}, found_end={state['found_end']})", options)
+        
+        return state['found_end']
+
+    def monitor_serial_output(self, connection, options, timeout_flag=None, initial_buffer=""):
         """Monitor output from serial connection."""
-        buffer = ""
-        found_start = False
-        found_end = False
+        state = {'buffer': initial_buffer, 'found_start': False, 'found_end': False}
         bytes_read = 0
         read_count = 0
         
-        self.debug(f"Initial state: buffer='{buffer}', found_start={found_start}, found_end={found_end}", options)
+        self.debug(f"Initial state: buffer={state['buffer']!r}, found_start=False, found_end=False", options)
         
         while True:
+            # Process anything already buffered (including handshake leftovers)
+            if self._scan_output_buffer(state, options):
+                break
+            
             # Check for timeout
             if timeout_flag and timeout_flag.is_set():
                 self.debug("Timeout reached, exiting output monitoring", options)
                 break
                 
             try:
-                data = connection.read_nonblock(1024)
+                data = connection.read_available(1024)
                 if not data:
                     time.sleep(0.1)
                     continue
@@ -1486,66 +1630,8 @@ class CLI:
                 if options.verbose:
                     self.debug(f"Raw data: {repr(data)}", options)
                 
-                buffer += data
-                self.debug(f"Buffer length: {len(buffer)} characters", options)
-                
-                # Look for ***START*** marker
-                if not found_start and "***START***" in buffer:
-                    start_index = buffer.index("***START***")
-                    self.debug(f"Found ***START*** marker at index {start_index}", options)
-                    
-                    # Check if ***END*** is also in this buffer
-                    if "***END***" in buffer:
-                        end_index = buffer.index("***END***")
-                        self.debug(f"Found ***END*** marker at index {end_index} in same buffer", options)
-                        
-                        # Only display content between ***START*** and ***END***
-                        display_start = start_index + len("***START***")
-                        display_end = end_index
-                        if display_start < display_end:
-                            display_content = buffer[display_start:display_end]
-                            self.debug(f"Content between markers: {repr(display_content)}", options)
-                            if display_content.strip():
-                                self.debug("Displaying content between markers", options)
-                                print(display_content, end='', flush=True)
-                        
-                        found_start = True
-                        found_end = True
-                        self.debug("Set found_start=true, found_end=true, breaking loop", options)
-                        break
-                    else:
-                        # Only ***START*** found, display content after it
-                        display_content = buffer[start_index + len("***START***"):]
-                        self.debug(f"Content after ***START***: {repr(display_content)}", options)
-                        if display_content.strip():
-                            self.debug("Displaying content after ***START***", options)
-                            print(display_content, end='', flush=True)
-                        found_start = True
-                        buffer = ""
-                        self.debug("Set found_start=true, cleared buffer", options)
-                elif found_start and not found_end:
-                    # Look for ***END*** marker
-                    if "***END***" in buffer:
-                        end_index = buffer.index("***END***")
-                        self.debug(f"Found ***END*** marker at index {end_index}", options)
-                        # Display content up to ***END***
-                        display_content = buffer[:end_index]
-                        self.debug(f"Content before ***END***: {repr(display_content)}", options)
-                        if display_content.strip():
-                            self.debug("Displaying content before ***END***", options)
-                            print(display_content, end='', flush=True)
-                        found_end = True
-                        self.debug("Set found_end=true, breaking loop", options)
-                        break
-                    else:
-                        # Display all content since we're between markers
-                        self.debug(f"Displaying buffer content (between markers): {repr(buffer)}", options)
-                        print(buffer, end='', flush=True)
-                        buffer = ""
-                        self.debug("Cleared buffer after display", options)
-                else:
-                    self.debug(f"Skipping data (found_start={found_start}, found_end={found_end})", options)
-                    
+                state['buffer'] += data
+                self.debug(f"Buffer length: {len(state['buffer'])} characters", options)
             except Exception as e:
                 if "timeout" in str(e).lower():
                     break
@@ -1727,98 +1813,41 @@ class CLI:
         
         return file_content, info_data, requirements_content, False
 
-    def monitor_websocket_output(self, connection, options):
-        """Monitor output from WebSocket connection."""
-        buffer = ""
-        found_start = False
-        found_end = False
+    def monitor_websocket_output(self, connection, options, initial_buffer=""):
+        """Monitor output from WebSocket connection by polling received data."""
+        state = {'buffer': initial_buffer, 'found_start': False, 'found_end': False}
         bytes_read = 0
-        message_count = 0
+        read_count = 0
         
-        self.debug(f"Initial WebSocket state: buffer='{buffer}', found_start={found_start}, found_end={found_end}", options)
-        
-        # Set up message handler for WebSocket
-        def message_handler(msg):
-            nonlocal buffer, found_start, found_end, bytes_read, message_count
-            message_count += 1
-            data = msg.data if hasattr(msg, 'data') else str(msg)
-            bytes_read += len(data.encode('utf-8'))
-            self.debug(f"WebSocket received {len(data.encode('utf-8'))} bytes (total: {bytes_read}, messages: {message_count})", options)
-            if options.verbose:
-                self.debug(f"Raw WebSocket data: {repr(data)}", options)
-            
-            buffer += data
-            self.debug(f"Buffer length: {len(buffer)} characters", options)
-            
-            # Look for ***START*** marker
-            if not found_start and "***START***" in buffer:
-                start_index = buffer.index("***START***")
-                self.debug(f"Found ***START*** marker at index {start_index}", options)
-                
-                # Check if ***END*** is also in this buffer
-                if "***END***" in buffer:
-                    end_index = buffer.index("***END***")
-                    self.debug(f"Found ***END*** marker at index {end_index} in same buffer", options)
-                    
-                    # Only display content between ***START*** and ***END***
-                    display_start = start_index + len("***START***")
-                    display_end = end_index
-                    if display_start < display_end:
-                        display_content = buffer[display_start:display_end]
-                        self.debug(f"Content between markers: {repr(display_content)}", options)
-                        if display_content.strip():
-                            self.debug("Displaying content between markers", options)
-                            print(display_content, end='', flush=True)
-                    
-                    found_start = True
-                    found_end = True
-                    self.debug("Set found_start=true, found_end=true, WebSocket monitoring complete", options)
-                else:
-                    # Only ***START*** found, display content after it
-                    display_content = buffer[start_index + len("***START***"):]
-                    self.debug(f"Content after ***START***: {repr(display_content)}", options)
-                    if display_content.strip():
-                        self.debug("Displaying content after ***START***", options)
-                        print(display_content, end='', flush=True)
-                    found_start = True
-                    buffer = ""
-                    self.debug("Set found_start=true, cleared buffer", options)
-            elif found_start and not found_end:
-                # Look for ***END*** marker
-                if "***END***" in buffer:
-                    end_index = buffer.index("***END***")
-                    self.debug(f"Found ***END*** marker at index {end_index}", options)
-                    # Display content up to ***END***
-                    display_content = buffer[:end_index]
-                    self.debug(f"Content before ***END***: {repr(display_content)}", options)
-                    if display_content.strip():
-                        self.debug("Displaying content before ***END***", options)
-                        print(display_content, end='', flush=True)
-                    found_end = True
-                    self.debug("Set found_end=true, WebSocket monitoring complete", options)
-                else:
-                    # Display all content since we're between markers
-                    self.debug(f"Displaying buffer content (between markers): {repr(buffer)}", options)
-                    print(buffer, end='', flush=True)
-                    buffer = ""
-                    self.debug("Cleared buffer after display", options)
-            else:
-                self.debug(f"Skipping data (found_start={found_start}, found_end={found_end})", options)
-        
-        connection.on_message(message_handler)
+        self.debug(f"Initial WebSocket state: buffer={state['buffer']!r}, found_start=False, found_end=False", options)
         
         # Get timeout from options, default to 10 seconds if not specified
         timeout = getattr(options, 'timeout', 10.0)
-        
-        # Wait for output with timeout
         start_time = time.time()
+        
         while True:
-            if found_end:
+            # Process anything already buffered (including handshake leftovers)
+            if self._scan_output_buffer(state, options):
                 break
+            
             # If timeout is 0, wait indefinitely
             if timeout > 0 and time.time() - start_time >= timeout:
+                self.debug("Timeout reached, exiting WebSocket output monitoring", options)
                 break
-            time.sleep(0.1)
+            
+            data = connection.read_available()
+            if not data:
+                time.sleep(0.1)
+                continue
+            
+            bytes_read += len(data.encode('utf-8'))
+            read_count += 1
+            self.debug(f"WebSocket received {len(data.encode('utf-8'))} bytes (total: {bytes_read}, reads: {read_count})", options)
+            if options.verbose:
+                self.debug(f"Raw WebSocket data: {repr(data)}", options)
+            
+            state['buffer'] += data
+            self.debug(f"Buffer length: {len(state['buffer'])} characters", options)
         
         self.debug("WebSocket output monitoring complete", options)
-        self.debug(f"Final WebSocket stats: bytes_read={bytes_read}, message_count={message_count}", options) 
+        self.debug(f"Final WebSocket stats: bytes_read={bytes_read}, read_count={read_count}", options) 

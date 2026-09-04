@@ -9,6 +9,9 @@ from argparse import Namespace
 import json
 
 from circremote.cli import CLI
+from tests.conftest import make_options
+
+pytestmark = pytest.mark.unit
 
 
 class TestCLI:
@@ -44,6 +47,20 @@ class TestCLI:
         
         assert result == {}
 
+    def test_parse_command_line_variables_value_contains_equals(self, cli_instance):
+        """Test that only the first '=' splits the assignment."""
+        args = ['url=http://example.com/?a=b&c=d']
+        result = cli_instance.parse_command_line_variables(args)
+        
+        assert result == {'url': 'http://example.com/?a=b&c=d'}
+
+    def test_parse_command_line_variables_empty_value(self, cli_instance):
+        """Test parsing an assignment with an empty value."""
+        args = ['name=']
+        result = cli_instance.parse_command_line_variables(args)
+        
+        assert result == {'name': ''}
+
     def test_parse_default_commandline_variables(self, cli_instance, sample_info_json):
         """Test parsing positional arguments as variables."""
         args = ['board.IO1', 'board.IO2']
@@ -69,12 +86,13 @@ class TestCLI:
         with pytest.raises(SystemExit):
             cli_instance.parse_default_commandline_variables(args, sample_info_json, 'test')
 
-    def test_parse_default_commandline_variables_not_enough_args(self, cli_instance, sample_info_json):
-        """Test error handling for not enough arguments."""
-        args = ['board.IO1']  # Missing scl
+    def test_parse_default_commandline_variables_partial_args(self, cli_instance, sample_info_json):
+        """Test that fewer positional args than expected is allowed (defaults fill the rest)."""
+        args = ['board.IO1']  # scl not provided; should come from defaults later
         
-        with pytest.raises(SystemExit):
-            cli_instance.parse_default_commandline_variables(args, sample_info_json, 'test')
+        result = cli_instance.parse_default_commandline_variables(args, sample_info_json, 'test')
+        
+        assert result == {'sda': 'board.IO1'}
 
     def test_validate_variables_valid(self, cli_instance, sample_info_json):
         """Test validation of valid variables."""
@@ -123,6 +141,65 @@ class TestCLI:
         expected = {'sda': 'board.IO1'}  # Should only keep provided value
         assert result == expected
 
+    def test_add_defaults_precedence_device_over_global_over_info(self, cli_instance, sample_info_json):
+        """Test defaults precedence: device defaults > global defaults > info.json defaults."""
+        device_info = {
+            'name': 'test-device',
+            'device': '/dev/ttyUSB0',
+            'defaults': {'sda': 'board.DEVICE_SDA'}
+        }
+        cli_instance.config.devices = {'test-device': device_info}
+        cli_instance.config.variable_defaults = {
+            'sda': 'board.GLOBAL_SDA',
+            'scl': 'board.GLOBAL_SCL',
+        }
+        
+        result = cli_instance.add_defaults_from_info({}, sample_info_json, 'test', device_info)
+        
+        # sda: device default wins over global and info.json
+        assert result['sda'] == 'board.DEVICE_SDA'
+        # scl: no device default, global default wins over info.json
+        assert result['scl'] == 'board.GLOBAL_SCL'
+
+    def test_add_defaults_command_line_wins_over_all(self, cli_instance, sample_info_json):
+        """Test that command line values are never overridden by any default."""
+        device_info = {
+            'name': 'test-device',
+            'device': '/dev/ttyUSB0',
+            'defaults': {'sda': 'board.DEVICE_SDA'}
+        }
+        cli_instance.config.devices = {'test-device': device_info}
+        
+        result = cli_instance.add_defaults_from_info({'sda': 'board.CLI_SDA'}, sample_info_json, 'test', device_info)
+        
+        assert result['sda'] == 'board.CLI_SDA'
+
+    def test_add_defaults_stringifies_json_types(self, cli_instance):
+        """Test that non-string defaults (bool, int, float) become their str() form."""
+        info_data = {
+            'variables': [
+                {'name': 'continuous', 'default': False},
+                {'name': 'count', 'default': 5},
+                {'name': 'brightness', 'default': 0.1},
+            ]
+        }
+        
+        result = cli_instance.add_defaults_from_info({}, info_data, 'test')
+        
+        assert result == {'continuous': 'False', 'count': '5', 'brightness': '0.1'}
+
+    def test_add_defaults_skips_null_default(self, cli_instance):
+        """Test that a JSON null default is not applied."""
+        info_data = {
+            'variables': [
+                {'name': 'pin', 'default': None},
+            ]
+        }
+        
+        result = cli_instance.add_defaults_from_info({}, info_data, 'test')
+        
+        assert result == {}
+
     def test_interpolate_variables(self, cli_instance, sample_info_json):
         """Test variable interpolation in template content."""
         content = "import {{sda}}\nimport {{scl}}"
@@ -132,6 +209,33 @@ class TestCLI:
         
         expected = "import board.IO1\nimport board.IO2"
         assert result == expected
+
+    def test_interpolate_variables_with_spaces(self, cli_instance, sample_info_json):
+        """Test interpolation of the '{{ var }}' spaced form used by real command files."""
+        content = 'sda_pin = {{ sda }}\nscl_pin = {{  scl  }}'
+        variables = {'sda': 'board.IO1', 'scl': 'board.IO2'}
+        
+        result = cli_instance.interpolate_variables(content, variables, sample_info_json, 'test')
+        
+        assert result == 'sda_pin = board.IO1\nscl_pin = board.IO2'
+
+    def test_interpolate_variables_multiple_occurrences(self, cli_instance, sample_info_json):
+        """Test that all occurrences of a template variable are replaced."""
+        content = 'a = {{ sda }}\nb = {{ sda }}\nc = "{{ scl }}"'
+        variables = {'sda': 'board.IO1', 'scl': 'board.IO2'}
+        
+        result = cli_instance.interpolate_variables(content, variables, sample_info_json, 'test')
+        
+        assert result == 'a = board.IO1\nb = board.IO1\nc = "board.IO2"'
+
+    def test_interpolate_variables_literal_backslashes(self, cli_instance, sample_info_json):
+        """Test that values with backslashes are inserted literally, not as regex escapes."""
+        content = 'x = "{{sda}}"'
+        variables = {'sda': 'dir\\name\\g<0>.txt', 'scl': 'board.IO2'}
+        
+        result = cli_instance.interpolate_variables(content, variables, sample_info_json, 'test')
+        
+        assert result == 'x = "dir\\name\\g<0>.txt"'
 
     def test_interpolate_variables_missing_var(self, cli_instance, sample_info_json):
         """Test error handling for missing variables."""
@@ -203,6 +307,7 @@ class TestCLI:
         """Test direct device specification."""
         cli_instance.config = mock_config
         mock_config.find_device.return_value = None
+        mock_config.find_device_by_path.return_value = None
         
         result = cli_instance.resolve_device('/dev/ttyUSB0', Mock())
         
@@ -212,17 +317,40 @@ class TestCLI:
         }
         assert result == expected
 
+    def test_resolve_device_by_path(self, cli_instance, mock_config):
+        """Test that a raw device path resolves to the config entry (defaults apply)."""
+        cli_instance.config = mock_config
+        device_entry = {
+            'name': 'bling',
+            'device': '/dev/ttyUSB0',
+            'defaults': {'neopixel_pin': 'board.MATRIX_DATA'}
+        }
+        mock_config.find_device.return_value = None
+        mock_config.find_device_by_path.return_value = device_entry
+        
+        result = cli_instance.resolve_device('/dev/ttyUSB0', Mock())
+        
+        assert result == device_entry
+
     def test_debug_message_verbose(self, cli_instance):
         """Test debug message output in verbose mode."""
-        options = Namespace(verbose=True)
+        options = make_options(verbose=True)
         
         with patch('builtins.print') as mock_print:
             cli_instance.debug("Test message", options)
-            mock_print.assert_called_once_with("Test message")
+            mock_print.assert_called_once_with("DEBUG: Test message")
 
     def test_debug_message_not_verbose(self, cli_instance):
         """Test debug message suppression when not verbose."""
-        options = Namespace(verbose=False)
+        options = make_options(verbose=False)
+        
+        with patch('builtins.print') as mock_print:
+            cli_instance.debug("Test message", options)
+            mock_print.assert_not_called()
+
+    def test_debug_message_quiet_suppresses_verbose(self, cli_instance):
+        """Test that quiet mode suppresses debug output even with verbose set."""
+        options = make_options(verbose=True, quiet=True)
         
         with patch('builtins.print') as mock_print:
             cli_instance.debug("Test message", options)
@@ -295,7 +423,7 @@ class TestCLI:
         test_file = tmp_path / "test_sensor.py"
         test_file.write_text("# Test sensor code\nprint('Hello')")
         
-        options = Namespace(verbose=True, skip_circup=True)
+        options = make_options(verbose=True, skip_circup=True)
         result = cli_instance.resolve_command_path(str(test_file), options)
         
         file_content, command_dir, code_file, info_data, is_pathname = result
@@ -317,7 +445,7 @@ class TestCLI:
         info_file = test_dir / "info.json"
         info_file.write_text('{"name": "Test Sensor", "description": "Test"}')
         
-        options = Namespace(verbose=True, skip_circup=True)
+        options = make_options(verbose=True, skip_circup=True)
         result = cli_instance.resolve_command_path(str(test_dir), options)
         
         file_content, command_dir, code_file, info_data, is_pathname = result
@@ -333,21 +461,21 @@ class TestCLI:
         test_dir = tmp_path / "test_sensor"
         test_dir.mkdir()
         
-        options = Namespace(verbose=True, skip_circup=True)
+        options = make_options(verbose=True, skip_circup=True)
         
         with pytest.raises(SystemExit):
             cli_instance.resolve_command_path(str(test_dir), options)
 
     def test_resolve_command_path_nonexistent(self, cli_instance):
         """Test resolving a nonexistent pathname."""
-        options = Namespace(verbose=True, skip_circup=True)
+        options = make_options(verbose=True, skip_circup=True)
         
         with pytest.raises(SystemExit):
             cli_instance.resolve_command_path("/nonexistent/path", options)
 
     def test_resolve_command_path_builtin_command(self, cli_instance):
         """Test resolving a built-in command (not a pathname)."""
-        options = Namespace(verbose=True, skip_circup=True)
+        options = make_options(verbose=True, skip_circup=True)
         result = cli_instance.resolve_command_path("BME280", options)
         
         file_content, command_dir, code_file, info_data, is_pathname = result
@@ -368,7 +496,7 @@ class TestCLI:
         original_cwd = os.getcwd()
         try:
             os.chdir(tmp_path)
-            options = Namespace(verbose=True, skip_circup=True)
+            options = make_options(verbose=True, skip_circup=True)
             result = cli_instance.resolve_command_path("./test_sensor.py", options)
             
             file_content, command_dir, code_file, info_data, is_pathname = result
@@ -392,7 +520,7 @@ class TestCLI:
         requirements_file = test_dir / "requirements.txt"
         requirements_file.write_text("adafruit-circuitpython-bme280")
         
-        options = Namespace(verbose=True, skip_circup=False)
+        options = make_options(verbose=True, skip_circup=False)
         result = cli_instance.resolve_command_path(str(test_dir), options)
         
         file_content, command_dir, code_file, info_data, is_pathname = result
@@ -414,7 +542,7 @@ class TestCLI:
         requirements_file = test_dir / "requirements.txt"
         requirements_file.write_text("# Empty requirements\n\n")
         
-        options = Namespace(verbose=True, skip_circup=False)
+        options = make_options(verbose=True, skip_circup=False)
         result = cli_instance.resolve_command_path(str(test_dir), options)
         
         file_content, command_dir, code_file, info_data, is_pathname = result
@@ -514,7 +642,7 @@ class TestCLI:
         assert options.skip_circup is True
         assert remaining == ['/dev/ttyUSB0', 'BME280']
 
-    def test_show_command_help_builtin_command(self, cli_instance, tmp_path):
+    def test_show_command_help_builtin_command(self, cli_instance, tmp_path, capsys):
         """Test showing help for a built-in command."""
         # Create a mock BME280 command directory
         commands_dir = tmp_path / 'commands'
@@ -539,9 +667,16 @@ class TestCLI:
         with patch.object(cli_instance, 'resolve_command_path') as mock_resolve:
             mock_resolve.return_value = (None, bme280_dir, bme280_dir / 'code.py', info_data, False)
             
-            # Test that the method runs without error
-            options = Namespace(skip_circup=False, verbose=False)
+            options = make_options()
             cli_instance.show_command_help('BME280', options)
+        
+        # Verify the help output contains the key information
+        captured = capsys.readouterr()
+        assert 'BME280' in captured.out
+        assert 'BME280 temperature sensor' in captured.out
+        assert 'sda' in captured.out
+        assert 'I2C SDA pin' in captured.out
+        assert 'board.SDA' in captured.out
 
     def test_show_command_help_nonexistent_command(self, cli_instance, capsys):
         """Test showing help for a nonexistent command."""
@@ -551,77 +686,50 @@ class TestCLI:
         captured = capsys.readouterr()
         assert 'Command \'nonexistent\' not found' in captured.out
 
-    def test_list_all_commands(self, cli_instance, tmp_path, capsys):
-        """Test listing all commands."""
-        # Create mock command directories
-        commands_dir = tmp_path / 'commands'
-        commands_dir.mkdir()
+    def test_list_all_commands(self, cli_instance, capsys):
+        """Test listing all commands includes real built-in commands."""
+        cli_instance.list_all_commands(None)
         
-        # Create some built-in commands
-        (commands_dir / 'BME280').mkdir()
-        (commands_dir / 'BME280' / 'code.py').write_text('# BME280 code')
-        (commands_dir / 'SHT30').mkdir()
-        (commands_dir / 'SHT30' / 'code.py').write_text('# SHT30 code')
-        
-        with patch('circremote.cli.Path') as mock_path:
-            # Mock the Path(__file__).parent / 'commands' call
-            mock_parent = Mock()
-            mock_parent.__truediv__ = Mock(return_value=commands_dir)
-            mock_path.return_value.parent = mock_parent
-            
-            # Test that the method runs without error
-            cli_instance.list_all_commands(None)
-            
-            # Check that some output was captured
-            captured = capsys.readouterr()
-            assert 'Available commands:' in captured.out
+        captured = capsys.readouterr()
+        assert 'Available commands:' in captured.out
+        assert 'Built-in commands:' in captured.out
+        # Spot-check some commands that ship with circremote
+        assert 'BME280' in captured.out
+        assert 'scan-i2c' in captured.out
 
-    def test_list_all_commands_with_search_paths(self, cli_instance, tmp_path):
-        """Test listing commands including search paths."""
+    def test_list_all_commands_with_search_paths(self, cli_instance, tmp_path, capsys):
+        """Test listing commands includes search path commands."""
         # Create search path commands
         search_path = tmp_path / 'search_commands'
         search_path.mkdir()
         (search_path / 'custom_sensor').mkdir()
         (search_path / 'custom_sensor' / 'code.py').write_text('# Custom sensor')
         
-        # Create built-in commands
-        commands_dir = tmp_path / 'commands'
-        commands_dir.mkdir()
-        (commands_dir / 'BME280').mkdir()
-        (commands_dir / 'BME280' / 'code.py').write_text('# BME280 code')
+        # A directory without code.py must not be listed
+        (search_path / 'not_a_command').mkdir()
         
-        # Set up config with search paths
         cli_instance.config.search_paths = [str(search_path)]
         
-        with patch('circremote.cli.Path') as mock_path:
-            mock_parent = Mock()
-            mock_parent.__truediv__ = Mock(return_value=commands_dir)
-            mock_path.return_value.parent = mock_parent
-            
-            # Test that the method runs without error
-            cli_instance.list_all_commands(None)
+        cli_instance.list_all_commands(None)
+        
+        captured = capsys.readouterr()
+        assert 'Search path commands:' in captured.out
+        assert 'custom_sensor' in captured.out
+        assert 'not_a_command' not in captured.out
 
-    def test_list_all_commands_with_aliases(self, cli_instance, tmp_path):
-        """Test listing commands including aliases."""
-        # Set up config with aliases (should be a dict mapping alias name to command)
+    def test_list_all_commands_with_aliases(self, cli_instance, capsys):
+        """Test listing commands includes aliases."""
         cli_instance.config.command_aliases = {
             'temp': 'BME280',
             'light': 'TSL2591'
         }
         
-        # Create built-in commands
-        commands_dir = tmp_path / 'commands'
-        commands_dir.mkdir()
-        (commands_dir / 'BME280').mkdir()
-        (commands_dir / 'BME280' / 'code.py').write_text('# BME280 code')
+        cli_instance.list_all_commands(None)
         
-        with patch('circremote.cli.Path') as mock_path:
-            mock_parent = Mock()
-            mock_parent.__truediv__ = Mock(return_value=commands_dir)
-            mock_path.return_value.parent = mock_parent
-            
-            # Test that the method runs without error
-            cli_instance.list_all_commands(None)
+        captured = capsys.readouterr()
+        assert 'Command aliases:' in captured.out
+        assert 'temp -> BME280' in captured.out
+        assert 'light -> TSL2591' in captured.out
 
     def test_handle_circup_installation_with_custom_path(self, cli_instance, tmp_path):
         """Test circup installation with custom path from config."""
@@ -634,7 +742,7 @@ class TestCLI:
     
         # Create options object with required attributes
         from argparse import Namespace
-        options = Namespace(yes=False, verbose=False)
+        options = make_options()
     
         with patch('os.path.exists', return_value=True), \
              patch('os.access', return_value=True), \
@@ -657,7 +765,7 @@ class TestCLI:
         
         # Set up options with command line path and required attributes
         from argparse import Namespace
-        options = Namespace(circup='/usr/local/bin/circup', yes=False, verbose=False)
+        options = make_options(circup='/usr/local/bin/circup')
         cli_instance.config.options = options
         
         with patch('os.path.exists', return_value=True), \
@@ -681,7 +789,7 @@ class TestCLI:
         
         # Create options object with required attributes
         from argparse import Namespace
-        options = Namespace(yes=False, verbose=False)
+        options = make_options()
         
         with patch('os.path.exists', return_value=False), \
              patch('builtins.print') as mock_print:
