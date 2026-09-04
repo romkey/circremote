@@ -1,0 +1,59 @@
+site_name: circremote
+site_description: A command-line tool for remotely executing CircuitPython code on devices over serial or Web Workflow connections
+site_author: John Romkey
+site_url: https://circremote.readthedocs.io/
+
+repo_url: https://github.com/romkey/circremote
+repo_name: romkey/circremote
+edit_uri: edit/main/doc/
+
+docs_dir: doc
+
+# Editor backup files live alongside the documentation sources
+exclude_docs: |
+  *~
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Usage: usage.md
+  - Commands: commands.md
+  - Configuration: configuration.md
+  - FAQ: faq.md
+  - Development:
+      - Development: development.md
+      - Testing: testing.md
+      - Contributing: contributing.md
+      - Releases: release.md
+  - About: about.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - search

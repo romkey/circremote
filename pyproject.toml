@@ -48,13 +48,17 @@ dev = [
     "sphinx>=3.0",
     "sphinx-rtd-theme>=0.5",
 ]
+docs = [
+    "mkdocs>=1.6,<2.0",
+    "mkdocs-material>=9.5",
+]
 
 [project.scripts]
 circremote = "circremote.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/romkey/circremote"
-Documentation = "https://github.com/romkey/circremote#readme"
+Documentation = "https://circremote.readthedocs.io/"
 Repository = "https://github.com/romkey/circremote"
 "Bug Tracker" = "https://github.com/romkey/circremote/issues"
 "Changelog" = "https://github.com/romkey/circremote/blob/main/CHANGELOG.md"

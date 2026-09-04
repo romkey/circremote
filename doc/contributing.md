@@ -6,4 +6,4 @@
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+Please read the [Code of Conduct](https://github.com/romkey/circremote/blob/main/CODE_OF_CONDUCT.md) before contributing.

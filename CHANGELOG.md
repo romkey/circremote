@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+New commands (all untested):
+- ADS7128
+- APDS9999
+- AS7343
+- GP8403
+- MAX44009
+- SCD43
+- TCS3430
+- TMAG5273A1
+- TMAG5273A2
+- TMP119
+- VCNL4030
+
+Documentation:
+- Added Read the Docs support. The Markdown in `doc/` is now built with
+  MkDocs and published at https://circremote.readthedocs.io/.
+
+Fixed:
+- Reliably enter raw REPL mode before uploading code. The REPL handshake now
+  reads and verifies the device's responses (the `>>>` prompt, the raw REPL
+  banner, and the `OK` execution acknowledgment) instead of using fixed
+  delays, retrying each step as needed. Previously, the first run against a
+  device that was still executing code.py (common with Web Workflow
+  connections) could paste the program into the normal REPL, where
+  auto-indent mangled it.
+
+## [0.13.1] - 2025-09-21
+
+New commands:
+- STCC4
+- analog-read
+- benchmark
+- ble-scan
+- digital-read
+- digital-write
+- gps-serial
+- matrix-diagnostic
+- matrix-rainbow
+- onewire
+- pwm-write
+- stop
+
+## [0.12.1] - 2025-09-12
+
+Tested and fixed commands:
+- ADXL343
+- BMP280 
+- DS18B20
+- DS248x (formerly DS2484) 
+- LTR-329
+- MLX90393 
+- MMC5603
+- Si7021 
+- TLV493D 
+- VEML7700
+- neopixel-rainbow
+
 ## [0.12.0] - 2025-08-14
 
 Windows support! Mostly worked on Windows already but this update
