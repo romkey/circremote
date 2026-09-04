@@ -9,26 +9,28 @@ resolution, and template interpolation.
 """
 
 import json
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from circremote.cli import CLI
 
 pytestmark = pytest.mark.integration
 
 
-SAMPLE_CODE = (
-    "pin = {{ pin }}\n"
-    "count = {{ count }}\n"
-    'label = "{{ label }}"\n'
-)
+SAMPLE_CODE = "pin = {{ pin }}\n" "count = {{ count }}\n" 'label = "{{ label }}"\n'
 
 SAMPLE_INFO = {
     "description": "Test command",
     "variables": [
         {"name": "pin", "required": True, "description": "a pin"},
         {"name": "count", "required": False, "description": "a count", "default": 1},
-        {"name": "label", "required": False, "description": "a label", "default": "default-label"},
+        {
+            "name": "label",
+            "required": False,
+            "description": "a label",
+            "default": "default-label",
+        },
     ],
     "default_commandline": "pin count label",
     "tested": True,
@@ -63,9 +65,9 @@ def run_cli(argv, config_file):
     REPL handshake verifies: the normal '>>>' prompt, the raw REPL banner
     and prompt, then the raw REPL 'OK' execution acknowledgment.
     """
-    with patch("circremote.cli.CircuitPythonConnection") as mock_conn_class, \
-         patch("circremote.cli.time.sleep"), \
-         patch.object(CLI, "monitor_output"):
+    with patch("circremote.cli.CircuitPythonConnection") as mock_conn_class, patch(
+        "circremote.cli.time.sleep"
+    ), patch.object(CLI, "monitor_output"):
         mock_conn = Mock()
         mock_conn.connection_type = "serial"
         responses = iter([">>> ", "raw REPL; CTRL-B to exit\r\n>", "OK"])
@@ -101,7 +103,9 @@ class TestVariablePipeline:
     """End-to-end tests of argument parsing, defaults, and interpolation."""
 
     def test_all_positional_arguments(self, command_dir, config_file):
-        conn = run_cli(["/dev/ttyUSB0", str(command_dir), "board.D5", "10", "hello"], config_file)
+        conn = run_cli(
+            ["/dev/ttyUSB0", str(command_dir), "board.D5", "10", "hello"], config_file
+        )
         code = sent_code(conn)
         assert "pin = board.D5\n" in code
         assert "count = 10\n" in code
@@ -136,7 +140,14 @@ class TestVariablePipeline:
 
     def test_explicit_assignment_overrides_positional(self, command_dir, config_file):
         conn = run_cli(
-            ["/dev/ttyUSB0", str(command_dir), "board.D7", "5", "pos-label", "label=explicit-wins"],
+            [
+                "/dev/ttyUSB0",
+                str(command_dir),
+                "board.D7",
+                "5",
+                "pos-label",
+                "label=explicit-wins",
+            ],
             config_file,
         )
         code = sent_code(conn)
@@ -152,7 +163,9 @@ class TestVariablePipeline:
         code = sent_code(conn)
         assert 'label = "quoted"\n' in code
 
-    def test_too_many_positional_arguments_errors(self, command_dir, config_file, capsys):
+    def test_too_many_positional_arguments_errors(
+        self, command_dir, config_file, capsys
+    ):
         with pytest.raises(SystemExit):
             run_cli(
                 ["/dev/ttyUSB0", str(command_dir), "board.D5", "10", "hello", "extra"],
@@ -168,16 +181,20 @@ class TestDeviceDefaults:
     @pytest.fixture
     def device_config_file(self, tmp_path):
         path = tmp_path / "config.json"
-        path.write_text(json.dumps({
-            "devices": [
+        path.write_text(
+            json.dumps(
                 {
-                    "name": "bling",
-                    "device": "/dev/ttyUSB9",
-                    "defaults": {"pin": "board.MATRIX_DATA", "count": 320},
+                    "devices": [
+                        {
+                            "name": "bling",
+                            "device": "/dev/ttyUSB9",
+                            "defaults": {"pin": "board.MATRIX_DATA", "count": 320},
+                        }
+                    ],
+                    "variable_defaults": {"label": "global-label"},
                 }
-            ],
-            "variable_defaults": {"label": "global-label"},
-        }))
+            )
+        )
         return path
 
     def test_device_defaults_by_name(self, command_dir, device_config_file):
@@ -197,7 +214,9 @@ class TestDeviceDefaults:
         code = sent_code(conn)
         assert 'label = "global-label"\n' in code
 
-    def test_command_line_overrides_device_defaults(self, command_dir, device_config_file):
+    def test_command_line_overrides_device_defaults(
+        self, command_dir, device_config_file
+    ):
         conn = run_cli(["bling", str(command_dir), "pin=board.D1"], device_config_file)
         code = sent_code(conn)
         assert "pin = board.D1\n" in code
@@ -213,13 +232,17 @@ class TestBooleanAndNumericDefaults:
         (cmd_dir / "code.py").write_text(
             'flag = "{{ flag }}".lower() in ("true", "1", "yes", "on")\n'
         )
-        (cmd_dir / "info.json").write_text(json.dumps({
-            "description": "bool test",
-            "variables": [
-                {"name": "flag", "required": False, "default": False},
-            ],
-            "tested": True,
-        }))
+        (cmd_dir / "info.json").write_text(
+            json.dumps(
+                {
+                    "description": "bool test",
+                    "variables": [
+                        {"name": "flag", "required": False, "default": False},
+                    ],
+                    "tested": True,
+                }
+            )
+        )
 
         conn = run_cli(["/dev/ttyUSB0", str(cmd_dir)], config_file)
         code = sent_code(conn)

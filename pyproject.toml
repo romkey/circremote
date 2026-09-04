@@ -77,3 +77,12 @@ exclude = ["doc/*", "docker/*", "tests/*", "doc*", "docker*", "tests*"]
 [tool.setuptools.dynamic]
 version = {attr = "circremote.version.VERSION"}
 dependencies = {file = ["requirements.txt"]}
+
+[tool.black]
+line-length = 88
+extend-exclude = "circremote/commands"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_glob = ["circremote/commands/*"]

@@ -19,6 +19,7 @@ the device:
 import json
 import re
 from pathlib import Path
+
 import pytest
 
 pytestmark = pytest.mark.functional

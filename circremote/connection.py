@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import re
-import time
 import base64
+import platform
+import re
+import threading
+import time
+
 import serial
 import websocket
-import threading
-import platform
-from urllib.parse import urlparse
 
 
 class CircuitPythonConnection:
@@ -27,20 +27,20 @@ class CircuitPythonConnection:
         # so it can be consumed synchronously via read_available().
         self._recv_buffer = ""
         self._recv_lock = threading.Lock()
-        
+
         self.establish_connection()
 
     def write(self, data):
         """Write data to the connection."""
         self.debug(f"Writing {len(data)} bytes")
-        if self.connection_type == 'serial':
-            self.connection.write(data.encode('utf-8'))
+        if self.connection_type == "serial":
+            self.connection.write(data.encode("utf-8"))
         else:
             self.connection.send(data)
 
     def flush(self):
         """Flush the connection buffer."""
-        if self.connection_type == 'serial':
+        if self.connection_type == "serial":
             self.connection.flush()
         # WebSocket doesn't need explicit flush
 
@@ -48,15 +48,15 @@ class CircuitPythonConnection:
         """Close the connection."""
         self.debug(f"Closing {self.connection_type} connection")
         if self.connection:
-            if self.connection_type == 'serial':
+            if self.connection_type == "serial":
                 self.connection.close()
             else:
                 self.connection.close()
 
     def read_nonblock(self, max_bytes=1024):
         """Read data from serial connection (non-blocking)."""
-        if self.connection_type == 'serial':
-            return self.connection.read(max_bytes).decode('utf-8', errors='ignore')
+        if self.connection_type == "serial":
+            return self.connection.read(max_bytes).decode("utf-8", errors="ignore")
         else:
             raise RuntimeError("read_nonblock not supported for WebSocket connections")
 
@@ -68,7 +68,7 @@ class CircuitPythonConnection:
         For WebSocket connections it drains the data accumulated by the
         receive thread without blocking.
         """
-        if self.connection_type == 'serial':
+        if self.connection_type == "serial":
             waiting = self.connection.in_waiting
             if waiting:
                 data = self.connection.read(min(waiting, max_bytes))
@@ -77,7 +77,7 @@ class CircuitPythonConnection:
                 waiting = self.connection.in_waiting
                 if data and waiting:
                     data += self.connection.read(min(waiting, max_bytes - 1))
-            return data.decode('utf-8', errors='ignore')
+            return data.decode("utf-8", errors="ignore")
         else:
             with self._recv_lock:
                 data = self._recv_buffer
@@ -86,21 +86,21 @@ class CircuitPythonConnection:
 
     def on_message(self, handler):
         """Register a message handler for WebSocket connections."""
-        if self.connection_type == 'websocket':
+        if self.connection_type == "websocket":
             self.ws_message_handlers.append(handler)
         else:
             raise RuntimeError("on_message only supported for WebSocket connections")
 
     def on_error(self, handler):
         """Register an error handler for WebSocket connections."""
-        if self.connection_type == 'websocket':
+        if self.connection_type == "websocket":
             self.ws_error_handlers.append(handler)
         else:
             raise RuntimeError("on_error only supported for WebSocket connections")
 
     def on_close(self, handler):
         """Register a close handler for WebSocket connections."""
-        if self.connection_type == 'websocket':
+        if self.connection_type == "websocket":
             self.ws_close_handlers.append(handler)
         else:
             raise RuntimeError("on_close only supported for WebSocket connections")
@@ -115,54 +115,54 @@ class CircuitPythonConnection:
     def establish_websocket_connection(self):
         """Establish WebSocket connection."""
         self.debug("Establishing WebSocket connection")
-        self.connection_type = 'websocket'
-        
+        self.connection_type = "websocket"
+
         host, port = self.parse_websocket_connection(self.connection_string)
         self.debug(f"Parsed WebSocket connection: host={host}, port={port}")
-        
+
         # Build WebSocket URL
-        protocol = 'wss' if port == 443 else 'ws'
+        protocol = "wss" if port == 443 else "ws"
         ws_url = f"{protocol}://{host}:{port}/cp/serial/"
         self.debug(f"WebSocket URL: {ws_url}")
-        
+
         # Prepare headers for basic auth if password provided
         headers = {}
         if self.password:
             auth_string = base64.b64encode(f":{self.password}".encode()).decode()
-            headers['Authorization'] = f"Basic {auth_string}"
+            headers["Authorization"] = f"Basic {auth_string}"
             self.debug("Added basic auth header")
-        
+
         # Track connection status
         connection_error = None
         connection_established = False
-        
+
         def on_error(ws, error):
             nonlocal connection_error
             connection_error = error
             self.debug(f"WebSocket connection error: {error}")
-            
+
             # Check for 401 unauthorized error
-            if hasattr(error, 'status_code') and error.status_code == 401:
+            if hasattr(error, "status_code") and error.status_code == 401:
                 connection_error = "Bad password - authentication failed"
             # Check for connection refused error before inspecting args, so a
             # ConnectionRefusedError with a message still gets classified
             elif isinstance(error, ConnectionRefusedError):
                 connection_error = "Connection refused"
-            elif hasattr(error, 'args') and len(error.args) > 0:
+            elif hasattr(error, "args") and len(error.args) > 0:
                 error_str = str(error.args[0])
-                if '401' in error_str or 'unauthorized' in error_str.lower():
+                if "401" in error_str or "unauthorized" in error_str.lower():
                     connection_error = "Bad password - authentication failed"
-                elif 'refused' in error_str.lower():
+                elif "refused" in error_str.lower():
                     connection_error = "Connection refused"
-        
+
         def on_open(ws):
             nonlocal connection_established
             connection_established = True
             self.debug("WebSocket connection opened successfully")
-        
+
         try:
             self.debug("Attempting to connect to WebSocket")
-            
+
             # Create WebSocket connection
             self.connection = websocket.WebSocketApp(
                 ws_url,
@@ -170,14 +170,14 @@ class CircuitPythonConnection:
                 on_open=on_open,
                 on_message=self._on_ws_message,
                 on_error=on_error,
-                on_close=self._on_ws_close
+                on_close=self._on_ws_close,
             )
-            
+
             # Start WebSocket in a separate thread
             ws_thread = threading.Thread(target=self.connection.run_forever)
             ws_thread.daemon = True
             ws_thread.start()
-            
+
             # Wait for connection to establish or fail
             timeout = 5  # 5 second timeout
             start_time = time.time()
@@ -186,7 +186,7 @@ class CircuitPythonConnection:
                     connection_error = "Connection timeout"
                     break
                 time.sleep(0.1)
-            
+
             # Check for connection errors
             if connection_error:
                 error_str = str(connection_error)
@@ -194,7 +194,9 @@ class CircuitPythonConnection:
                     print(f"❌ {error_str}")
                     print("Please check your password and try again.")
                     print("Use the -p option to specify the correct password:")
-                    print(f"  circremote -p <password> {self.connection_string} <command>")
+                    print(
+                        f"  circremote -p <password> {self.connection_string} <command>"
+                    )
                 elif "Connection refused" in error_str:
                     print(f"❌ {error_str}")
                     print("The connection was refused. This could be due to:")
@@ -204,8 +206,12 @@ class CircuitPythonConnection:
                     print("  • Firewall blocking the connection")
                     print()
                     print("To enable Web Workflow on your CircuitPython device:")
-                    print("  • Visit: https://docs.circuitpython.org/en/latest/docs/workflow.html")
-                    print("  • Add 'CIRCUITPY_WEB_API_PASSWORD = \"your_password\"' to boot.py")
+                    print(
+                        "  • Visit: https://docs.circuitpython.org/en/latest/docs/workflow.html"
+                    )
+                    print(
+                        "  • Add 'CIRCUITPY_WEB_API_PASSWORD = \"your_password\"' to boot.py"
+                    )
                     print("  • Restart the device")
                     print()
                     print("Check your connection string and try again:")
@@ -214,20 +220,23 @@ class CircuitPythonConnection:
                     print(f"Error connecting to WebSocket: {error_str}")
                 self.debug(f"WebSocket connection failed: {error_str}")
                 raise RuntimeError(error_str)
-            
+
             if connection_established:
                 self.debug("WebSocket connection established")
-                if self.debug_options and self.debug_options.get('verbose'):
+                if self.debug_options and self.debug_options.get("verbose"):
                     print(f"Connected to CircuitPython Web Workflow at {host}:{port}")
             else:
                 raise RuntimeError("WebSocket connection failed to establish")
-                
+
         except Exception as e:
             error_str = str(e)
             if "Bad password" in error_str:
                 # Already handled above, don't show duplicate message
                 pass
-            elif isinstance(e, ConnectionRefusedError) or "ConnectionRefusedError" in error_str:
+            elif (
+                isinstance(e, ConnectionRefusedError)
+                or "ConnectionRefusedError" in error_str
+            ):
                 print("❌ Connection refused")
                 print("The connection was refused. This could be due to:")
                 print("  • Incorrect IP address or hostname")
@@ -236,8 +245,12 @@ class CircuitPythonConnection:
                 print("  • Firewall blocking the connection")
                 print()
                 print("To enable Web Workflow on your CircuitPython device:")
-                print("  • Visit: https://docs.circuitpython.org/en/latest/docs/workflow.html")
-                print("  • Add 'CIRCUITPY_WEB_API_PASSWORD = \"your_password\"' to boot.py")
+                print(
+                    "  • Visit: https://docs.circuitpython.org/en/latest/docs/workflow.html"
+                )
+                print(
+                    "  • Add 'CIRCUITPY_WEB_API_PASSWORD = \"your_password\"' to boot.py"
+                )
                 print("  • Restart the device")
                 print()
                 print("Check your connection string and try again:")
@@ -250,34 +263,36 @@ class CircuitPythonConnection:
     def establish_serial_connection(self):
         """Establish serial connection."""
         self.debug("Establishing serial connection")
-        self.connection_type = 'serial'
-        
+        self.connection_type = "serial"
+
         # Normalize serial port name for cross-platform compatibility
         port_name = self.normalize_serial_port(self.connection_string)
-        
+
         try:
             self.debug(f"Attempting to open serial port '{port_name}'")
-            self.debug("Serial port settings: 115200 bps, 8 data bits, 1 stop bit, no parity")
-            
+            self.debug(
+                "Serial port settings: 115200 bps, 8 data bits, 1 stop bit, no parity"
+            )
+
             self.connection = serial.Serial(
                 port=port_name,
                 baudrate=115200,
                 bytesize=serial.EIGHTBITS,
                 parity=serial.PARITY_NONE,
                 stopbits=serial.STOPBITS_ONE,
-                timeout=1
+                timeout=1,
             )
-            
+
             self.debug("Serial port opened successfully")
-            if self.debug_options and self.debug_options.get('verbose'):
+            if self.debug_options and self.debug_options.get("verbose"):
                 print(f"Opened serial port {port_name} at 115200 bps")
-            
+
         except Exception as e:
             print(f"Error opening serial port: {e}")
             self.debug(f"Serial port error details: {type(e).__name__}: {e}")
-            
+
             # Provide helpful error messages for common issues
-            if platform.system() == 'Windows':
+            if platform.system() == "Windows":
                 print("\nCommon Windows serial port issues:")
                 print("  • Use 'COM1', 'COM2', etc. instead of '/dev/tty*'")
                 print("  • Check Device Manager to find the correct COM port")
@@ -289,7 +304,7 @@ class CircuitPythonConnection:
                 print("  • Check if user is in 'dialout' group: groups $USER")
                 print("  • Add user to dialout group: sudo usermod -a -G dialout $USER")
                 print("  • Check device permissions: ls -la /dev/tty*")
-            
+
             raise
 
     def normalize_serial_port(self, port_name):
@@ -297,53 +312,53 @@ class CircuitPythonConnection:
         # If it's already a valid port name, return as-is
         if self.is_valid_serial_port(port_name):
             return port_name
-        
+
         # Try to convert common patterns
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             # Convert Unix-style names to Windows COM ports
-            if port_name.startswith('/dev/tty'):
+            if port_name.startswith("/dev/tty"):
                 # This is a Unix-style name, try to find equivalent COM port
                 # For now, just return the original and let the user specify the correct COM port
                 return port_name
         else:
             # Convert Windows-style names to Unix-style
-            if port_name.upper().startswith('COM'):
+            if port_name.upper().startswith("COM"):
                 # This is a Windows COM port, try to find equivalent Unix port
                 # For now, just return the original and let the user specify the correct Unix port
                 return port_name
-        
+
         return port_name
 
     def is_valid_serial_port(self, port_name):
         """Check if the port name is valid for the current platform."""
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             # Windows COM ports: COM1, COM2, etc.
-            return bool(re.match(r'^COM\d+$', port_name, re.IGNORECASE))
+            return bool(re.match(r"^COM\d+$", port_name, re.IGNORECASE))
         else:
             # Unix-style ports: /dev/ttyUSB0, /dev/ttyACM0, etc.
-            return bool(re.match(r'^/dev/tty[A-Z0-9]+$', port_name))
+            return bool(re.match(r"^/dev/tty[A-Z0-9]+$", port_name))
 
     def is_websocket_connection(self, connection_string):
         """Check if connection string looks like an IP address."""
-        ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}(:\d+)?$'
+        ip_pattern = r"^(\d{1,3}\.){3}\d{1,3}(:\d+)?$"
         return bool(re.match(ip_pattern, connection_string))
 
     def parse_websocket_connection(self, connection_string):
         """Parse WebSocket connection string into host and port."""
-        if ':' in connection_string:
-            host, port = connection_string.split(':', 1)
+        if ":" in connection_string:
+            host, port = connection_string.split(":", 1)
             port = int(port)
         else:
             host = connection_string
             port = 80  # Default HTTP port
-        
+
         return host, port
 
     def _on_ws_message(self, ws, message):
         """Handle WebSocket message events."""
         self.debug(f"WebSocket message received: {message}")
         if isinstance(message, bytes):
-            message = message.decode('utf-8', errors='ignore')
+            message = message.decode("utf-8", errors="ignore")
         with self._recv_lock:
             self._recv_buffer += message
         for handler in self.ws_message_handlers:
@@ -354,7 +369,7 @@ class CircuitPythonConnection:
 
     def _on_ws_error(self, ws, error):
         """Handle WebSocket error events."""
-        if self.debug_options.get('verbose'):
+        if self.debug_options.get("verbose"):
             print(f"WebSocket error: {error}")
         for handler in self.ws_error_handlers:
             try:
@@ -364,7 +379,7 @@ class CircuitPythonConnection:
 
     def _on_ws_close(self, ws, close_status_code, close_msg):
         """Handle WebSocket close events."""
-        if self.debug_options.get('verbose'):
+        if self.debug_options.get("verbose"):
             print(f"WebSocket closed: {close_status_code} - {close_msg}")
         for handler in self.ws_close_handlers:
             try:
@@ -374,5 +389,5 @@ class CircuitPythonConnection:
 
     def debug(self, message):
         """Print debug message if verbose mode is enabled."""
-        if self.debug_options.get('verbose'):
-            print(message) 
+        if self.debug_options.get("verbose"):
+            print(message)

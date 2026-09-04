@@ -55,9 +55,12 @@ jobs:
         TOXENV: coverage
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
-        file: ./htmlcov/coverage.xml
+        files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: true 
+        token: ${{ secrets.CODECOV_TOKEN }}
+        # Codecov being unavailable, or the repo having no upload token, should
+        # not fail the build - the coverage run itself already succeeded.
+        fail_ci_if_error: false 

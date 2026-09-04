@@ -8,8 +8,9 @@ path exits and prints a useful message.
 
 import json
 import threading
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from circremote.cli import CLI
 from tests.conftest import make_options
@@ -44,16 +45,18 @@ def run_cli(argv, config_file, connect_error=None):
     verifies: the normal '>>>' prompt, the raw REPL banner and prompt, then
     the raw REPL 'OK' execution acknowledgment.
     """
-    with patch("circremote.cli.CircuitPythonConnection") as mock_conn_class, \
-         patch("circremote.cli.time.sleep"), \
-         patch.object(CLI, "monitor_output"):
+    with patch("circremote.cli.CircuitPythonConnection") as mock_conn_class, patch(
+        "circremote.cli.time.sleep"
+    ), patch.object(CLI, "monitor_output"):
         if connect_error is not None:
             mock_conn_class.side_effect = connect_error
         else:
             mock_conn = Mock()
             mock_conn.connection_type = "serial"
             responses = iter([">>> ", "raw REPL; CTRL-B to exit\r\n>", "OK"])
-            mock_conn.read_available = Mock(side_effect=lambda *a, **k: next(responses, ""))
+            mock_conn.read_available = Mock(
+                side_effect=lambda *a, **k: next(responses, "")
+            )
             mock_conn_class.return_value = mock_conn
 
         cli = CLI()
@@ -71,7 +74,10 @@ class TestErrorHandling:
             run_cli(["/dev/ttyUSB0", "definitely_not_a_real_command_xyz"], config_file)
         assert exc_info.value.code == 1
         captured = capsys.readouterr()
-        assert "Error: Command 'definitely_not_a_real_command_xyz' not found" in captured.out
+        assert (
+            "Error: Command 'definitely_not_a_real_command_xyz' not found"
+            in captured.out
+        )
         assert "Available commands:" in captured.out
 
     def test_missing_pathname_directory(self, config_file, capsys):
@@ -107,7 +113,9 @@ class TestErrorHandling:
         )
 
         with pytest.raises(SystemExit) as exc_info:
-            run_cli(["/dev/ttyUSB0", str(cmd_dir), "pin=board.D1", "bogus=1"], config_file)
+            run_cli(
+                ["/dev/ttyUSB0", str(cmd_dir), "pin=board.D1", "bogus=1"], config_file
+            )
         assert exc_info.value.code == 1
         captured = capsys.readouterr()
         assert "Invalid variables" in captured.out
@@ -298,7 +306,9 @@ class TestErrorHandling:
         assert "default_commandline" in captured.out
         assert "'nonexistent' is not a valid variable" in captured.out
 
-    def test_untested_command_quiet_without_yes_errors(self, tmp_path, config_file, capsys):
+    def test_untested_command_quiet_without_yes_errors(
+        self, tmp_path, config_file, capsys
+    ):
         """Test that an untested command in quiet mode without -y exits."""
         cmd_dir = make_command(tmp_path, info={"description": "test", "tested": False})
 
@@ -345,9 +355,9 @@ class TestTimeoutHandling:
         options = make_options(timeout=5.0)
         conn = self._serial_connection()
 
-        with patch("signal.signal") as mock_signal, \
-             patch("signal.alarm") as mock_alarm, \
-             patch.object(CLI, "monitor_serial_output") as mock_monitor:
+        with patch("signal.signal") as mock_signal, patch(
+            "signal.alarm"
+        ) as mock_alarm, patch.object(CLI, "monitor_serial_output") as mock_monitor:
             cli_instance.monitor_output(conn, options)
 
         mock_signal.assert_called_once()
@@ -362,8 +372,9 @@ class TestTimeoutHandling:
         conn = Mock()
         conn.connection_type = "websocket"
 
-        with patch("signal.alarm") as mock_alarm, \
-             patch.object(CLI, "monitor_websocket_output") as mock_monitor:
+        with patch("signal.alarm") as mock_alarm, patch.object(
+            CLI, "monitor_websocket_output"
+        ) as mock_monitor:
             cli_instance.monitor_output(conn, options)
 
         mock_alarm.assert_not_called()
@@ -374,8 +385,9 @@ class TestTimeoutHandling:
         options = make_options(timeout=0)
         conn = self._serial_connection()
 
-        with patch("signal.alarm") as mock_alarm, \
-             patch.object(CLI, "monitor_serial_output") as mock_monitor:
+        with patch("signal.alarm") as mock_alarm, patch.object(
+            CLI, "monitor_serial_output"
+        ) as mock_monitor:
             cli_instance.monitor_output(conn, options)
 
         mock_alarm.assert_not_called()
@@ -391,7 +403,9 @@ class TestTimeoutHandling:
         # Must return promptly instead of looping forever
         cli_instance.monitor_serial_output(conn, default_options, flag)
 
-    def test_serial_output_between_markers_is_printed(self, cli_instance, default_options, capsys):
+    def test_serial_output_between_markers_is_printed(
+        self, cli_instance, default_options, capsys
+    ):
         """Test that only content between START/END markers is displayed."""
         conn = self._serial_connection()
         conn.read_available.side_effect = [
