@@ -3,7 +3,7 @@
 [![Tests](https://github.com/romkey/circremote/actions/workflows/tests.yml/badge.svg)](https://github.com/romkey/circremote/actions/workflows/tests.yml)
 [![Lint](https://github.com/romkey/circremote/actions/workflows/lint.yml/badge.svg)](https://github.com/romkey/circremote/actions/workflows/lint.yml)
 [![Documentation Status](https://readthedocs.org/projects/circremote/badge/?version=latest)](https://circremote.readthedocs.io/en/latest/?badge=latest)
-[![CircuitPython](https://img.shields.io/badge/CircuitPython-8%20%7C%209%20%7C%2010-purple.svg)](https://circuitpython.org/)
+[![CircuitPython](https://img.shields.io/badge/CircuitPython-9%20%7C%2010-purple.svg)](https://circuitpython.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/romkey/circremote/blob/main/LICENSE)
 
 A command-line tool for remotely executing CircuitPython code ("commands") on devices over serial or Web Workflow connections.
