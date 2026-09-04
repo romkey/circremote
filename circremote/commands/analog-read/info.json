@@ -1,0 +1,25 @@
+{
+  "description": "Read analog values from a pin using ADC",
+  "variables": [
+    {
+      "name": "pin",
+      "required": true,
+      "description": "Analog input pin (e.g., board.A0, board.A1)"
+    },
+    {
+      "name": "continuous",
+      "required": false,
+      "description": "Whether to continuously read values (true/false)",
+      "default": false
+    },
+    {
+      "name": "interval",
+      "required": false,
+      "description": "Interval between readings in continuous mode (seconds)",
+      "default": 1
+    }
+  ],
+  "default_commandline": "pin continuous interval",
+  "tested": true,
+  "warn_offline": false
+}

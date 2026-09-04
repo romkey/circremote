@@ -1,0 +1,14 @@
+{
+  "description": "Scans OneWire bus for devices",
+  "tested": true,
+  "variables": [
+    {
+      "name": "onewire_pin",
+      "required": true,
+      "description": "Pin for OneWire device",
+      "default": null
+    }
+  ],
+  "default_commandline": "onewire_pin",
+  "warn_offline": false
+}

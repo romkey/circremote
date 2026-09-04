@@ -1,0 +1,57 @@
+{
+  "description": "Run comprehensive diagnostics on LED matrix displays like Adafruit Matrix Portal S3",
+  "variables": [
+    {
+      "name": "width",
+      "required": false,
+      "description": "Width of the LED matrix in pixels",
+      "default": 64
+    },
+    {
+      "name": "height",
+      "required": false,
+      "description": "Height of the LED matrix in pixels",
+      "default": 32
+    },
+    {
+      "name": "bit_depth",
+      "required": false,
+      "description": "Bit depth for color (3-6, higher = more colors but more memory)",
+      "default": 4
+    },
+    {
+      "name": "rgb_pins",
+      "required": false,
+      "description": "RGB data pins as a list",
+      "default": "[board.MTX_R1, board.MTX_G1, board.MTX_B1, board.MTX_R2, board.MTX_G2, board.MTX_B2]"
+    },
+    {
+      "name": "addr_pins",
+      "required": false,
+      "description": "Address pins as a list",
+      "default": "[board.MTX_ADDRA, board.MTX_ADDRB, board.MTX_ADDRC, board.MTX_ADDRD]"
+    },
+    {
+      "name": "clock_pin",
+      "required": false,
+      "description": "Clock pin",
+      "default": "board.MTX_CLK"
+    },
+    {
+      "name": "latch_pin",
+      "required": false,
+      "description": "Latch pin",
+      "default": "board.MTX_LAT"
+    },
+    {
+      "name": "output_enable_pin",
+      "required": false,
+      "description": "Output enable pin",
+      "default": "board.MTX_OE"
+    }
+  ],
+  "default_commandline": "width height bit_depth rgb_pins addr_pins clock_pin latch_pin output_enable_pin",
+  "tested": false,
+  "warn_offline": false
+}
+

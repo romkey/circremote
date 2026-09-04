@@ -15,7 +15,7 @@ except:
 
 # Initialize SHT20
 try:
-    sht20 = adafruit_sht31d.SHT31D(i2c, address={{ address }}, address=0x40)  # SHT20 uses address 0x40
+    sht20 = adafruit_sht31d.SHT31D(i2c, address={{ address }})  # SHT20 uses address 0x40
 except Exception as e:
     print(f"Error initializing SHT20: {e}")
     import sys

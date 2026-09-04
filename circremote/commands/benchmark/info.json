@@ -1,0 +1,26 @@
+{
+  "description": "Performance benchmark tool that tests various computational operations including integer/float arithmetic, data structure operations, and function calls. Useful for comparing performance across different CircuitPython devices and versions.",
+  "variables": [
+    {
+      "name": "iterations",
+      "required": false,
+      "description": "Number of iterations to run for each benchmark test",
+      "default": 10000
+    },
+    {
+      "name": "warmup_runs",
+      "required": false,
+      "description": "Number of warmup runs before timing to ensure consistent results",
+      "default": 3
+    },
+    {
+      "name": "output_json",
+      "required": false,
+      "description": "Output results in JSON format with system information (true/false)",
+      "default": false
+    }
+  ],
+  "default_commandline": "iterations warmup_runs output_json",
+  "tested": false,
+  "warn_offline": false
+}

@@ -1,0 +1,48 @@
+{
+  "description": "Write digital values to a pin",
+  "variables": [
+    {
+      "name": "pin",
+      "required": true,
+      "description": "Digital output pin (e.g., board.D2, board.D3)"
+    },
+    {
+      "name": "level",
+      "required": true,
+      "description": "Output level (HIGH/LOW, 1/0, TRUE/FALSE, ON/OFF)"
+    },
+    {
+      "name": "mode",
+      "required": false,
+      "description": "Output mode (write, toggle, pulse, blink)",
+      "default": "write"
+    },
+    {
+      "name": "pulse_duration",
+      "required": false,
+      "description": "Duration of pulse in seconds (for pulse mode)",
+      "default": 1.0
+    },
+    {
+      "name": "blink_count",
+      "required": false,
+      "description": "Number of blinks (for blink mode)",
+      "default": 5
+    },
+    {
+      "name": "blink_on_time",
+      "required": false,
+      "description": "Time pin is HIGH during blink (seconds)",
+      "default": 0.5
+    },
+    {
+      "name": "blink_off_time",
+      "required": false,
+      "description": "Time pin is LOW during blink (seconds)",
+      "default": 0.5
+    }
+  ],
+  "default_commandline": "pin level mode pulse_duration blink_count blink_on_time blink_off_time",
+  "tested": false,
+  "warn_offline": false
+}

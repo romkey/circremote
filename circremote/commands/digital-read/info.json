@@ -1,0 +1,31 @@
+{
+  "description": "Read digital values from a pin",
+  "variables": [
+    {
+      "name": "pin",
+      "required": true,
+      "description": "Digital input pin (e.g., board.D2, board.D3)"
+    },
+    {
+      "name": "pull",
+      "required": false,
+      "description": "Pull resistor configuration (UP, DOWN, or NONE)",
+      "default": "NONE"
+    },
+    {
+      "name": "continuous",
+      "required": false,
+      "description": "Whether to continuously read values (true/false)",
+      "default": false
+    },
+    {
+      "name": "interval",
+      "required": false,
+      "description": "Interval between readings in continuous mode (seconds)",
+      "default": 1
+    }
+  ],
+  "default_commandline": "pin pull continuous interval",
+  "tested": true,
+  "warn_offline": false
+}

@@ -1,0 +1,85 @@
+{
+  "description": "Control PWM output on a pin",
+  "variables": [
+    {
+      "name": "pin",
+      "required": true,
+      "description": "PWM-capable pin (e.g., board.D3, board.D5)"
+    },
+    {
+      "name": "frequency",
+      "required": false,
+      "description": "PWM frequency in Hz",
+      "default": 1000
+    },
+    {
+      "name": "duty_cycle",
+      "required": false,
+      "description": "PWM duty cycle as percentage (0-100)",
+      "default": 50
+    },
+    {
+      "name": "mode",
+      "required": false,
+      "description": "PWM mode (write, fade, sweep, stop)",
+      "default": "write"
+    },
+    {
+      "name": "continuous",
+      "required": false,
+      "description": "Whether to run PWM continuously (true/false)",
+      "default": false
+    },
+    {
+      "name": "fade_start",
+      "required": false,
+      "description": "Starting duty cycle for fade mode (%)",
+      "default": 0
+    },
+    {
+      "name": "fade_end",
+      "required": false,
+      "description": "Ending duty cycle for fade mode (%)",
+      "default": 100
+    },
+    {
+      "name": "fade_duration",
+      "required": false,
+      "description": "Duration of fade in seconds",
+      "default": 2.0
+    },
+    {
+      "name": "fade_steps",
+      "required": false,
+      "description": "Number of steps in fade",
+      "default": 100
+    },
+    {
+      "name": "sweep_start",
+      "required": false,
+      "description": "Starting duty cycle for sweep mode (%)",
+      "default": 0
+    },
+    {
+      "name": "sweep_end",
+      "required": false,
+      "description": "Ending duty cycle for sweep mode (%)",
+      "default": 100
+    },
+    {
+      "name": "sweep_duration",
+      "required": false,
+      "description": "Duration of each sweep cycle in seconds",
+      "default": 2.0
+    },
+    {
+      "name": "sweep_cycles",
+      "required": false,
+      "description": "Number of sweep cycles",
+      "default": 3
+    }
+  ],
+  "default_commandline": "pin frequency duty_cycle mode continuous fade_start fade_end fade_duration fade_steps sweep_start sweep_end sweep_duration sweep_cycles",
+  "tested": false,
+  "warn_offline": false
+}

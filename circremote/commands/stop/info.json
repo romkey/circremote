@@ -1,0 +1,6 @@
+{
+  "description": "Stop microcontroller (loops sleeping)",
+  "variables": [],
+  "tested": true,
+  "warn_offline": false
+}

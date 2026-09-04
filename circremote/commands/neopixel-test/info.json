@@ -21,6 +21,6 @@
     }
   ],
   "default_commandline": "neopixel_pin neopixel_count brightness",
-  "tested": false,
+  "tested": true,
   "warn_offline": false
 }

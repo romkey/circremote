@@ -1,0 +1,26 @@
+{
+  "description": "Scan for nearby Bluetooth devices and display their information",
+  "variables": [
+    {
+      "name": "max_scans",
+      "required": false,
+      "description": "Maximum number of scan cycles to perform",
+      "default": 10
+    },
+    {
+      "name": "scan_interval",
+      "required": false,
+      "description": "Interval between scan cycles in seconds",
+      "default": 2
+    },
+    {
+      "name": "test_mode",
+      "required": false,
+      "description": "Run Bluetooth capabilities test instead of scanning (True/False)",
+      "default": false
+    }
+  ],
+  "default_commandline": "max_scans scan_interval test_mode",
+  "tested": true,
+  "warn_offline": false
+}

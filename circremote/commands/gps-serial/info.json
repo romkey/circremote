@@ -1,0 +1,32 @@
+{
+  "description": "Read and display NMEA GPS data from a serial GPS device",
+  "variables": [
+    {
+      "name": "tx",
+      "required": false,
+      "description": "Board TX pin (connect to the GPS module's RX)",
+      "default": "board.TX"
+    },
+    {
+      "name": "rx",
+      "required": false,
+      "description": "Board RX pin (connect to the GPS module's TX)",
+      "default": "board.RX"
+    },
+    {
+      "name": "baud",
+      "required": false,
+      "description": "Serial baud rate for GPS communication",
+      "default": 9600
+    },
+    {
+      "name": "print_interval",
+      "required": false,
+      "description": "Interval between printing GPS data (in seconds)",
+      "default": 2
+    }
+  ],
+  "default_commandline": "tx rx baud print_interval",
+  "tested": true,
+  "warn_offline": false
+}
