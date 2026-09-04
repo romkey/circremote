@@ -1,0 +1,43 @@
+{
+  "description": "GP8403 is a two-channel 12-bit I2C DAC with an integrated booster that outputs 0-5V or 0-10V analog voltages, useful for driving analog control inputs, op-amps, and industrial 0-10V devices. Output values can optionally be saved to on-chip NVM so they are restored at power-up. This command sets both output channels to the requested voltages.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x58"
+    },
+    {
+      "name": "output_range",
+      "required": false,
+      "description": "Output range in volts, 5 or 10",
+      "default": 10
+    },
+    {
+      "name": "voltage0",
+      "required": false,
+      "description": "Voltage to output on channel 0",
+      "default": 0
+    },
+    {
+      "name": "voltage1",
+      "required": false,
+      "description": "Voltage to output on channel 1",
+      "default": 0
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}

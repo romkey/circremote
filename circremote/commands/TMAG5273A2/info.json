@@ -1,0 +1,25 @@
+{
+  "description": "TMAG5273A2 is a low-power linear 3D Hall-effect sensor from Texas Instruments that measures magnetic field strength on the X, Y, and Z axes. The A2 variant covers the wider +/-133 mT and +/-266 mT ranges and responds at I2C address 0x35. It also provides a die temperature reading, a calculated angle from a configurable axis pair, and a magnitude result.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x35"
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}

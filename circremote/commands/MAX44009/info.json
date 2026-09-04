@@ -1,0 +1,25 @@
+{
+  "description": "MAX44009 is an ultra-low-power ambient light sensor from Maxim/Analog Devices with a very wide 0.045 to 188,000 lux dynamic range and a response close to the human eye. It features configurable integration time, automatic or manual ranging, a current division ratio for bright light, and programmable upper/lower lux interrupt thresholds. It communicates via I2C.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x4A"
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}

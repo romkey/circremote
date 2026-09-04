@@ -1,0 +1,25 @@
+{
+  "description": "SCD43 is a photoacoustic CO2 sensor from Sensirion in the SCD4x family, offering a wider CO2 measurement range and improved accuracy over the SCD40 and SCD41. It also reports temperature and relative humidity, supports periodic and single-shot measurement, automatic self-calibration, temperature offset, and altitude/pressure compensation. It communicates via I2C.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x62"
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}

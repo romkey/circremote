@@ -1,0 +1,25 @@
+{
+  "description": "TCS3430 is an XYZ tristimulus color sensor from ams that reports CIE X, Y, and Z channels plus two infrared channels, allowing calculation of chromaticity coordinates and correlated color temperature. It features configurable ALS gain from 1x to 128x, integration time from 2.78 ms to 711 ms, and interrupt thresholds. It communicates via I2C.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x39"
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}
