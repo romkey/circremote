@@ -1,5 +1,11 @@
 # circremote
 
+[![Tests](https://github.com/romkey/circremote/actions/workflows/tests.yml/badge.svg)](https://github.com/romkey/circremote/actions/workflows/tests.yml)
+[![Lint](https://github.com/romkey/circremote/actions/workflows/lint.yml/badge.svg)](https://github.com/romkey/circremote/actions/workflows/lint.yml)
+[![Documentation Status](https://readthedocs.org/projects/circremote/badge/?version=latest)](https://circremote.readthedocs.io/en/latest/?badge=latest)
+[![CircuitPython](https://img.shields.io/badge/CircuitPython-8%20%7C%209%20%7C%2010-purple.svg)](https://circuitpython.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/romkey/circremote/blob/main/LICENSE)
+
 A command-line tool for remotely executing CircuitPython code ("commands") on devices over serial or Web Workflow connections.
 
 It can run the commands included with it, your own commands from anywhere in the filesystem, and commands that it loads over HTTP/HTTPS. It can easily execute example programs from Github.
@@ -161,6 +167,8 @@ circremote my-device temp
 - `-t, --timeout`: Connection timeout (seconds)
 
 ## Documentation
+
+Full documentation is at [circremote.readthedocs.io](https://circremote.readthedocs.io/).
 
 - [Usage Guide](doc/usage.md)
 - [Command Reference](doc/commands.md)
