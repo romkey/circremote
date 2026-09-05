@@ -1,0 +1,25 @@
+{
+  "description": "ENS161 is a digital multi-gas sensor from ScioSense that reports an Air Quality Index (AQI), total volatile organic compounds (TVOC), and equivalent CO2 (eCO2). It is the successor to the ENS160 and is register compatible with it, so the Adafruit ENS160 library drives both - it accepts either part ID. The sensor supports temperature and humidity compensation and communicates via I2C.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x53"
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}

@@ -5,6 +5,7 @@
 ### Air Quality Sensors
 - `CCS811` - Digital gas sensor for VOCs and eCO2
 - `ENS160` - Digital gas sensor for VOCs, eCO2, and TVOC
+- `ENS161` - Digital gas sensor for AQI, eCO2, and TVOC (ENS160 successor)
 - `PMS5003` - Particulate matter sensor 
 - `PMSA003I` - I2C particulate matter sensor 
 - `SCD30` - CO2, temperature, and humidity sensor
@@ -15,6 +16,7 @@
 - `SEN66` - Environmental sensor
 - `SGP30` - Air quality sensor for eCO2 and TVOC
 - `SGP40` - VOC air quality sensor
+- `SGP41` - VOC and NOx air quality sensor
 - `STCC4` - CO2, temperature, and humidity sensor
 
 ### Analog & Digital Converters
@@ -34,6 +36,7 @@
 - `LTR-329` - Digital light sensor
 - `LTR390` - UV light sensor 
 - `MAX44009` - Ultra-low-power ambient light sensor with wide dynamic range
+- `OPT4048` - Tristimulus XYZ color sensor with CIE chromaticity, lux, and color temperature
 - `TCRT1000` - Reflective optical sensor
 - `TCS3430` - XYZ tristimulus color sensor
 - `TSL2561` - High-accuracy digital light sensor with light source identification
@@ -68,6 +71,7 @@
 - `LSM6DSOX` - 6-axis IMU (accelerometer + gyroscope)
 - `MPU6050` - 6-axis motion tracking sensor
 - `MSA311` - 3-axis accelerometer with motion detection
+- `STHS34PF80` - Infrared presence and motion detection sensor
 - `VL53L0X` - Time-of-flight distance sensor
 - `VL53L1X` - Long-range time-of-flight sensor
 - `VL53L4CX` - Advanced time-of-flight distance sensor

@@ -1,0 +1,25 @@
+{
+  "description": "SGP41 is a digital gas sensor from Sensirion that measures both VOC (Volatile Organic Compounds) and NOx (nitrogen oxides) for indoor air quality monitoring. It uses metal oxide gas sensing and Sensirion's gas index algorithm, which converts the raw signals into VOC and NOx index values with automatic baseline compensation. The sensor requires a conditioning period at startup and 1 Hz sampling for the index algorithm. It communicates via I2C.",
+  "variables": [
+    {
+      "name": "sda",
+      "required": false,
+      "description": "I2C SDA pin",
+      "default": "board.SDA"
+    },
+    {
+      "name": "scl",
+      "required": false,
+      "description": "I2C SCL pin",
+      "default": "board.SCL"
+    },
+    {
+      "name": "address",
+      "required": false,
+      "description": "I2C address",
+      "default": "0x59"
+    }
+  ],
+  "tested": false,
+  "warn_offline": false
+}
